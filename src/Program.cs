@@ -18,30 +18,39 @@ namespace MTCG
             // svr.Incoming += _ProcessMesage;
 
             // svr.Run();
+            string requestedRoute = "/user/mustermax";
+            HTTPMethod reqMethod = HTTPMethod.GET;
             IUrlParser parser = new UrlParser();
             RouteRegistry registry = new RouteRegistry(parser);
-            registry.RegisterGet("api/{controller:alpha}/user/{id:int}");
-            // registry.RegisterGet("api/score/user/{id:int}");
-            UrlParams m1 = registry.MapRequest("/api/home/user/2", HTTPMethod.GET);
-            // GroupCollection m2 = registry.MapRequest("/api/score/user/21", HTTPMethod.GET);
-            
-            // if (m1 != null)
-            // {
-            //     Console.WriteLine(m1["controller"].Value);
-            // }
-            // Assembly assembly = Assembly.GetExecutingAssembly();
-            // var controllerTypes = assembly.GetTypes().Where(t => t.GetCustomAttribute<ControllerAttribute>() != null);
 
-            // foreach (var controllerType in controllerTypes)
-            // {
-            //     IEnumerable<MethodInfo> methods = controllerType.GetMethods()
-            //         .Where(method => method.GetCustomAttribute<RouteAttribute>() != null);
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            var controllerTypes = assembly.GetTypes().Where(t => t.GetCustomAttribute<ControllerAttribute>() != null);
 
-            //     foreach (var controllerMethod in methods)
-            //     {
-            //         Console.WriteLine(controllerMethod.Name);
-            //     }
-            // }
+            foreach (Type controllerType in controllerTypes)
+            {
+                IEnumerable<MethodInfo> routeActions = controllerType.GetMethods()
+                    .Where(method => method.GetCustomAttribute<RouteAttribute>() != null);
+
+                foreach (MethodInfo method in controllerType.GetMethods())
+                {
+                    RouteAttribute routeAttribute = (RouteAttribute)Attribute.GetCustomAttribute(method, typeof(RouteAttribute));
+
+                    if (routeAttribute != null)
+                    {
+                        string route = routeAttribute.Route;
+                        HTTPMethod httpMethod = routeAttribute.Method;
+
+                        registry.RegisterRoute(route, httpMethod);
+                        ResolvedUrl req = registry.MapRequest(requestedRoute, reqMethod);
+                        
+                        if (req.IsRouteRegistered)
+                        {
+                            Console.WriteLine(req.RawUrl);
+
+                        }
+                    }
+                }
+            }
 
         }
 

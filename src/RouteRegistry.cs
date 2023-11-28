@@ -5,31 +5,30 @@ using System.Text.RegularExpressions;
 
 namespace MTCG;
 
-public class UrlParams
+public class ResolvedUrl
 {
     private Dictionary<string, string> urlParams = new Dictionary<string, string>();
     private string? rawUrl;
     private HTTPMethod method;
     bool isRouteRegistered = false;
-    public UrlParams(Dictionary<string, string> parameters, HTTPMethod method, string rawUrl)
+    public ResolvedUrl(Dictionary<string, string> parameters, HTTPMethod method, string rawUrl)
     {
         this.urlParams = parameters;
         this.method = method;
+        this.rawUrl = rawUrl;
 
         if (urlParams.Count > 0)
         {
             isRouteRegistered = true;
         }
     }
-    public bool IsRouteRegistered
-    {
-        get => this.isRouteRegistered;
-    }
-    public UrlParams(HTTPMethod method, string rawUrl)
+    public bool IsRouteRegistered { get; private set; }
+
+    public ResolvedUrl(HTTPMethod method, string rawUrl)
     {
         this.isRouteRegistered = false;
     }
-    public UrlParams(string rawUrl)
+    public ResolvedUrl(string rawUrl)
     {
         this.isRouteRegistered = false;
     }
@@ -114,13 +113,13 @@ public class RouteRegistry
     // was soll Map eigentlich genau machen?
     // IMPROVE potentialPatterns umbenennen
     // ? was soll diese methode überhaupt machen
-    public UrlParams? MapRequest(string requestedUrl, HTTPMethod method)
+    public ResolvedUrl? MapRequest(string requestedUrl, HTTPMethod method)
     {
         Dictionary<string, string> namedTokensInUrlFound = new();
         List<string>? potentialPatterns;
 
         if (!routePatterns.TryGetValue(method, out potentialPatterns))
-            return new UrlParams(method, requestedUrl);
+            return new ResolvedUrl(method, requestedUrl);
 
         string trimmedUrl = urlParser.CleanUrl(requestedUrl);
 
@@ -135,7 +134,7 @@ public class RouteRegistry
             }
         }
 
-        return new UrlParams(namedTokensInUrlFound, method, requestedUrl);
+        return new ResolvedUrl(namedTokensInUrlFound, method, requestedUrl);
     }
 
 }

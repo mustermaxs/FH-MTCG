@@ -70,7 +70,7 @@ namespace UnitTests.Routing
                 }
 
                 registry.RegisterGet(routeTemplate);
-                UrlParams result = registry.MapRequest(requestedUrl, method);
+                ResolvedUrl result = registry.MapRequest(requestedUrl, method);
 
                 Assert.IsTrue(result?.IsRouteRegistered ?? false, $"{registry.GetType().Name} wasn't able to map the requested route.\n" +
                 $"Requested Url: {requestedUrl}\n" +
@@ -87,7 +87,7 @@ namespace UnitTests.Routing
         {
             string pattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
             registry.RegisterGet(routeTemplate);
-            UrlParams result = registry.MapRequest(requestedUrl, method);
+            ResolvedUrl result = registry.MapRequest(requestedUrl, method);
             Assert.IsFalse(result.IsRouteRegistered,
             $"---------------------------------------------------------------------\n" +
             $"{registry.GetType().Name} wasn't able to map the requested route.\n" +

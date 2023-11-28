@@ -5,7 +5,64 @@ using System.Text.RegularExpressions;
 
 namespace MTCG;
 
-class RouteRegistry
+public class UrlParams
+{
+    private Dictionary<string, string> urlParams = new Dictionary<string, string>();
+    private string? rawUrl;
+    private HTTPMethod method;
+    bool isRouteRegistered = false;
+    public UrlParams(Dictionary<string, string> parameters, HTTPMethod method, string rawUrl)
+    {
+        this.urlParams = parameters;
+        this.method = method;
+
+        if (urlParams.Count > 0)
+        {
+            isRouteRegistered = true;
+        }
+    }
+    public bool IsRouteRegistered
+    {
+        get => this.isRouteRegistered;
+    }
+    public UrlParams(HTTPMethod method, string rawUrl)
+    {
+        this.isRouteRegistered = false;
+    }
+    public UrlParams(string rawUrl)
+    {
+        this.isRouteRegistered = false;
+    }
+    public HTTPMethod Method
+    {
+        get => this.method;
+    }
+    public string? RawUrl
+    {
+        get => this.rawUrl;
+    }
+    public T GetParam<T>(string key)
+    {
+        string? value;
+
+        if (this.urlParams.TryGetValue(key, out value))
+        {
+            try
+            {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error converting parameter to type {typeof(T)}: {ex}");
+            }
+        }
+
+        throw new KeyNotFoundException($"Parameter {key} couldn't be found");
+    }
+
+}
+
+public class RouteRegistry
 {
     public Dictionary<HTTPMethod, List<string>> routePatterns;
     private IUrlParser urlParser;
@@ -17,54 +74,68 @@ class RouteRegistry
           { HTTPMethod.GET, new List<string>() },
           { HTTPMethod.POST, new List<string>() },
           { HTTPMethod.PUT, new List<string>() },
-          { HTTPMethod.DELETE, new List<string>() }
+          { HTTPMethod.DELETE, new List<string>() },
+          { HTTPMethod.PATCH, new List<string>() }
         };
     }
 
     public void RegisterGet(string routePattern)
     {
-        this.routePatterns[HTTPMethod.GET].Add(this.urlParser.CreateRegexPattern(routePattern));
+        this.routePatterns[HTTPMethod.GET].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
     }
     public void RegisterPost(string routePattern)
     {
-        this.routePatterns[HTTPMethod.POST].Add(this.urlParser.CreateRegexPattern(routePattern));
+        this.routePatterns[HTTPMethod.POST].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
     }
     public void RegisterPut(string routePattern)
     {
-        this.routePatterns[HTTPMethod.PUT].Add(this.urlParser.CreateRegexPattern(routePattern));
+        this.routePatterns[HTTPMethod.PUT].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
     }
     public void RegisterDelete(string routePattern)
     {
-        this.routePatterns[HTTPMethod.DELETE].Add(this.urlParser.CreateRegexPattern(routePattern));
+        this.routePatterns[HTTPMethod.DELETE].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
+    }
+
+    public void RegisterRoute(string routePattern, HTTPMethod method)
+    {
+        if (Enum.IsDefined<HTTPMethod>(method))
+        {
+            this.routePatterns[method].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
+        }
+        else
+        {
+            throw new ArgumentException($"Unkown HTTP Method provided. Acceptable methods are: {HTTPMethod.GET}, {HTTPMethod.POST}, {HTTPMethod.PUT}, {HTTPMethod.DELETE}, {HTTPMethod.PATCH}.");
+        }
+
     }
 
     // TODO passenden Controller & Methode finden
     // wer soll das machen?
     // was soll Map eigentlich genau machen?
     // IMPROVE potentialPatterns umbenennen
-    public GroupCollection Map(string requestedUrl, HTTPMethod method)
+    // ? was soll diese methode überhaupt machen
+    public UrlParams? MapRequest(string requestedUrl, HTTPMethod method)
     {
-        List<string> potentialPatterns;
+        Dictionary<string, string> namedTokensInUrlFound = new();
+        List<string>? potentialPatterns;
 
         if (!routePatterns.TryGetValue(method, out potentialPatterns))
-            return null;
+            return new UrlParams(method, requestedUrl);
 
-        MatchCollection match = null;
-        string requestedUrlCleaned = urlParser.CleanUrl(requestedUrl);
-        
+        string trimmedUrl = urlParser.CleanUrl(requestedUrl);
+
 
         foreach (string pattern in potentialPatterns)
         {
-            match = Regex.MatchUrl(requestedUrlCleaned, pattern);
+            namedTokensInUrlFound = this.urlParser.MatchUrlAndGetParams(trimmedUrl, pattern);
 
-            if (match.Count > 0)
+            if (namedTokensInUrlFound.Count > 0)
             {
                 break;
             }
         }
 
-        return match[0]?.Groups ?? null;
-
+        return new UrlParams(namedTokensInUrlFound, method, requestedUrl);
     }
 
 }

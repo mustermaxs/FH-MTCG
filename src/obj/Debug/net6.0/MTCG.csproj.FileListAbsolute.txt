@@ -3,3 +3,13 @@
 /home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.AssemblyInfoInputs.cache
 /home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.AssemblyInfo.cs
 /home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.csproj.CoreCompileInputs.cache
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/MTCG
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/MTCG.deps.json
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/MTCG.runtimeconfig.json
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/MTCG.dll
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/ref/MTCG.dll
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/MTCG.pdb
+/home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.dll
+/home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/ref/MTCG.dll
+/home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.pdb
+/home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.genruntimeconfig.cache

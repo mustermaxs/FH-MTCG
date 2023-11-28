@@ -6,7 +6,7 @@ namespace MTCG
     public interface IUrlParser
     {
         string CleanUrl(string url);
-        string CreateRegexPattern(string urlTemplate);
-        Group MatchUrl(string url, string urlPattern);
+        string ReplaceTokensWithRegexPatterns(string urlTemplate);
+        Dictionary<string, string> MatchUrlAndGetParams(string url, string urlPattern);
     }
 }

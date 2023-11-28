@@ -21,14 +21,14 @@ namespace MTCG
             IUrlParser parser = new UrlParser();
             RouteRegistry registry = new RouteRegistry(parser);
             registry.RegisterGet("api/{controller:alpha}/user/{id:int}");
-            registry.RegisterGet("api/score/user/{id:int}");
-            GroupCollection m1 = registry.Map("/api/home/user/2", HTTPMethod.GET);
-            GroupCollection m2 = registry.Map("/api/score/user/21", HTTPMethod.GET);
+            // registry.RegisterGet("api/score/user/{id:int}");
+            UrlParams m1 = registry.MapRequest("/api/home/user/2", HTTPMethod.GET);
+            // GroupCollection m2 = registry.MapRequest("/api/score/user/21", HTTPMethod.GET);
             
-            if (m1 != null)
-            {
-                Console.WriteLine(m1["controller"].Value);
-            }
+            // if (m1 != null)
+            // {
+            //     Console.WriteLine(m1["controller"].Value);
+            // }
             // Assembly assembly = Assembly.GetExecutingAssembly();
             // var controllerTypes = assembly.GetTypes().Where(t => t.GetCustomAttribute<ControllerAttribute>() != null);
 

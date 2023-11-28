@@ -1,0 +1,9 @@
+
+
+namespace MTCG
+{
+    interface IController
+    {
+        
+    }
+}

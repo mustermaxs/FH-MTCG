@@ -1,0 +1,5 @@
+/home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.csproj.AssemblyReference.cache
+/home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.GeneratedMSBuildEditorConfig.editorconfig
+/home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.AssemblyInfoInputs.cache
+/home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.AssemblyInfo.cs
+/home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.csproj.CoreCompileInputs.cache

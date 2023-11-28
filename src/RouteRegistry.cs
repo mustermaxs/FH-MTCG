@@ -108,6 +108,22 @@ public class RouteRegistry
 
     }
 
+    public void RegisterRoute(string routePattern, HTTPMethod method, Type controllerType)
+    {
+        if (!Enum.IsDefined<HTTPMethod>(method))
+        {
+            throw new ArgumentException($"Unkown HTTP Method provided. Acceptable methods are: {HTTPMethod.GET}, {HTTPMethod.POST}, {HTTPMethod.PUT}, {HTTPMethod.DELETE}, {HTTPMethod.PATCH}.");
+        }
+        else if (!controllerType.IsAssignableTo(typeof(IController)))
+        {
+            throw new ArgumentException($"{controllerType} does not implement IController interface.");
+        }
+        else
+        {
+            this.routePatterns[method].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
+        }
+    }
+
     // TODO passenden Controller & Methode finden
     // wer soll das machen?
     // was soll Map eigentlich genau machen?

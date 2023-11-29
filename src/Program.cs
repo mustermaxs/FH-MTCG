@@ -45,7 +45,7 @@ namespace MTCG
                         
                         if (req.IsRouteRegistered)
                         {
-                            Console.WriteLine(req.RawUrl);
+                            Console.WriteLine($"is route registered: {req.IsRouteRegistered}");
 
                         }
                     }

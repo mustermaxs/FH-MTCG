@@ -3,7 +3,7 @@ using MTCG;
 namespace MTCG
 {
     [Controller]
-    public class UserController
+    public class UserController : IController
     {
         public UserController() { }
 

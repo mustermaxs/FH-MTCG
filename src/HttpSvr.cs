@@ -71,7 +71,8 @@ namespace MTCG
 
         private void RegisterRoutes()
         {
-            
+            // EndpointMapper mapper = new(..)
+            // mapper.RegisteredEndpoints("/user/{userid:int}", HTTPMethod.GET);
         }
 
 

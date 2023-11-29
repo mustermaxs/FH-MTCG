@@ -4,24 +4,27 @@ namespace MTCG;
 
 public abstract class AbstractEndpoint
 {
-    public AbstractEndpoint(HTTPMethod method, string routePattern, Type controllerType, string controllerMethod)
+    public AbstractEndpoint(HTTPMethod method, string routePattern, string routeTemplate, Type controllerType, string controllerMethod)
     {
-        if (!controllerType.IsAssignableFrom(typeof(IController)))
+        if (!typeof(IController).IsAssignableFrom(controllerType))
         {
-            throw new ArgumentException($"Invalid controller type passed");
+            throw new ArgumentException($"Invalid controller type passed.\nType passed: {controllerType}");
         }
-        this.routePattern = routePattern;
+        this.endpointPattern = routePattern;
         this.method = method;
         this.controllerMethod = controllerMethod;
         this.controllerType = controllerType;
+        this.routeTemplate = routeTemplate;
     }
-    protected string routePattern;
+    protected string endpointPattern;
+    protected string routeTemplate;
+    public string RouteTemplate => routeTemplate;
     protected string controllerMethod;
     protected Type controllerType;
-    protected string ControllerMethod => controllerMethod;
-    protected Type COntrollerType => controllerType;
+    public string ControllerMethod => controllerMethod;
+    public Type ControllerType => controllerType;
     protected HTTPMethod method;
     public HTTPMethod Method => method;
-    public string RoutePattern => routePattern;
+    public string EndpointPattern => endpointPattern;
 
 }

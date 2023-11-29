@@ -29,6 +29,15 @@ namespace UnitTests.Routing
                         $"Generated regex '{generatedRegex}' does not match expected pattern '{expectedRoutePattern}'.");
         }
 
+        //TODO
+        // public void UrlParser_FindsNamedParams(string routeTemplate, string expectedRoutePattern, string key, string expectedValue)
+        // {
+        //     string trimmedRouteTemplate = parser.CleanUrl(routeTemplate);
+        //     string generatedRegex = this.parser?.ReplaceTokensWithRegexPatterns(trimmedRouteTemplate) ?? "";
+        //     Assert.That(generatedRegex, Is.EqualTo(expectedRoutePattern),
+        //                 $"Generated regex '{generatedRegex}' does not match expected pattern '{expectedRoutePattern}'.");
+        // }
+
     }
 
     [TestFixture]
@@ -64,17 +73,16 @@ namespace UnitTests.Routing
 
                 try
                 {
-                    routeResolver.RegisterEndpoint(routeTemplate, method);
+                    routeResolver.RegisterEndpoint(routeTemplate, method, typeof(IController), "Index");
                 }
                 catch (Exception ex)
                 {
-                    Assert.Fail($"Unknown HTTPMethod passed.");
+                    Assert.Fail($"Error: {ex}.");
                 }
 
-                routeResolver.RegisterEndpointGet(routeTemplate);
-                ResolvedUrl result = routeResolver.TryMapRouteToEndpoint(requestedUrl, method);
+                RequestObject result = routeResolver.TryMapRouteToEndpoint(requestedUrl, method);
 
-                Assert.IsTrue(result?.IsRouteRegistered, $"{routeResolver.GetType().Name} wasn't able to map the requested route.\n" +
+                Assert.IsTrue(result?.RouteFound, $"{routeResolver.GetType().Name} wasn't able to map the requested route.\n" +
                 $"Requested Url: {requestedUrl}\n" +
                 $"Template:     {routeTemplate}\n" +
                 $"Pattern:      {pattern}");
@@ -88,14 +96,39 @@ namespace UnitTests.Routing
         public void RouteRegistry_CantFindRegisteredAndRequestedRoute(string routeTemplate, string requestedUrl, bool foundRoute, HTTPMethod method)
         {
             string pattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
-            routeResolver.RegisterEndpointGet(routeTemplate);
-            ResolvedUrl result = routeResolver.TryMapRouteToEndpoint(requestedUrl, method);
-            Assert.IsFalse(result.IsRouteRegistered,
+            routeResolver.RegisterEndpoint(routeTemplate, method, typeof(IController), "Index");
+            RequestObject result = routeResolver.TryMapRouteToEndpoint(requestedUrl, method);
+            Assert.IsFalse(result.RouteFound,
             $"---------------------------------------------------------------------\n" +
             $"{routeResolver.GetType().Name} should not have found the requested route.\n" +
             $"Url:      {requestedUrl}" +
             $"\nTemplate: {routeTemplate}" +
             $"\nPattern:  {pattern}");
+        }
+    }
+
+    [TestFixture]
+    public class MTCG_EndpointMapper
+    {
+        IUrlParser? parser;
+        IEndpointMapper? mapper;
+        [SetUp]
+        public void SetUp()
+        {
+            this.parser = new UrlParser();
+            this.mapper = new EndpointMapper(parser);
+        }
+
+        [TestCase("/mtcg/user/{userid:int}/", "mtcg/user/123", HTTPMethod.GET, true, "userid", 123)]
+        public void EndpointMapper_ReturnsExpectedRequestObject(string urlTemplate, string url, HTTPMethod method, bool foundRoute, string paramKey, int value)
+        {
+            RequestObject request;
+            mapper.RegisterEndpoint(urlTemplate, method, typeof(IController), "Index");
+            request = mapper.TryMapRouteToEndpoint(url, method);
+            Assert.That(request.RouteFound == true, $"Route not found");
+
+            int intValue = request.GetParam<int>(paramKey);
+            Assert.That(request.GetParam<int>(paramKey) == value, $"failed");
         }
     }
 
@@ -123,5 +156,22 @@ namespace UnitTests.Routing
     //     public void HttpServer_StopServer()
     //     {
     //     }
+    // }
+
+
+    // [TestFixture]
+    // public class MTCG_EndpointMapper
+    // {
+    //     IUrlParser parser;
+    //     EndpointMapper mapper;
+    //     [SetUp]
+    //     public void SetUp()
+    //     {
+    //         parser = new UrlParser();
+    //         mapper = new EndpointMapper(parser);
+    //     }
+
+    //     [Test]
+    //     public void EndpointMapper_Returns
     // }
 }

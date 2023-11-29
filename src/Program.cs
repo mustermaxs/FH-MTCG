@@ -14,43 +14,45 @@ namespace MTCG
         /// <param name="args">Arguments.</param>
         static void Main(string[] args)
         {
+            EndpointMapper mapper = new(new UrlParser());
+            mapper.RegisterEndpoint("/user/{userid:int}", HTTPMethod.GET, typeof(UserController), "Index");
             // HttpServer svr = new();
             // svr.Incoming += _ProcessMesage;
 
             // svr.Run();
-            string requestedRoute = "/user/mustermax";
-            HTTPMethod reqMethod = HTTPMethod.GET;
-            IUrlParser parser = new UrlParser();
-            EndpointMapper routeResolver = new EndpointMapper(parser);
+            // string requestedRoute = "/user/mustermax";
+            // HTTPMethod reqMethod = HTTPMethod.GET;
+            // IUrlParser parser = new UrlParser();
+            // EndpointMapper routeResolver = new EndpointMapper(parser);
 
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            var controllerTypes = assembly.GetTypes().Where(t => t.GetCustomAttribute<ControllerAttribute>() != null);
+            // Assembly assembly = Assembly.GetExecutingAssembly();
+            // var controllerTypes = assembly.GetTypes().Where(t => t.GetCustomAttribute<ControllerAttribute>() != null);
 
-            foreach (Type controllerType in controllerTypes)
-            {
-                IEnumerable<MethodInfo> routeActions = controllerType.GetMethods()
-                    .Where(method => method.GetCustomAttribute<RouteAttribute>() != null);
+            // foreach (Type controllerType in controllerTypes)
+            // {
+            //     IEnumerable<MethodInfo> routeActions = controllerType.GetMethods()
+            //         .Where(method => method.GetCustomAttribute<RouteAttribute>() != null);
 
-                foreach (MethodInfo method in controllerType.GetMethods())
-                {
-                    RouteAttribute routeAttribute = (RouteAttribute)Attribute.GetCustomAttribute(method, typeof(RouteAttribute));
+            //     foreach (MethodInfo method in controllerType.GetMethods())
+            //     {
+            //         RouteAttribute routeAttribute = (RouteAttribute)Attribute.GetCustomAttribute(method, typeof(RouteAttribute));
 
-                    if (routeAttribute != null)
-                    {
-                        string route = routeAttribute.Route;
-                        HTTPMethod httpMethod = routeAttribute.Method;
+            //         if (routeAttribute != null)
+            //         {
+            //             string route = routeAttribute.Route;
+            //             HTTPMethod httpMethod = routeAttribute.Method;
 
-                        routeResolver.RegisterEndpoint(route, httpMethod);
-                        ResolvedUrl req = routeResolver.TryMapRouteToEndpoint(requestedRoute, reqMethod);
+            //             routeResolver.RegisterEndpoint(route, httpMethod);
+            //             RequestObject req = routeResolver.TryMapRouteToEndpoint(requestedRoute, reqMethod);
                         
-                        if (req.IsRouteRegistered)
-                        {
-                            Console.WriteLine($"is route registered: {req.IsRouteRegistered}");
+            //             if (req.RouteFound)
+            //             {
+            //                 Console.WriteLine($"is route registered: {req.RouteFound}");
 
-                        }
-                    }
-                }
-            }
+            //             }
+            //         }
+            //     }
+            // }
 
         }
 

@@ -10,19 +10,19 @@ public class ResolvedUrl
     private Dictionary<string, string> urlParams = new Dictionary<string, string>();
     private string? rawUrl;
     private HTTPMethod method;
-    bool isRouteRegistered = false;
+    bool isRouteRegistered;
     public ResolvedUrl(Dictionary<string, string> parameters, HTTPMethod method, string rawUrl)
     {
         this.urlParams = parameters;
         this.method = method;
         this.rawUrl = rawUrl;
-
-        if (urlParams.Count > 0)
-        {
-            isRouteRegistered = true;
-        }
     }
-    public bool IsRouteRegistered { get; private set; }
+    public bool IsRouteRegistered { get; set; } = false;
+    public Dictionary<string, string> UrlParams
+    {
+        private get { return urlParams; }
+        set { urlParams = value; }
+    }
 
     public ResolvedUrl(HTTPMethod method, string rawUrl)
     {
@@ -40,6 +40,7 @@ public class ResolvedUrl
     {
         get => this.rawUrl;
     }
+
     public T GetParam<T>(string key)
     {
         string? value;
@@ -117,6 +118,7 @@ public class RouteRegistry
     {
         Dictionary<string, string> namedTokensInUrlFound = new();
         List<string>? potentialPatterns;
+        var res = new ResolvedUrl(method, requestedUrl);
 
         if (!routePatterns.TryGetValue(method, out potentialPatterns))
             return new ResolvedUrl(method, requestedUrl);
@@ -130,11 +132,13 @@ public class RouteRegistry
 
             if (namedTokensInUrlFound.Count > 0)
             {
+                res.UrlParams = namedTokensInUrlFound;
+                res.IsRouteRegistered = true;
                 break;
             }
         }
 
-        return new ResolvedUrl(namedTokensInUrlFound, method, requestedUrl);
+        return res;
     }
 
 }

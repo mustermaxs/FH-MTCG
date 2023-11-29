@@ -8,14 +8,14 @@ namespace MTCG;
 /// <summary>Works as a store for registered routes. Can be used to check if requested route matches
 /// any of the registered route patterns. If so, it can provide a ResolveRoute object containing the 
 /// named parameters and their associated values</summary>
-public class RouteResolver
+public class EndpointMapper : IEndpointMapper
 {
-    public Dictionary<HTTPMethod, List<string>> parsedRouteTemplates;
+    private Dictionary<HTTPMethod, List<string>> parsedRouteTemplates;
     private IUrlParser urlParser;
 
     /// <summary>Constructor</summary>
     /// <param name="urlParser">Requires a parser that implements the interface IUrlParser</param>
-    public RouteResolver(IUrlParser urlParser)
+    public EndpointMapper(IUrlParser urlParser)
     {
         this.urlParser = urlParser;
         parsedRouteTemplates = new Dictionary<HTTPMethod, List<string>>
@@ -28,6 +28,9 @@ public class RouteResolver
         };
     }
 
+    public Dictionary<HTTPMethod, List<string>> RegisteredEndpoints => this.parsedRouteTemplates;
+
+
     /// <summary>Register a route template pattern using HTTP method GET</summary>
     /// <param name="routePattern">
     /// URL template for example like:
@@ -36,7 +39,7 @@ public class RouteResolver
     /// - /api/user/{username:alpha} -> username can only be letters from the alphabet
     /// - /api/token/{accesstoken:alphanum} -> accesstoken can be any string
     /// </param>
-    public void RegisterGet(string routePattern)
+    public void RegisterEndpointGet(string routePattern)
     {
         this.parsedRouteTemplates[HTTPMethod.GET].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
     }
@@ -48,7 +51,7 @@ public class RouteResolver
     /// - /api/user/{username:alpha} -> username can only be letters from the alphabet
     /// - /api/token/{accesstoken:alphanum} -> accesstoken can be any string
     /// </param>
-    public void RegisterPost(string routePattern)
+    public void RegisterEndpointPost(string routePattern)
     {
         this.parsedRouteTemplates[HTTPMethod.POST].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
     }
@@ -60,7 +63,7 @@ public class RouteResolver
     /// - /api/user/{username:alpha} -> username can only be letters from the alphabet
     /// - /api/token/{accesstoken:alphanum} -> accesstoken can be any string
     /// </param>
-    public void RegisterPut(string routePattern)
+    public void RegisterEndpointPut(string routePattern)
     {
         this.parsedRouteTemplates[HTTPMethod.PUT].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
     }
@@ -72,7 +75,7 @@ public class RouteResolver
     /// - /api/user/{username:alpha} -> username can only be letters from the alphabet
     /// - /api/token/{accesstoken:alphanum} -> accesstoken can be any string
     /// </param>
-    public void RegisterDelete(string routePattern)
+    public void RegisterEndpointDelete(string routePattern)
     {
         this.parsedRouteTemplates[HTTPMethod.DELETE].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
     }
@@ -86,17 +89,25 @@ public class RouteResolver
     /// - /api/user/{username:alpha} -> username can only be letters from the alphabet
     /// - /api/token/{accesstoken:alphanum} -> accesstoken can be any string
     /// </param>
-    public void RegisterRoute(string routePattern, HTTPMethod method)
+
+    protected bool IsRouteAlreadyRegistered(string routePattern, HTTPMethod method)
     {
-        if (Enum.IsDefined<HTTPMethod>(method))
+        return Enum.IsDefined<HTTPMethod>(method) && this.parsedRouteTemplates[method].Contains<string>(routePattern);
+    }
+    public void RegisterEndpoint(string routePattern, HTTPMethod method)
+    {
+        var parsedRoutePattern = this.urlParser.ReplaceTokensWithRegexPatterns(routePattern);
+
+        if (Enum.IsDefined<HTTPMethod>(method) && !IsRouteAlreadyRegistered(parsedRoutePattern, method))
         {
-            this.parsedRouteTemplates[method].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
+            this.parsedRouteTemplates[method].Add(parsedRoutePattern);
         }
         else
         {
-            throw new ArgumentException($"Unkown HTTP Method provided. Acceptable methods are: {HTTPMethod.GET}, {HTTPMethod.POST}, {HTTPMethod.PUT}, {HTTPMethod.DELETE}, {HTTPMethod.PATCH}.");
+            throw new ArgumentException(
+                $"Unkown HTTP Method provided. Acceptable methods are:" +
+                "{HTTPMethod.GET}, {HTTPMethod.POST}, {HTTPMethod.PUT}, {HTTPMethod.DELETE}, {HTTPMethod.PATCH}.");
         }
-
     }
 
     // TODO passenden Controller & Methode finden
@@ -107,7 +118,7 @@ public class RouteResolver
     /// <summary>Checks if the requested route is registered in the store.</summary>
     /// <returns>ResolvedUrl object containing (in case they exist) values of the named url parameters 
     /// and a bool (IsRouteRegistered) inidicating if the requested route was even registered in the store.</returns>
-    public ResolvedUrl? MapRequest(string requestedUrl, HTTPMethod method)
+    public ResolvedUrl? TryMapRequestedRoute(string requestedUrl, HTTPMethod method)
     {
         Dictionary<string, string> namedTokensInUrlFound = new();
         List<string>? potentialPatterns;

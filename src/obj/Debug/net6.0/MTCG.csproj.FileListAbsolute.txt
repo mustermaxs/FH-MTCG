@@ -13,3 +13,11 @@
 /home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/ref/MTCG.dll
 /home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.pdb
 /home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.genruntimeconfig.cache
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/Microsoft.Extensions.Logging.Abstractions.dll
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/Npgsql.dll
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/System.Diagnostics.DiagnosticSource.dll
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/System.Text.Encodings.Web.dll
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/System.Text.Json.dll
+/home/mustermax/vscode_projects/MTCG/src/bin/Debug/net6.0/runtimes/browser/lib/net6.0/System.Text.Encodings.Web.dll
+/home/mustermax/vscode_projects/MTCG/src/obj/Debug/net6.0/MTCG.csproj.CopyComplete

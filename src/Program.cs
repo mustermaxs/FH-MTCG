@@ -21,7 +21,7 @@ namespace MTCG
             string requestedRoute = "/user/mustermax";
             HTTPMethod reqMethod = HTTPMethod.GET;
             IUrlParser parser = new UrlParser();
-            RouteResolver routeResolver = new RouteResolver(parser);
+            EndpointMapper routeResolver = new EndpointMapper(parser);
 
             Assembly assembly = Assembly.GetExecutingAssembly();
             var controllerTypes = assembly.GetTypes().Where(t => t.GetCustomAttribute<ControllerAttribute>() != null);
@@ -40,8 +40,8 @@ namespace MTCG
                         string route = routeAttribute.Route;
                         HTTPMethod httpMethod = routeAttribute.Method;
 
-                        routeResolver.RegisterRoute(route, httpMethod);
-                        ResolvedUrl req = routeResolver.MapRequest(requestedRoute, reqMethod);
+                        routeResolver.RegisterEndpoint(route, httpMethod);
+                        ResolvedUrl req = routeResolver.TryMapRequestedRoute(requestedRoute, reqMethod);
                         
                         if (req.IsRouteRegistered)
                         {

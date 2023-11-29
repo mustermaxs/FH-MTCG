@@ -34,14 +34,14 @@ namespace UnitTests.Routing
     [TestFixture]
     public class MTCG_RouteRegistry
     {
-        RouteResolver? routeResolver;
+        EndpointMapper? routeResolver;
         private IUrlParser parser = new UrlParser();
         private string registeredGETRoute = "/api/{controller:alpha}/test/{view:alpha}/user/{userid:int}";
 
         [SetUp]
         public void SetUp()
         {
-            routeResolver = new RouteResolver(parser);
+            routeResolver = new EndpointMapper(parser);
         }
 
 
@@ -64,15 +64,15 @@ namespace UnitTests.Routing
 
                 try
                 {
-                    routeResolver.RegisterRoute(routeTemplate, method);
+                    routeResolver.RegisterEndpoint(routeTemplate, method);
                 }
                 catch (Exception ex)
                 {
                     Assert.Fail($"Unknown HTTPMethod passed.");
                 }
 
-                routeResolver.RegisterGet(routeTemplate);
-                ResolvedUrl result = routeResolver.MapRequest(requestedUrl, method);
+                routeResolver.RegisterEndpointGet(routeTemplate);
+                ResolvedUrl result = routeResolver.TryMapRequestedRoute(requestedUrl, method);
 
                 Assert.IsTrue(result?.IsRouteRegistered, $"{routeResolver.GetType().Name} wasn't able to map the requested route.\n" +
                 $"Requested Url: {requestedUrl}\n" +
@@ -88,8 +88,8 @@ namespace UnitTests.Routing
         public void RouteRegistry_CantFindRegisteredAndRequestedRoute(string routeTemplate, string requestedUrl, bool foundRoute, HTTPMethod method)
         {
             string pattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
-            routeResolver.RegisterGet(routeTemplate);
-            ResolvedUrl result = routeResolver.MapRequest(requestedUrl, method);
+            routeResolver.RegisterEndpointGet(routeTemplate);
+            ResolvedUrl result = routeResolver.TryMapRequestedRoute(requestedUrl, method);
             Assert.IsFalse(result.IsRouteRegistered,
             $"---------------------------------------------------------------------\n" +
             $"{routeResolver.GetType().Name} should not have found the requested route.\n" +

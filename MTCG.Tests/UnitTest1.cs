@@ -34,14 +34,14 @@ namespace UnitTests.Routing
     [TestFixture]
     public class MTCG_RouteRegistry
     {
-        RouteRegistry? registry;
+        RouteResolver? routeResolver;
         private IUrlParser parser = new UrlParser();
         private string registeredGETRoute = "/api/{controller:alpha}/test/{view:alpha}/user/{userid:int}";
 
         [SetUp]
         public void SetUp()
         {
-            registry = new RouteRegistry(parser);
+            routeResolver = new RouteResolver(parser);
         }
 
 
@@ -58,23 +58,23 @@ namespace UnitTests.Routing
         [TestCase("/mtcg/route/without/params/", "/mtcg/route/without/params/", true, HTTPMethod.DELETE)]
         public void RouteRegistry_FindsRegisteredAndRequestedRoute(string routeTemplate, string requestedUrl, bool foundRoute, HTTPMethod method)
         {
-            if (parser != null && registry != null)
+            if (parser != null && routeResolver != null)
             {
                 string pattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
 
                 try
                 {
-                    registry.RegisterRoute(routeTemplate, method);
+                    routeResolver.RegisterRoute(routeTemplate, method);
                 }
                 catch (Exception ex)
                 {
                     Assert.Fail($"Unknown HTTPMethod passed.");
                 }
 
-                registry.RegisterGet(routeTemplate);
-                ResolvedUrl result = registry.MapRequest(requestedUrl, method);
+                routeResolver.RegisterGet(routeTemplate);
+                ResolvedUrl result = routeResolver.MapRequest(requestedUrl, method);
 
-                Assert.IsTrue(result?.IsRouteRegistered, $"{registry.GetType().Name} wasn't able to map the requested route.\n" +
+                Assert.IsTrue(result?.IsRouteRegistered, $"{routeResolver.GetType().Name} wasn't able to map the requested route.\n" +
                 $"Requested Url: {requestedUrl}\n" +
                 $"Template:     {routeTemplate}\n" +
                 $"Pattern:      {pattern}");
@@ -88,11 +88,11 @@ namespace UnitTests.Routing
         public void RouteRegistry_CantFindRegisteredAndRequestedRoute(string routeTemplate, string requestedUrl, bool foundRoute, HTTPMethod method)
         {
             string pattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
-            registry.RegisterGet(routeTemplate);
-            ResolvedUrl result = registry.MapRequest(requestedUrl, method);
+            routeResolver.RegisterGet(routeTemplate);
+            ResolvedUrl result = routeResolver.MapRequest(requestedUrl, method);
             Assert.IsFalse(result.IsRouteRegistered,
             $"---------------------------------------------------------------------\n" +
-            $"{registry.GetType().Name} should not have found the requested route.\n" +
+            $"{routeResolver.GetType().Name} should not have found the requested route.\n" +
             $"Url:      {requestedUrl}" +
             $"\nTemplate: {routeTemplate}" +
             $"\nPattern:  {pattern}");

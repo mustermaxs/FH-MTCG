@@ -62,11 +62,11 @@ public class ResolvedUrl
 
 }
 
-public class RouteRegistry
+public class RouteResolver
 {
     public Dictionary<HTTPMethod, List<string>> routePatterns;
     private IUrlParser urlParser;
-    public RouteRegistry(IUrlParser urlParser)
+    public RouteResolver(IUrlParser urlParser)
     {
         this.urlParser = urlParser;
         routePatterns = new Dictionary<HTTPMethod, List<string>>

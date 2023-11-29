@@ -41,7 +41,7 @@ namespace MTCG
                         HTTPMethod httpMethod = routeAttribute.Method;
 
                         routeResolver.RegisterEndpoint(route, httpMethod);
-                        ResolvedUrl req = routeResolver.TryMapRequestedRoute(requestedRoute, reqMethod);
+                        ResolvedUrl req = routeResolver.TryMapRouteToEndpoint(requestedRoute, reqMethod);
                         
                         if (req.IsRouteRegistered)
                         {

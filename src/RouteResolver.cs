@@ -10,7 +10,7 @@ namespace MTCG;
 /// named parameters and their associated values</summary>
 public class EndpointMapper : IEndpointMapper
 {
-    private Dictionary<HTTPMethod, List<string>> parsedRouteTemplates;
+    private Dictionary<string, AbstractEndpoint> endpointMappings;
     private IUrlParser urlParser;
 
     /// <summary>Constructor</summary>
@@ -18,18 +18,16 @@ public class EndpointMapper : IEndpointMapper
     public EndpointMapper(IUrlParser urlParser)
     {
         this.urlParser = urlParser;
-        parsedRouteTemplates = new Dictionary<HTTPMethod, List<string>>
-        {
-          { HTTPMethod.GET, new List<string>() },
-          { HTTPMethod.POST, new List<string>() },
-          { HTTPMethod.PUT, new List<string>() },
-          { HTTPMethod.DELETE, new List<string>() },
-          { HTTPMethod.PATCH, new List<string>() }
-        };
+        endpointMappings = new Dictionary<string, AbstractEndpoint>();
     }
 
-    public Dictionary<HTTPMethod, List<string>> RegisteredEndpoints => this.parsedRouteTemplates;
+    public Dictionary<string, AbstractEndpoint> RegisteredEndpoints => this.endpointMappings;
 
+    // TODO use key as parsedRouteTempaltes key
+    private string GetKeyForEndpointMapping(string url, HTTPMethod method)
+    {
+        return $"{method}-{url}";
+    }
 
     /// <summary>Register a route template pattern using HTTP method GET</summary>
     /// <param name="routePattern">
@@ -39,10 +37,10 @@ public class EndpointMapper : IEndpointMapper
     /// - /api/user/{username:alpha} -> username can only be letters from the alphabet
     /// - /api/token/{accesstoken:alphanum} -> accesstoken can be any string
     /// </param>
-    public void RegisterEndpointGet(string routePattern)
-    {
-        this.parsedRouteTemplates[HTTPMethod.GET].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
-    }
+    // public void RegisterEndpointGet(string routePattern)
+    // {
+    //     this.endpointMappings[HTTPMethod.GET].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
+    // }
     /// <summary>Register a route template pattern using HTTP method POST</summary>
     /// <param name="routePattern">
     /// URL template for example like:
@@ -51,10 +49,10 @@ public class EndpointMapper : IEndpointMapper
     /// - /api/user/{username:alpha} -> username can only be letters from the alphabet
     /// - /api/token/{accesstoken:alphanum} -> accesstoken can be any string
     /// </param>
-    public void RegisterEndpointPost(string routePattern)
-    {
-        this.parsedRouteTemplates[HTTPMethod.POST].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
-    }
+    // public void RegisterEndpointPost(string routePattern)
+    // {
+    //     this.endpointMappings[HTTPMethod.POST].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
+    // }
     /// <summary>Register a route template pattern using HTTP method PUT</summary>
     /// <param name="routePattern">
     /// URL template for example like:
@@ -63,10 +61,10 @@ public class EndpointMapper : IEndpointMapper
     /// - /api/user/{username:alpha} -> username can only be letters from the alphabet
     /// - /api/token/{accesstoken:alphanum} -> accesstoken can be any string
     /// </param>
-    public void RegisterEndpointPut(string routePattern)
-    {
-        this.parsedRouteTemplates[HTTPMethod.PUT].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
-    }
+    // public void RegisterEndpointPut(string routePattern)
+    // {
+    //     this.endpointMappings[HTTPMethod.PUT].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
+    // }
     /// <summary>Register a route template pattern using HTTP method DELETE</summary>
     /// <param name="routePattern">
     /// URL template for example like:
@@ -75,10 +73,10 @@ public class EndpointMapper : IEndpointMapper
     /// - /api/user/{username:alpha} -> username can only be letters from the alphabet
     /// - /api/token/{accesstoken:alphanum} -> accesstoken can be any string
     /// </param>
-    public void RegisterEndpointDelete(string routePattern)
-    {
-        this.parsedRouteTemplates[HTTPMethod.DELETE].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
-    }
+    // public void RegisterEndpointDelete(string routePattern)
+    // {
+    //     this.endpointMappings[HTTPMethod.DELETE].Add(this.urlParser.ReplaceTokensWithRegexPatterns(routePattern));
+    // }
 
     /// <summary>Register a route template pattern.</summary>
     /// <param name="method">Expects the HTTP method for which the route is registered for.</param>
@@ -90,17 +88,21 @@ public class EndpointMapper : IEndpointMapper
     /// - /api/token/{accesstoken:alphanum} -> accesstoken can be any string
     /// </param>
 
-    protected bool IsRouteAlreadyRegistered(string routePattern, HTTPMethod method)
+    protected bool IsRouteAlreadyRegistered(string route, HTTPMethod method)
     {
-        return Enum.IsDefined<HTTPMethod>(method) && this.parsedRouteTemplates[method].Contains<string>(routePattern);
+        string parsedRoutePattern = urlParser.ReplaceTokensWithRegexPatterns(route);
+        string key = GetKeyForEndpointMapping(parsedRoutePattern, method);
+
+        return endpointMappings.TryGetValue(key, out _);
     }
-    public void RegisterEndpoint(string routePattern, HTTPMethod method)
+    public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, string controllerMethodName)
     {
         var parsedRoutePattern = this.urlParser.ReplaceTokensWithRegexPatterns(routePattern);
 
-        if (Enum.IsDefined<HTTPMethod>(method) && !IsRouteAlreadyRegistered(parsedRoutePattern, method))
+        if (!IsRouteAlreadyRegistered(parsedRoutePattern, method))
         {
-            this.parsedRouteTemplates[method].Add(parsedRoutePattern);
+            string key = GetKeyForEndpointMapping(routePattern, method);
+            this.endpointMappings[key] = new Endpoint(method, parsedRoutePattern, controllerType, controllerMethodName);
         }
         else
         {
@@ -108,6 +110,19 @@ public class EndpointMapper : IEndpointMapper
                 $"Unkown HTTP Method provided. Acceptable methods are:" +
                 "{HTTPMethod.GET}, {HTTPMethod.POST}, {HTTPMethod.PUT}, {HTTPMethod.DELETE}, {HTTPMethod.PATCH}.");
         }
+    }
+
+    private string RemovePrefixFromKey(string key)
+    {
+        string delimiter = "-";
+        int delimiterIndex = key.IndexOf(delimiter);
+
+        if (delimiterIndex != -1 && delimiterIndex < key.Length - 1)
+        {
+            throw new Exception($"Malformed key in EndpointMapper");
+        }
+
+        return key;
     }
 
     // TODO passenden Controller & Methode finden
@@ -118,16 +133,12 @@ public class EndpointMapper : IEndpointMapper
     /// <summary>Checks if the requested route is registered in the store.</summary>
     /// <returns>ResolvedUrl object containing (in case they exist) values of the named url parameters 
     /// and a bool (IsRouteRegistered) inidicating if the requested route was even registered in the store.</returns>
-    public ResolvedUrl? TryMapRequestedRoute(string requestedUrl, HTTPMethod method)
+    public ResolvedUrl? TryMapRouteToEndpoint(string requestedUrl, HTTPMethod method)
     {
+        string trimmedUrl = urlParser.CleanUrl(requestedUrl);
         Dictionary<string, string> namedTokensInUrlFound = new();
-        List<string>? potentialPatterns;
         var res = new ResolvedUrl(method, requestedUrl);
 
-        if (!parsedRouteTemplates.TryGetValue(method, out potentialPatterns))
-            return new ResolvedUrl(method, requestedUrl);
-
-        string trimmedUrl = urlParser.CleanUrl(requestedUrl);
 
 
         foreach (string pattern in potentialPatterns)

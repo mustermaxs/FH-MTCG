@@ -72,7 +72,7 @@ namespace UnitTests.Routing
                 }
 
                 routeResolver.RegisterEndpointGet(routeTemplate);
-                ResolvedUrl result = routeResolver.TryMapRequestedRoute(requestedUrl, method);
+                ResolvedUrl result = routeResolver.TryMapRouteToEndpoint(requestedUrl, method);
 
                 Assert.IsTrue(result?.IsRouteRegistered, $"{routeResolver.GetType().Name} wasn't able to map the requested route.\n" +
                 $"Requested Url: {requestedUrl}\n" +
@@ -89,7 +89,7 @@ namespace UnitTests.Routing
         {
             string pattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
             routeResolver.RegisterEndpointGet(routeTemplate);
-            ResolvedUrl result = routeResolver.TryMapRequestedRoute(requestedUrl, method);
+            ResolvedUrl result = routeResolver.TryMapRouteToEndpoint(requestedUrl, method);
             Assert.IsFalse(result.IsRouteRegistered,
             $"---------------------------------------------------------------------\n" +
             $"{routeResolver.GetType().Name} should not have found the requested route.\n" +

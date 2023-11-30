@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 
 namespace MTCG;
 
@@ -13,7 +14,7 @@ class ReflectionRouteObtainer : IRouteObtainer
     }
     public List<object> ObtainRoutes()
     {
-        var endpointList = new List<AbstractEndpoint>();
+        var endpointList = new List<object>();
 
         var controllerTypes = attributeHandler.GetAttributeOfType<ControllerAttribute>(typeof(IController));
         
@@ -30,7 +31,11 @@ class ReflectionRouteObtainer : IRouteObtainer
                     controllerType=controllerType,
                     controllerMethod=methodInfo.Name
                 };
+
+                endpointList.Add(endpointConfig);
             }
         }
+
+        return endpointList;
     }
 }

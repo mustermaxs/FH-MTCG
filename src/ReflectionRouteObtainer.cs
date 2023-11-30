@@ -1,35 +1,53 @@
 using System;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
+using System.Reflection.Metadata;
 
 namespace MTCG;
 
-class ReflectionRouteObtainer : IRouteObtainer
+public class EndpointConfig
 {
-  private IAttributeHandler attributeHandler;
+    public HTTPMethod Method { get; set; }
+    public string RouteTemplate { get; set; }
+    public Type ControllerType { get; set; }
+    public string ControllerMethod { get; set; }
 
-  public ReflectionRouteObtainer(IAttributeHandler attributeHandler)
+    public void Deconstruct(out HTTPMethod method, out string routeTemplate, out Type controllerType, out string controllerMethod)
+    {
+        method = Method;
+        routeTemplate = RouteTemplate;
+        controllerType = ControllerType;
+        controllerMethod = ControllerMethod;
+    }
+}
+
+public class ReflectionRouteObtainer : IRouteObtainer
+{
+    private IAttributeHandler attributeHandler;
+
+    public ReflectionRouteObtainer(IAttributeHandler attributeHandler)
     {
         this.attributeHandler = attributeHandler;
     }
-    public List<object> ObtainRoutes()
+
+    public List<EndpointConfig> ObtainRoutes()
     {
-        var endpointList = new List<object>();
+        var endpointList = new List<EndpointConfig>();
 
         var controllerTypes = attributeHandler.GetAttributeOfType<ControllerAttribute>(typeof(IController));
-        
+
         foreach (var controllerType in controllerTypes)
         {
             var controllerMethodsInfos = attributeHandler.GetClassMethodsWithAttribute<RouteAttribute>(controllerType);
 
-            foreach (MethodInfo methodInfo in controllerMethodsInfos)
+            foreach (var methodInfo in controllerMethodsInfos)
             {
                 var routeAttribute = attributeHandler.GetMethodAttributeWithMethodInfo<RouteAttribute>(methodInfo);
-                var endpointConfig = new{
-                    method=routeAttribute?.Method,
-                    routeTemplate=routeAttribute?.RouteTemplate,
-                    controllerType=controllerType,
-                    controllerMethod=methodInfo.Name
+                var endpointConfig = new EndpointConfig
+                {
+                    Method = (HTTPMethod)routeAttribute?.Method,
+                    RouteTemplate = routeAttribute?.RouteTemplate,
+                    ControllerType = (Type)controllerType,
+                    ControllerMethod = methodInfo.Name
                 };
 
                 endpointList.Add(endpointConfig);

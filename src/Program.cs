@@ -17,16 +17,16 @@ namespace MTCG
             EndpointMapper mapper = new(new UrlParser());
 
             var currentAssembly = Assembly.GetExecutingAssembly();
-            var controllerManager = new ControllerManager(currentAssembly);
-            var controllerTypes = controllerManager.GetControllerTypes();
+            var controllerManager = new AttributeHandler(currentAssembly);
+            var controllerTypes = controllerManager.GetAttributeOfType<ControllerAttribute>(typeof(IController));
 
             foreach (var controllerType in controllerTypes)
             {
-                var methods = controllerManager.GetMethodsWithAttributes<RouteAttribute>(controllerType);
+                var methods = controllerManager.GetClassMethodsWithAttribute<RouteAttribute>(controllerType);
 
                 foreach (var method in methods)
                 {
-                    var routeAttribute = controllerManager.GetRouteAttribute(method);
+                    var routeAttribute = controllerManager.GetMethodAttributeWithMethodInfo<RouteAttribute>(method);
                     mapper.RegisterEndpoint(routeAttribute.RouteTemplate, routeAttribute.Method, controllerType, method.Name);
                 }
             }

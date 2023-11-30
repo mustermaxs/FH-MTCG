@@ -5,7 +5,6 @@ namespace MTCG;
 
 public abstract class IAttributeHandler
 {
-{
     public readonly Assembly assembly;
     public IAttributeHandler(Assembly assembly)
     {
@@ -33,5 +32,4 @@ public abstract class IAttributeHandler
     {
         return (T)Attribute.GetCustomAttribute(methodInfo, typeof(T));
     }
-}
 }

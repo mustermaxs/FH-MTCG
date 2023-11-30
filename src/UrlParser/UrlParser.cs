@@ -12,14 +12,14 @@ namespace MTCG
             return url.Trim('/');
         }
 
-        public string CleanUrl(string url)
+        public string TrimUrl(string url)
         {
             return RemoveTrailingSlashes(url);
         }
 
         public string ReplaceTokensWithRegexPatterns(string url)
         {
-            string urlPattern = CleanUrl(url);
+            string urlPattern = TrimUrl(url);
 
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:alpha)\})", @"(?<$2>[a-zA-Z-]+)");
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:alphanum)\})", @"(?<$2>[a-zA-Z0-9-]+)");

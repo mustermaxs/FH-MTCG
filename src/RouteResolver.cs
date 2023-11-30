@@ -5,16 +5,20 @@ using System.Text.RegularExpressions;
 
 namespace MTCG;
 
-/// <summary>Works as a store for registered routes. Can be used to check if requested route matches
-/// any of the registered route patterns. If so, it can provide a ResolveRoute object containing the 
-/// named parameters and their associated values</summary>
+/// <summary>
+/// Works as a store for registered routes. Can be used to 
+/// check if requested route matches
+/// any of the registered route patterns. 
+/// If so, it can provide a ResolveRoute object containing the 
+/// named parameters and their associated values
+/// </summary>
 public class EndpointMapper : IEndpointMapper
 {
     private Dictionary<HTTPMethod, List<AbstractEndpoint>> endpointMappings;
-    private IUrlParser urlParser;
+    private IUrlParser parser;
     public EndpointMapper(IUrlParser urlParser)
     {
-        this.urlParser = urlParser;
+        this.parser = urlParser;
         this.endpointMappings = new Dictionary<HTTPMethod, List<AbstractEndpoint>>
             {
                 { HTTPMethod.POST, new List<AbstractEndpoint>() },
@@ -27,7 +31,7 @@ public class EndpointMapper : IEndpointMapper
     public Dictionary<HTTPMethod, List<AbstractEndpoint>> RegisteredEndpoints => this.endpointMappings;
 
     //TODO
-    public bool IsRouteAlreadyRegistered(string routeTemplate, HTTPMethod method)
+    public bool IsRouteRegistered(string routeTemplate, HTTPMethod method)
     {
         List<AbstractEndpoint> potentialEndpoints;
 
@@ -40,9 +44,9 @@ public class EndpointMapper : IEndpointMapper
     }
     public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, string controllerMethodName)
     {
-        var parsedRoutePattern = this.urlParser.ReplaceTokensWithRegexPatterns(routePattern);
+        var parsedRoutePattern = this.parser.ReplaceTokensWithRegexPatterns(routePattern);
 
-        if (!IsRouteAlreadyRegistered(parsedRoutePattern, method))
+        if (!IsRouteRegistered(parsedRoutePattern, method))
         {
             this.endpointMappings[method].Add(new Endpoint(method, parsedRoutePattern, routePattern, controllerType, controllerMethodName));
         }
@@ -54,23 +58,28 @@ public class EndpointMapper : IEndpointMapper
         }
     }
 
-
-    /// <summary>Checks if the requested route is registered in the store.</summary>
-    /// <returns>ResolvedUrl object containing (in case they exist) values of the named url parameters 
-    /// and a bool (IsRouteRegistered) inidicating if the requested route was even registered in the store.</returns>
+    /// <summary>
+    /// Checks if the requested route is registered in the store.
+    /// </summary>
+    /// <returns>
+    /// ResolvedUrl object containing (in case they exist)
+    /// values of the named url parameters 
+    /// and a bool (IsRouteRegistered) inidicating 
+    /// if the requested route was even registered in the store.
+    /// </returns>
     public RequestObject? TryMapRouteToEndpoint(string requestedUrl, HTTPMethod method)
     {
         List<AbstractEndpoint> potentialEndpoints = endpointMappings[method];
-        string trimmedUrl = urlParser.CleanUrl(requestedUrl);
-        Dictionary<string, string> namedTokensInUrlFound = new();
+        string trimmedUrl = parser.TrimUrl(requestedUrl);
+        Dictionary<string, string> namedTokens = new();
 
         foreach (var endpoint in potentialEndpoints)
         {
-            namedTokensInUrlFound = this.urlParser.MatchUrlAndGetParams(trimmedUrl, endpoint.EndpointPattern);
+            namedTokens = this.parser.MatchUrlAndGetParams(trimmedUrl, endpoint.EndpointPattern);
 
-            if (namedTokensInUrlFound.Count > 0)
+            if (namedTokens.Count > 0)
             {
-                return new RequestObject(namedTokensInUrlFound, endpoint);
+                return new RequestObject(namedTokens, endpoint);
             }
         }
 

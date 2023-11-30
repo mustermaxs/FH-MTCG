@@ -11,7 +11,7 @@ public class RequestObject
     private string? rawUrl;
     private HTTPMethod method;
     bool routeFound = false;
-    private AbstractEndpoint? endpoint;
+    private readonly AbstractEndpoint? endpoint;
     public RequestObject(Dictionary<string, string> parameters, AbstractEndpoint endpoint)
     {
         this.urlParams = parameters;
@@ -37,14 +37,9 @@ public class RequestObject
     {
         this.routeFound = false;
     }
-    public HTTPMethod Method
-    {
-        get => this.method;
-    }
-    public string? RawUrl
-    {
-        get => this.rawUrl;
-    }
+    public HTTPMethod Method => this.method;
+    public string? RawUrl => this.rawUrl;
+    public AbstractEndpoint Endpoint => endpoint;
 
     /// <summary>
     /// Gets value of named parameter by parameter name and tries to convert it to 

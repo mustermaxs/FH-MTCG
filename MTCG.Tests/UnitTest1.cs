@@ -3,7 +3,7 @@ using System;
 using MTCG;
 using System.Security.Claims; // Add the correct namespace for IUrlParser
 
-namespace UnitTests.Routing
+namespace UnitTests.MTCG
 {
     [TestFixture]
     public class MTCG_UrlParser
@@ -23,7 +23,7 @@ namespace UnitTests.Routing
         [TestCase("/api/{controller:alpha}/test/{view:alpha}/user/{userid:int}", "^api/(?<controller>[a-zA-Z-]+)/test/(?<view>[a-zA-Z-]+)/user/(?<userid>[0-9]+)$")]
         public void UrlParser_ReplacesTokensWithRegexPatterns(string routeTemplate, string expectedRoutePattern)
         {
-            string trimmedRouteTemplate = parser.CleanUrl(routeTemplate);
+            string trimmedRouteTemplate = parser.TrimUrl(routeTemplate);
             string generatedRegex = this.parser?.ReplaceTokensWithRegexPatterns(trimmedRouteTemplate) ?? "";
             Assert.That(generatedRegex, Is.EqualTo(expectedRoutePattern),
                         $"Generated regex '{generatedRegex}' does not match expected pattern '{expectedRoutePattern}'.");

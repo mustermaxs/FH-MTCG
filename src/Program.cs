@@ -15,9 +15,30 @@ namespace MTCG
         static void Main(string[] args)
         {
             EndpointMapper mapper = new(new UrlParser());
-            mapper.RegisterEndpoint("/user/{userid:int}", HTTPMethod.GET, typeof(UserController), "Index");
+
+            var currentAssembly = Assembly.GetExecutingAssembly();
+            var controllerManager = new ControllerManager(currentAssembly);
+            var controllerTypes = controllerManager.GetControllerTypes();
+
+            foreach (var controllerType in controllerTypes)
+            {
+                var methods = controllerManager.GetMethodsWithAttributes<RouteAttribute>(controllerType);
+
+                foreach (var method in methods)
+                {
+                    var routeAttribute = controllerManager.GetRouteAttribute(method);
+                    mapper.RegisterEndpoint(routeAttribute.RouteTemplate, routeAttribute.Method, controllerType, method.Name);
+                }
+            }
+            var req = mapper.TryMapRouteToEndpoint("/user/Maximilian", HTTPMethod.GET);
+            IController controller = (IController)Activator.CreateInstance(req.Endpoint.ControllerType);
+            string methodName = req.Endpoint.ControllerMethod;
+            MethodInfo controllerMethod = req.Endpoint.ControllerType.GetMethod(methodName);
+            // object {username} = req.
+            Console.WriteLine(controllerMethod.Invoke(controller, new object[]{req.GetParam<string>("username")}));
             // HttpServer svr = new();
             // svr.Incoming += _ProcessMesage;
+
 
             // svr.Run();
             // string requestedRoute = "/user/mustermax";
@@ -44,7 +65,7 @@ namespace MTCG
 
             //             routeResolver.RegisterEndpoint(route, httpMethod);
             //             RequestObject req = routeResolver.TryMapRouteToEndpoint(requestedRoute, reqMethod);
-                        
+
             //             if (req.RouteFound)
             //             {
             //                 Console.WriteLine($"is route registered: {req.RouteFound}");

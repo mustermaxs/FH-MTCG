@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 
 
@@ -71,8 +72,7 @@ namespace MTCG
 
         private void RegisterRoutes()
         {
-            // EndpointMapper mapper = new(..)
-            // mapper.RegisteredEndpoints("/user/{userid:int}", HTTPMethod.GET);
+
         }
 
 

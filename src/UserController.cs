@@ -8,15 +8,15 @@ namespace MTCG
         public UserController() { }
 
         [Route("user/{userid:int}", HTTPMethod.GET)]
-        public string Index()
+        public string Index(string username)
         {
-            return "UserController INDEX";
+            return $"Username: {username}";
         }
 
         [Route("user/{username:alpha}", HTTPMethod.GET)]
-        public string GetName()
+        public string GetName(string username)
         {
-            return "Maximilian Sinnl";
+            return $"Username: {username}";
         }
     }
 }

@@ -2,8 +2,10 @@ using System;
 
 namespace MTCG
 {
-    public interface IController
+    public abstract class IController
     {
+        // TODO
+        private IRepository repository;
         
     }
 }

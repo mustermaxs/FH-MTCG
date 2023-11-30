@@ -26,5 +26,4 @@ public abstract class AbstractEndpoint
     protected HTTPMethod method;
     public HTTPMethod Method => method;
     public string EndpointPattern => endpointPattern;
-
 }

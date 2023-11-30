@@ -4,26 +4,26 @@ using MTCG;
 
 namespace MTCG
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-public class RouteAttribute : Attribute
-{
-    private string route;
-    private HTTPMethod method;
-
-    public RouteAttribute(string route, HTTPMethod method)
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class RouteAttribute : Attribute
     {
-        this.route = route;
-        this.method = method; // Add this line to assign the value of method
-    }
+        private string routeTemplate;
+        private HTTPMethod method;
 
-    public string Route
-    {
-        get { return route; }
-    }
+        public RouteAttribute(string route, HTTPMethod method)
+        {
+            this.routeTemplate = route;
+            this.method = method; // Add this line to assign the value of method
+        }
 
-    public HTTPMethod Method
-    {
-        get { return method; }
+        public string RouteTemplate
+        {
+            get { return routeTemplate; }
+        }
+
+        public HTTPMethod Method
+        {
+            get { return method; }
+        }
     }
-}
 }

@@ -5,6 +5,6 @@ namespace MTCG;
 public interface IEndpointMapper
 {
     public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, string controllerMethodName);
-    public bool IsRouteAlreadyRegistered(string routeTemplate, HTTPMethod method);
+    public bool IsRouteRegistered(string routeTemplate, HTTPMethod method);
     public RequestObject? TryMapRouteToEndpoint(string requestedUrl, HTTPMethod method);
 }

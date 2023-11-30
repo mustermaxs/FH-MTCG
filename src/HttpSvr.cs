@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text;
 
 
@@ -72,7 +73,17 @@ namespace MTCG
 
         private void RegisterRoutes()
         {
-
+            EndpointMapper routeRegistry = new(new UrlParser());
+            var currentAssembly = Assembly.GetExecutingAssembly();
+            IAttributeHandler attributeHandler = new AttributeHandler(currentAssembly);
+            IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);
+            var routes = routeObtainer.ObtainRoutes();
+            
+            foreach (var route in routes)
+            {
+                (HTTPMethod method, string routeTemplate, Type controllerType, string methodName) = route;
+                routeRegistry.RegisterEndpoint(routeTemplate, method, controllerType, methodName);
+            }
         }
 
 

@@ -14,28 +14,44 @@ namespace MTCG
         /// <param name="args">Arguments.</param>
         static void Main(string[] args)
         {
-            EndpointMapper mapper = new(new UrlParser());
 
+            EndpointMapper routeRegistry = new(new UrlParser());
             var currentAssembly = Assembly.GetExecutingAssembly();
-            var controllerManager = new AttributeHandler(currentAssembly);
-            var controllerTypes = controllerManager.GetAttributeOfType<ControllerAttribute>(typeof(IController));
+            IAttributeHandler attributeHandler = new AttributeHandler(currentAssembly);
+            IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);
+            var routes = routeObtainer.ObtainRoutes();
 
-            foreach (var controllerType in controllerTypes)
+            foreach (var route in routes)
             {
-                var methods = controllerManager.GetClassMethodsWithAttribute<RouteAttribute>(controllerType);
-
-                foreach (var method in methods)
-                {
-                    var routeAttribute = controllerManager.GetMethodAttributeWithMethodInfo<RouteAttribute>(method);
-                    mapper.RegisterEndpoint(routeAttribute.RouteTemplate, routeAttribute.Method, controllerType, method.Name);
-                }
+                (HTTPMethod method, string routeTemplate, Type controllerType, string methodName) = route;
+                routeRegistry.RegisterEndpoint(routeTemplate, method, controllerType, methodName);
             }
-            var req = mapper.TryMapRouteToEndpoint("/user/Maximilian", HTTPMethod.GET);
-            IController controller = (IController)Activator.CreateInstance(req.Endpoint.ControllerType);
-            string methodName = req.Endpoint.ControllerMethod;
-            MethodInfo controllerMethod = req.Endpoint.ControllerType.GetMethod(methodName);
-            // object {username} = req.
-            Console.WriteLine(controllerMethod.Invoke(controller, new object[]{req.GetParam<string>("username")}));
+
+            Console.WriteLine(routeRegistry.IsRouteRegistered("user/{userid:int}", HTTPMethod.GET));
+            Console.WriteLine(routeRegistry.IsRouteRegistered("user/{username:alpha}", HTTPMethod.GET));
+
+            // EndpointMapper mapper = new(new UrlParser());
+
+            // var currentAssembly = Assembly.GetExecutingAssembly();
+            // var controllerManager = new AttributeHandler(currentAssembly);
+            // var controllerTypes = controllerManager.GetAttributeOfType<ControllerAttribute>(typeof(IController));
+
+            // foreach (var controllerType in controllerTypes)
+            // {
+            //     var methods = controllerManager.GetClassMethodsWithAttribute<RouteAttribute>(controllerType);
+
+            //     foreach (var method in methods)
+            //     {
+            //         var routeAttribute = controllerManager.GetMethodAttributeWithMethodInfo<RouteAttribute>(method);
+            //         mapper.RegisterEndpoint(routeAttribute.RouteTemplate, routeAttribute.Method, controllerType, method.Name);
+            //     }
+            // }
+            // var req = mapper.TryMapRouteToEndpoint("/user/Maximilian", HTTPMethod.GET);
+            // IController controller = (IController)Activator.CreateInstance(req.Endpoint.ControllerType);
+            // string methodName = req.Endpoint.ControllerMethod;
+            // MethodInfo controllerMethod = req.Endpoint.ControllerType.GetMethod(methodName);
+            // // object {username} = req.
+            // Console.WriteLine(controllerMethod.Invoke(controller, new object[]{req.GetParam<string>("username")}));
             // HttpServer svr = new();
             // svr.Incoming += _ProcessMesage;
 

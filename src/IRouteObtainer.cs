@@ -5,7 +5,7 @@ namespace MTCG;
 
 interface IRouteObtainer
 {
-    public List<T> ObtainRoutes<T>();
+    public List<object> ObtainRoutes();
 }
 
 /// string routeTemplate, HTTPMethod, 

@@ -3,9 +3,9 @@ using System.Collections;
 
 namespace MTCG;
 
-interface IRouteObtainer
+public interface IRouteObtainer
 {
-    public List<object> ObtainRoutes();
+    public List<EndpointConfig> ObtainRoutes();
 }
 
 /// string routeTemplate, HTTPMethod, 

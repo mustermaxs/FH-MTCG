@@ -8,7 +8,7 @@ namespace MTCG
     public class RouteAttribute : Attribute
     {
         private string routeTemplate;
-        private HTTPMethod method;
+        private HTTPMethod? method;
 
         public RouteAttribute(string route, HTTPMethod method)
         {

@@ -19,6 +19,8 @@ namespace MTCG
         /// <summary>TCP listener.</summary>
         private TcpListener? _Listener;
 
+        private IEndpointMapper? routeRegistry;
+
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,24 +44,25 @@ namespace MTCG
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // public methods                                                                                                   //
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
+
         /// <summary>Runs the HTTP server.</summary>
         public void Run()
         {
-            if(Active) return;
+            if (Active) return;
 
             Active = true;
             _Listener = new(IPAddress.Parse("127.0.0.1"), 12000);
+            RegisterRoutes();
             _Listener.Start();
 
             byte[] buf = new byte[256];
 
-            while(Active) 
+            while (Active)
             {
                 TcpClient client = _Listener.AcceptTcpClient();
 
                 string data = string.Empty;
-                while(client.GetStream().DataAvailable || (string.IsNullOrEmpty(data)))
+                while (client.GetStream().DataAvailable || (string.IsNullOrEmpty(data)))
                 {
                     int n = client.GetStream().Read(buf, 0, buf.Length);
                     data += Encoding.ASCII.GetString(buf, 0, n);
@@ -73,15 +76,15 @@ namespace MTCG
 
         private void RegisterRoutes()
         {
-            EndpointMapper routeRegistry = new(new UrlParser());
+            routeRegistry = EndpointMapper.GetInstance();
             var currentAssembly = Assembly.GetExecutingAssembly();
             IAttributeHandler attributeHandler = new AttributeHandler(currentAssembly);
             IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);
             var routes = routeObtainer.ObtainRoutes();
-            
+
             foreach (var route in routes)
             {
-                (HTTPMethod method, string routeTemplate, Type controllerType, string methodName) = route;
+                (HTTPMethod method, string routeTemplate, Type controllerType, MethodInfo methodName) = route;
                 routeRegistry.RegisterEndpoint(routeTemplate, method, controllerType, methodName);
             }
         }

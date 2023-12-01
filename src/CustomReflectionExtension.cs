@@ -10,7 +10,7 @@ public static class CustomReflectionExtension
     /// and passes the dictionarys values to the method.
     /// type conversion from gets handled automatically
     /// </summary>
-    
+
     public static TReturnType MapArgumentsAndInvoke<TReturnType, TValueType>(
         this MethodBase self, object classInstance, Dictionary<string, TValueType> providedParams)
     {
@@ -114,6 +114,21 @@ public static class CustomReflectionExtension
                 else if (stringValue == "false" || stringValue == "no" || stringValue == "0")
                 {
                     return (bool)(object)false;
+                }
+            }
+            else if (toType == typeof(int))
+            {
+                int intVal;
+
+                if (Int32.TryParse((string)value, out intVal))
+                {
+                    return intVal;
+                }
+                else
+                {            throw new InvalidOperationException($"Cannot convert {value.GetType()} to {toType}");
+
+                    throw new InvalidOperationException($"Cannot convert {value.GetType()} to {toType}");
+
                 }
             }
 

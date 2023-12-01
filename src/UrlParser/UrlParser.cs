@@ -41,13 +41,14 @@ namespace MTCG
             GroupCollection groups = match.Groups;
             Dictionary<string, string> namedGroups = new Dictionary<string, string>();
 
-            foreach (string groupName in groups.Keys)
+            for (int i = 1; i < groups.Count; i++)
             {
-                namedGroups[groupName] = groups[groupName].Value;
+                string groupName = match.Groups[i].Name;
+                string groupValue = match.Groups[i].Value;
+                namedGroups[groupName] = groupValue;
             }
 
             return namedGroups;
-
         }
     }
 }

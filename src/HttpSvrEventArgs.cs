@@ -40,7 +40,11 @@ namespace MTCG
                 if(i == 0)
                 {
                     string[] inc = lines[0].Split(' ');
-                    Method = inc[0];
+                    HTTPMethod method;
+                    if (Enum.TryParse("HTTPMethod", out method))
+                    {
+                        Method = method;
+                    }
                     Path = inc[1];
                 }
                 else if(inheaders)
@@ -75,10 +79,11 @@ namespace MTCG
 
 
         /// <summary>Gets the HTTP method.</summary>
-        public virtual string Method
+        /// TODO FIX DEFAULT VALUE
+        public virtual HTTPMethod Method
         {
             get; protected set;
-        } = string.Empty;
+        } = HTTPMethod.GET;
 
 
         /// <summary>Gets the request path.</summary>

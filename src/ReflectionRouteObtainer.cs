@@ -6,6 +6,24 @@ namespace MTCG;
 
 public class EndpointConfig
 {
+    public override bool Equals(Object obj)
+    {
+        if (obj == null) return false;
+
+        try
+        {
+            EndpointConfig endpointConfig = (EndpointConfig)obj;
+            return (Method == (HTTPMethod)endpointConfig.Method &&
+            RouteTemplate == (string)endpointConfig.RouteTemplate &&
+            ControllerType == (Type)endpointConfig.ControllerType &&
+            ControllerMethod == (string)endpointConfig.ControllerMethod);
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
+
+    }
     public HTTPMethod Method { get; set; }
     public string RouteTemplate { get; set; }
     public Type ControllerType { get; set; }
@@ -19,6 +37,12 @@ public class EndpointConfig
         controllerMethod = ControllerMethod;
     }
 }
+
+/// <summary>
+/// Obtains valid endpoint definitions via custom attributes
+/// (RouteAttribute, ControllerAttribute)
+/// </summary>
+
 
 public class ReflectionRouteObtainer : IRouteObtainer
 {

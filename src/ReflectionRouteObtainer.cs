@@ -29,7 +29,7 @@ public class EndpointConfig
     public Type ControllerType { get; set; }
     public MethodInfo ControllerMethod { get; set; }
 
-    public void Deconstruct(out HTTPMethod method, out string routeTemplate, out Type controllerType, out string controllerMethod)
+    public void Deconstruct(out HTTPMethod method, out string routeTemplate, out Type controllerType, out MethodInfo controllerMethod)
     {
         method = Method;
         routeTemplate = RouteTemplate;

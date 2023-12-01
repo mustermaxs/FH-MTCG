@@ -20,7 +20,7 @@ public abstract class IEndpoint
     protected string endpointPattern;
     protected string routeTemplate;
     public string RouteTemplate => routeTemplate;
-    protected string controllerMethod;
+    protected MethodInfo controllerMethod;
     protected Type controllerType;
     public MethodInfo ControllerMethod => controllerMethod;
     public Type ControllerType => controllerType;

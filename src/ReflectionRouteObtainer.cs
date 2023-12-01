@@ -16,7 +16,7 @@ public class EndpointConfig
             return (Method == (HTTPMethod)endpointConfig.Method &&
             RouteTemplate == (string)endpointConfig.RouteTemplate &&
             ControllerType == (Type)endpointConfig.ControllerType &&
-            ControllerMethod == (string)endpointConfig.ControllerMethod);
+            ControllerMethod == (MethodInfo)endpointConfig.ControllerMethod);
         }
         catch (Exception ex)
         {
@@ -27,7 +27,7 @@ public class EndpointConfig
     public HTTPMethod Method { get; set; }
     public string RouteTemplate { get; set; }
     public Type ControllerType { get; set; }
-    public string ControllerMethod { get; set; }
+    public MethodInfo ControllerMethod { get; set; }
 
     public void Deconstruct(out HTTPMethod method, out string routeTemplate, out Type controllerType, out string controllerMethod)
     {
@@ -71,7 +71,7 @@ public class ReflectionRouteObtainer : IRouteObtainer
                     Method = (HTTPMethod)routeAttribute?.Method,
                     RouteTemplate = routeAttribute?.RouteTemplate,
                     ControllerType = (Type)controllerType,
-                    ControllerMethod = methodInfo.Name
+                    ControllerMethod = methodInfo
                 };
 
                 endpointList.Add(endpointConfig);

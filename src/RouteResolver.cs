@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace MTCG;
@@ -12,28 +13,40 @@ namespace MTCG;
 /// If so, it can provide a ResolveRoute object containing the 
 /// named parameters and their associated values
 /// </summary>
+/// TODO/10 IMPORTANT add Payload from HttpSvrEventArgs to Endpoint somehow
 public class EndpointMapper : IEndpointMapper
 {
-    private Dictionary<HTTPMethod, List<AbstractEndpoint>> endpointMappings;
+    private Dictionary<HTTPMethod, List<IEndpoint>> endpointMappings;
     private IUrlParser parser;
-    public EndpointMapper(IUrlParser urlParser)
+    private static IEndpointMapper _this = null;
+
+// TODO Dependency injection geht so nicht mehr
+    public static IEndpointMapper GetInstance()
+    {
+        if (_this == null)
+        {
+            _this = new EndpointMapper(new UrlParser());
+        }
+            return _this;
+    }
+    private EndpointMapper(IUrlParser urlParser)
     {
         this.parser = urlParser;
-        this.endpointMappings = new Dictionary<HTTPMethod, List<AbstractEndpoint>>
+        this.endpointMappings = new Dictionary<HTTPMethod, List<IEndpoint>>
             {
-                { HTTPMethod.POST, new List<AbstractEndpoint>() },
-                { HTTPMethod.GET, new List<AbstractEndpoint>() },
-                { HTTPMethod.PUT, new List<AbstractEndpoint>() },
-                { HTTPMethod.DELETE, new List<AbstractEndpoint>() },
-                { HTTPMethod.PATCH, new List<AbstractEndpoint>() }
+                { HTTPMethod.POST, new List<IEndpoint>() },
+                { HTTPMethod.GET, new List<IEndpoint>() },
+                { HTTPMethod.PUT, new List<IEndpoint>() },
+                { HTTPMethod.DELETE, new List<IEndpoint>() },
+                { HTTPMethod.PATCH, new List<IEndpoint>() }
             };
     }
-    public Dictionary<HTTPMethod, List<AbstractEndpoint>> RegisteredEndpoints => this.endpointMappings;
+    public Dictionary<HTTPMethod, List<IEndpoint>> RegisteredEndpoints => this.endpointMappings;
 
     //TODO
     public bool IsRouteRegistered(string routeTemplate, HTTPMethod method)
     {
-        List<AbstractEndpoint> potentialEndpoints;
+        List<IEndpoint> potentialEndpoints;
 
         if (endpointMappings.TryGetValue(method, out potentialEndpoints))
         {
@@ -42,7 +55,7 @@ public class EndpointMapper : IEndpointMapper
 
         return false;
     }
-    public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, string controllerMethodName)
+    public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, MethodInfo controllerMethodName)
     {
         var parsedRoutePattern = this.parser.ReplaceTokensWithRegexPatterns(routePattern);
 
@@ -67,9 +80,9 @@ public class EndpointMapper : IEndpointMapper
     /// and a bool (IsRouteRegistered) inidicating 
     /// if the requested route was even registered in the store.
     /// </returns>
-    public RequestObject? TryMapRouteToEndpoint(string requestedUrl, HTTPMethod method)
+    public TokenizedUrl? TryMapRouteToEndpoint(string requestedUrl, HTTPMethod method)
     {
-        List<AbstractEndpoint> potentialEndpoints = endpointMappings[method];
+        List<IEndpoint> potentialEndpoints = endpointMappings[method];
         string trimmedUrl = parser.TrimUrl(requestedUrl);
         Dictionary<string, string> namedTokens = new();
 
@@ -79,11 +92,11 @@ public class EndpointMapper : IEndpointMapper
 
             if (namedTokens.Count > 0)
             {
-                return new RequestObject(namedTokens, endpoint);
+                return new TokenizedUrl(namedTokens, endpoint);
             }
         }
 
-        return new RequestObject();
+        return new TokenizedUrl();
     }
 
 }

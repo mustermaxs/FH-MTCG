@@ -1,10 +1,11 @@
 using System;
+using System.Reflection;
 
 namespace MTCG;
 
-public abstract class AbstractEndpoint
+public abstract class IEndpoint
 {
-    public AbstractEndpoint(HTTPMethod method, string routePattern, string routeTemplate, Type controllerType, string controllerMethod)
+    public IEndpoint(HTTPMethod method, string routePattern, string routeTemplate, Type controllerType, MethodInfo controllerMethod)
     {
         if (!typeof(IController).IsAssignableFrom(controllerType))
         {
@@ -21,7 +22,7 @@ public abstract class AbstractEndpoint
     public string RouteTemplate => routeTemplate;
     protected string controllerMethod;
     protected Type controllerType;
-    public string ControllerMethod => controllerMethod;
+    public MethodInfo ControllerMethod => controllerMethod;
     public Type ControllerType => controllerType;
     protected HTTPMethod method;
     public HTTPMethod Method => method;

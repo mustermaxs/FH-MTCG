@@ -4,6 +4,7 @@ namespace MTCG;
 
 /// 12.02.2023 02:11
 /// TODO
+/// TODO in Router-Implementierung Methoden um Controller zu instanziieren
 public interface IRouter
 {
     public void RegisterRoutes();

@@ -53,9 +53,9 @@ public class ReflectionRouteObtainer : IRouteObtainer
         this.attributeHandler = attributeHandler;
     }
 
-    public List<EndpointConfig> ObtainRoutes()
+    public List<Endpoint> ObtainRoutes()
     {
-        var endpointList = new List<EndpointConfig>();
+        var endpointList = new List<Endpoint>();
 
         var controllerTypes = attributeHandler.GetAttributeOfType<ControllerAttribute>(typeof(IController));
 
@@ -66,15 +66,16 @@ public class ReflectionRouteObtainer : IRouteObtainer
             foreach (var methodInfo in controllerMethodsInfos)
             {
                 var routeAttribute = attributeHandler.GetMethodAttributeWithMethodInfo<RouteAttribute>(methodInfo);
-                var endpointConfig = new EndpointConfig
-                {
-                    Method = (HTTPMethod)routeAttribute?.Method,
-                    RouteTemplate = routeAttribute?.RouteTemplate,
-                    ControllerType = (Type)controllerType,
-                    ControllerMethod = methodInfo
-                };
+                // var endpoint = 
 
-                endpointList.Add(endpointConfig);
+                endpointList.Add(new Endpoint
+                (
+                    (HTTPMethod)routeAttribute!.Method,
+                    null,
+                    routeAttribute!.RouteTemplate,
+                    (Type)controllerType,
+                    (MethodInfo)methodInfo
+                ));
             }
         }
 

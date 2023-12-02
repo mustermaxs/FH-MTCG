@@ -5,7 +5,8 @@ namespace MTCG
     public abstract class IController
     {
         // TODO
-        private IRepository repository;
-        
+        private IRepository repo;
+
+        public IController(IRequest)
     }
 }

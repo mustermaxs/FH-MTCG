@@ -21,11 +21,11 @@ public class RouteRegistry : IEndpointMapper
     private static IEndpointMapper? _this = null;
 
     // TODO Dependency injection geht so nicht mehr
-    public static IEndpointMapper GetInstance()
+    public static IEndpointMapper GetInstance(IUrlParser urlParser)
     {
         if (_this == null)
         {
-            _this = new RouteRegistry(new UrlParser());
+            _this = new RouteRegistry(urlParser);
         }
         return _this;
     }

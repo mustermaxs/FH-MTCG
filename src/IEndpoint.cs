@@ -6,13 +6,13 @@ namespace MTCG;
 
 public abstract class IEndpoint
 {
-    public IEndpoint(HTTPMethod httpMethod, string routePattern, string routeTemplate, Type controllerType, MethodInfo controllerMethod)
+    public IEndpoint(HTTPMethod httpMethod, string? routePattern, string routeTemplate, Type controllerType, MethodInfo controllerMethod)
     {
         if (!typeof(IController).IsAssignableFrom(controllerType))
         {
             throw new ArgumentException($"Invalid controller type passed.\nType passed: {controllerType}");
         }
-        this.endpointPattern = routePattern;
+        this.endpointPattern = routePattern ?? null;
         this.httpMethod = httpMethod;
         this.controllerMethod = controllerMethod;
         this.controllerType = controllerType;
@@ -68,14 +68,14 @@ public abstract class IEndpoint
     }
 
 
-    protected string endpointPattern;
+    protected string? endpointPattern;
     protected string routeTemplate;
-    public string RouteTemplate => routeTemplate;
     protected MethodInfo controllerMethod;
     protected Type controllerType;
+    protected HTTPMethod httpMethod;
+    public string RouteTemplate => routeTemplate;
     public MethodInfo ControllerMethod => controllerMethod;
     public Type ControllerType => controllerType;
-    protected HTTPMethod httpMethod;
     public HTTPMethod Httpmethod => httpMethod;
     public string EndpointPattern => endpointPattern;
 }

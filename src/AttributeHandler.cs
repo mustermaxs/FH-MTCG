@@ -9,7 +9,7 @@ namespace MTCG;
 
 public class AttributeHandler : IAttributeHandler
 {
-    public AttributeHandler(Assembly assembly)
+    public AttributeHandler(Assembly? assembly = null)
     :base(assembly)
     {
 

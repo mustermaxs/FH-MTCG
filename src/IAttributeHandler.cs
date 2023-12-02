@@ -6,10 +6,11 @@ namespace MTCG;
 public abstract class IAttributeHandler
 {
     public readonly Assembly assembly;
-    public IAttributeHandler(Assembly assembly)
+    public IAttributeHandler(Assembly? assembly = null)
     {
         this.assembly = assembly ?? Assembly.GetExecutingAssembly();
     }
+
     virtual public IEnumerable<Type> GetAttributeOfType<T>(Type elementType) where T : Attribute
     {
         return assembly.GetTypes().Where(

@@ -18,16 +18,16 @@ public class EndpointMapper : IEndpointMapper
 {
     private Dictionary<HTTPMethod, List<IEndpoint>> endpointMappings;
     private IUrlParser parser;
-    private static IEndpointMapper _this = null;
+    private static IEndpointMapper? _this = null;
 
-// TODO Dependency injection geht so nicht mehr
+    // TODO Dependency injection geht so nicht mehr
     public static IEndpointMapper GetInstance()
     {
         if (_this == null)
         {
             _this = new EndpointMapper(new UrlParser());
         }
-            return _this;
+        return _this;
     }
     private EndpointMapper(IUrlParser urlParser)
     {
@@ -44,24 +44,41 @@ public class EndpointMapper : IEndpointMapper
     public Dictionary<HTTPMethod, List<IEndpoint>> RegisteredEndpoints => this.endpointMappings;
 
     //TODO
-    public bool IsRouteRegistered(string routeTemplate, HTTPMethod method)
+    public bool IsRouteRegistered(string routeTemplate, HTTPMethod httpMethod)
     {
         List<IEndpoint> potentialEndpoints;
 
-        if (endpointMappings.TryGetValue(method, out potentialEndpoints))
+        if (endpointMappings.TryGetValue(httpMethod, out potentialEndpoints))
         {
             return (bool)(potentialEndpoints?.Any(endpoint => endpoint.RouteTemplate == routeTemplate));
         }
 
         return false;
     }
-    public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, MethodInfo controllerMethodName)
+    public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, MethodInfo controllerMethod)
     {
         var parsedRoutePattern = this.parser.ReplaceTokensWithRegexPatterns(routePattern);
 
         if (!IsRouteRegistered(parsedRoutePattern, method))
         {
-            this.endpointMappings[method].Add(new Endpoint(method, parsedRoutePattern, routePattern, controllerType, controllerMethodName));
+            this.endpointMappings[method].Add(new Endpoint(method, parsedRoutePattern, routePattern, controllerType, controllerMethod));
+        }
+        else
+        {
+            throw new ArgumentException(
+                $"Unkown HTTP Method provided. Acceptable methods are:" +
+                "{HTTPMethod.GET}, {HTTPMethod.POST}, {HTTPMethod.PUT}, {HTTPMethod.DELETE}, {HTTPMethod.PATCH}.");
+        }
+    }
+    public void RegisterEndpoint(IEndpoint endpoint)
+    {
+        (string routeTemplate, HTTPMethod httpMethod, Type controllerType, MethodInfo controllerMethod) = endpoint;
+
+        var parsedRoutePattern = this.parser.ReplaceTokensWithRegexPatterns(routeTemplate);
+
+        if (!IsRouteRegistered(parsedRoutePattern, httpMethod))
+        {
+            this.endpointMappings[httpMethod].Add(new Endpoint(httpMethod, parsedRoutePattern, routeTemplate, controllerType, controllerMethod));
         }
         else
         {

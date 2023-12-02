@@ -97,7 +97,7 @@ public class RouteRegistry : IEndpointMapper
     /// and a bool (IsRouteRegistered) inidicating 
     /// if the requested route was even registered in the store.
     /// </returns>
-    public TokenizedUrl? MapRequestToEndpoint(string requestedUrl, HTTPMethod method)
+    public RouteContext MapRequestToEndpoint(string requestedUrl, HTTPMethod method)
     {
         List<IEndpoint> potentialEndpoints = endpointMappings[method];
         string trimmedUrl = parser.TrimUrl(requestedUrl);
@@ -109,7 +109,7 @@ public class RouteRegistry : IEndpointMapper
 
             if (namedTokens.Count > 0)
             {
-                return new TokenizedUrl(namedTokens, endpoint);
+                return new RouteContext(namedTokens, endpoint);
             }
         }
 

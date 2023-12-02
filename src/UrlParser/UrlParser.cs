@@ -12,14 +12,14 @@ namespace MTCG
             return url.Trim('/');
         }
 
-        public string CleanUrl(string url)
+        public string TrimUrl(string url)
         {
             return RemoveTrailingSlashes(url);
         }
 
         public string ReplaceTokensWithRegexPatterns(string url)
         {
-            string urlPattern = CleanUrl(url);
+            string urlPattern = TrimUrl(url);
 
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:alpha)\})", @"(?<$2>[a-zA-Z-]+)");
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:alphanum)\})", @"(?<$2>[a-zA-Z0-9-]+)");
@@ -41,13 +41,14 @@ namespace MTCG
             GroupCollection groups = match.Groups;
             Dictionary<string, string> namedGroups = new Dictionary<string, string>();
 
-            foreach (string groupName in groups.Keys)
+            for (int i = 1; i < groups.Count; i++)
             {
-                namedGroups[groupName] = groups[groupName].Value;
+                string groupName = match.Groups[i].Name;
+                string groupValue = match.Groups[i].Value;
+                namedGroups[groupName] = groupValue;
             }
 
             return namedGroups;
-
         }
     }
 }

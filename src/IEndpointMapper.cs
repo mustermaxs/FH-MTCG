@@ -1,10 +1,11 @@
 using System;
+using System.Reflection;
 
 namespace MTCG;
 
 public interface IEndpointMapper
 {
-    public void RegisterEndpoint(string routePattern, HTTPMethod method);
-    public bool IsRouteAlreadyRegistered(string routePattern, HTTPMethod method);
-    public ResolvedUrl? TryMapRequestedRoute(string requestedUrl, HTTPMethod method);
+    public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, MethodInfo controllerMethodName);
+    public bool IsRouteRegistered(string routeTemplate, HTTPMethod method);
+    public TokenizedUrl? MapRequestToEndpoint(string requestedUrl, HTTPMethod method);
 }

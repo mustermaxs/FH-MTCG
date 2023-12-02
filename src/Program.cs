@@ -14,42 +14,31 @@ namespace MTCG
         /// <param name="args">Arguments.</param>
         static void Main(string[] args)
         {
-            // HttpServer svr = new();
-            // svr.Incoming += _ProcessMesage;
 
-            // svr.Run();
-            string requestedRoute = "/user/mustermax";
-            HTTPMethod reqMethod = HTTPMethod.GET;
-            IUrlParser parser = new UrlParser();
-            EndpointMapper routeResolver = new EndpointMapper(parser);
+            HttpServer svr = new();
+            svr.Incoming += HandleClientRequest;
 
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            var controllerTypes = assembly.GetTypes().Where(t => t.GetCustomAttribute<ControllerAttribute>() != null);
+            svr.Run();
 
-            foreach (Type controllerType in controllerTypes)
+        }
+
+        private static void HandleClientRequest(object sender, HttpSvrEventArgs e)
+        {
+            try
             {
-                IEnumerable<MethodInfo> routeActions = controllerType.GetMethods()
-                    .Where(method => method.GetCustomAttribute<RouteAttribute>() != null);
-
-                foreach (MethodInfo method in controllerType.GetMethods())
-                {
-                    RouteAttribute routeAttribute = (RouteAttribute)Attribute.GetCustomAttribute(method, typeof(RouteAttribute));
-
-                    if (routeAttribute != null)
-                    {
-                        string route = routeAttribute.Route;
-                        HTTPMethod httpMethod = routeAttribute.Method;
-
-                        routeResolver.RegisterEndpoint(route, httpMethod);
-                        ResolvedUrl req = routeResolver.TryMapRequestedRoute(requestedRoute, reqMethod);
-                        
-                        if (req.IsRouteRegistered)
-                        {
-                            Console.WriteLine($"is route registered: {req.IsRouteRegistered}");
-
-                        }
-                    }
-                }
+            var routeRegistry = RouteRegistry.GetInstance();
+            TokenizedUrl urlObj = routeRegistry.MapRequestToEndpoint(e.Path, e.Method);
+            MethodInfo action = urlObj.Endpoint.ControllerMethod;
+            Type controllerType = urlObj.Endpoint.ControllerType;
+            var controller = (IController)Activator.CreateInstance(controllerType);
+            var attributeHandler = new AttributeHandler(Assembly.GetExecutingAssembly());
+            var response = action.MapArgumentsAndInvoke<string, string>(controller, urlObj.UrlParams);
+            e.Reply(200, response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex}");
+                e.Reply(400, "Error");
             }
 
         }
@@ -58,11 +47,11 @@ namespace MTCG
         /// <summary>Event handler for incoming server requests.</summary>
         /// <param name="sender">Sender.</param>
         /// <param name="e">Event arguments.</param>
-        private static void _ProcessMesage(object sender, HttpSvrEventArgs e)
-        {
-            Console.WriteLine(e.PlainMessage);
+        // private static void _ProcessMesage(object sender, HttpSvrEventArgs e)
+        // {
+        //     Console.WriteLine(e.PlainMessage);
 
-            e.Reply(200, "Yo! Understood.");
-        }
+        //     e.Reply(200, "Yo! Understood.");
+        // }
     }
 }

@@ -8,7 +8,7 @@ namespace MTCG
     {
         /// <summary>Perform trimming and other necessary preparations of the raw url string for further parsing</summary>
         /// <returns>Prepared url string for further processing/parsing</returns>
-        string CleanUrl(string url);
+        string TrimUrl(string url);
         /// <summary>
         /// Replaces the variable parameters in the URL template with regex patterns so that named
         /// tokens can be accessed by their name.

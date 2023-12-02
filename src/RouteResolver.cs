@@ -14,7 +14,7 @@ namespace MTCG;
 /// named parameters and their associated values
 /// </summary>
 /// TODO/10 IMPORTANT add Payload from HttpSvrEventArgs to Endpoint somehow
-public class EndpointMapper : IEndpointMapper
+public class RouteRegistry : IEndpointMapper
 {
     private Dictionary<HTTPMethod, List<IEndpoint>> endpointMappings;
     private IUrlParser parser;
@@ -25,11 +25,11 @@ public class EndpointMapper : IEndpointMapper
     {
         if (_this == null)
         {
-            _this = new EndpointMapper(new UrlParser());
+            _this = new RouteRegistry(new UrlParser());
         }
         return _this;
     }
-    private EndpointMapper(IUrlParser urlParser)
+    private RouteRegistry(IUrlParser urlParser)
     {
         this.parser = urlParser;
         this.endpointMappings = new Dictionary<HTTPMethod, List<IEndpoint>>
@@ -97,7 +97,7 @@ public class EndpointMapper : IEndpointMapper
     /// and a bool (IsRouteRegistered) inidicating 
     /// if the requested route was even registered in the store.
     /// </returns>
-    public TokenizedUrl? TryMapRouteToEndpoint(string requestedUrl, HTTPMethod method)
+    public TokenizedUrl? MapRequestToEndpoint(string requestedUrl, HTTPMethod method)
     {
         List<IEndpoint> potentialEndpoints = endpointMappings[method];
         string trimmedUrl = parser.TrimUrl(requestedUrl);

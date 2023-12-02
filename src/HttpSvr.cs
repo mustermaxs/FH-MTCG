@@ -76,7 +76,7 @@ namespace MTCG
 
         private void RegisterRoutes()
         {
-            routeRegistry = EndpointMapper.GetInstance();
+            routeRegistry = RouteRegistry.GetInstance();
             var currentAssembly = Assembly.GetExecutingAssembly();
             IAttributeHandler attributeHandler = new AttributeHandler(currentAssembly);
             IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);

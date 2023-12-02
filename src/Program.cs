@@ -26,8 +26,8 @@ namespace MTCG
         {
             try
             {
-            var routeRegistry = EndpointMapper.GetInstance();
-            TokenizedUrl urlObj = routeRegistry.TryMapRouteToEndpoint(e.Path, e.Method);
+            var routeRegistry = RouteRegistry.GetInstance();
+            TokenizedUrl urlObj = routeRegistry.MapRequestToEndpoint(e.Path, e.Method);
             MethodInfo action = urlObj.Endpoint.ControllerMethod;
             Type controllerType = urlObj.Endpoint.ControllerType;
             var controller = (IController)Activator.CreateInstance(controllerType);

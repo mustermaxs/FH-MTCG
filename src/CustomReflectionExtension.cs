@@ -125,10 +125,21 @@ public static class CustomReflectionExtension
                     return intVal;
                 }
                 else
-                {            throw new InvalidOperationException($"Cannot convert {value.GetType()} to {toType}");
-
+                {
                     throw new InvalidOperationException($"Cannot convert {value.GetType()} to {toType}");
+                }
+            }
+            else if (toType == typeof(float))
+            {
+                float floatVal;
 
+                if (float.TryParse((string)value, out floatVal))
+                {
+                    return floatVal;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Cannot convert {value.GetType()} to {toType}");
                 }
             }
 

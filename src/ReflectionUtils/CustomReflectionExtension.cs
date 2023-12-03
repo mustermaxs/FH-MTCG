@@ -3,13 +3,21 @@ using System.Collections.Generic;
 using System.Reflection;
 
 namespace MTCG;
-public static class CustomReflectionExtension
+public static class ReflectionUtils
 {
     /// <summary>
     /// Maps keys from dictionary with signature of provided method-base and
     /// and passes the dictionarys values to the method.
     /// type conversion from gets handled automatically
     /// </summary>
+    /// <param name="TReturnType">Type of return value</param>
+    /// <param name="TValueType">Type of dictionary value</param>
+    /// <param name="classInstance">Object whose method should get executed</param>
+    /// <param name="providedParams">
+    /// Arguments that should get mapped according to 
+    /// signature of the invoked method
+    /// </param>
+
 
     public static TReturnType MapArgumentsAndInvoke<TReturnType, TValueType>(
         this MethodBase self, object classInstance, Dictionary<string, TValueType> providedParams)
@@ -20,11 +28,11 @@ public static class CustomReflectionExtension
         }
         else
         {
-            return (TReturnType)self.Invoke(classInstance, MapProvidedArgumentsWithSignature(self, providedParams));
+            return (TReturnType)self.Invoke(classInstance, MapProvidedArgumentsToSignature(self, providedParams));
         }
     }
 
-    public static object[]? MapProvidedArgumentsWithSignature<TValueType>(
+    public static object[]? MapProvidedArgumentsToSignature<TValueType>(
         MethodBase classInstanceMethod, Dictionary<string, TValueType> providedParams)
     {
         // Type[] expectedParamTypes = classInstanceMethod.GetParameters().Select(param => param.ParameterType).ToArray();

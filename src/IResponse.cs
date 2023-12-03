@@ -1,23 +1,18 @@
 using System;
-using System.Net;
 
 namespace MTCG;
 
-public abstract class IResponse<T>
+public abstract class IResponse
 {
-    protected bool success = false;
-    protected T payload;
-    protected HttpCode statusCode;
-    public IResponse(HttpCode statusCode, T payload)
+    public IResponse(int statusCode, string? payload, string description)
     {
-        this.payload = payload;
+        this.Payload = payload ?? string.Empty;
         this.statusCode = statusCode;
+        this.Description = description;
     }
-    public bool Successful => success;
-    public HttpCode StatusCode => statusCode;
+    protected int statusCode;
 
-    virtual public T Payload
-    {
-        get => this.payload;
-    }
+    public string Description {get; set;}
+    public int Status => statusCode;
+    virtual public string Payload {get;} = string.Empty;
 }

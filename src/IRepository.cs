@@ -2,8 +2,8 @@ using System;
 
 namespace MTCG;
 
-public interface IRepository
+public interface IRepository<T>
 {
-    public T GetAll<T>();
-    public T GetById<T>(int id);
+    // public IEnumerable<T> GetAll();
+    public T? Get(int id);
 }

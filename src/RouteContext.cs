@@ -5,17 +5,21 @@ namespace MTCG;
 /// corresponding values (among other things).
 /// </summary>
 
-public class RoutingContext : IRountingContext
+public class RoutingContext : IRoutingContext
 {
     private Dictionary<string, string> urlParams = new Dictionary<string, string>();
-    private readonly IEndpoint? endpoint;
-    public RoutingContext(Dictionary<string, string> parameters, IEndpoint endpoint)
-    {
-        this.urlParams = parameters;
-        this.endpoint = endpoint;
-        this.routeFound = true;
-    }
+
     public RoutingContext(IEndpoint endpoint)
+    {
+        this.routeFound = false;
+    }
+    public RoutingContext(HTTPMethod method, string rawUrl)
+    {
+        this.httpMethod = method;
+        this.routeFound = false;
+        this.rawUrl = rawUrl;
+    }
+    public RoutingContext(string rawUrl)
     {
         this.routeFound = false;
     }
@@ -24,16 +28,12 @@ public class RoutingContext : IRountingContext
         get { return urlParams; }
         set { urlParams = value; }
     }
+    public bool TryGetHeader(string key, out string value)
+    {
+        value = this.Headers.SingleOrDefault<HttpHeader>(header => header.Name == key)?.Value ?? string.Empty;
 
-    public RoutingContext(HTTPMethod method, string rawUrl)
-    {
-        this.routeFound = false;
+        return value != string.Empty;
     }
-    public RoutingContext(string rawUrl)
-    {
-        this.routeFound = false;
-    }
-    public IEndpoint? Endpoint => endpoint;
 
     /// <summary>
     /// Gets value of named parameter by parameter name and tries to convert it to 

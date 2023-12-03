@@ -72,13 +72,17 @@ public class RouteRegistry : IEndpointMapper
     }
     public void RegisterEndpoint(IEndpoint endpoint)
     {
-        (string routeTemplate, HTTPMethod httpMethod, Type controllerType, MethodInfo controllerMethod) = endpoint;
+        var parsedRoutePattern = this.parser.ReplaceTokensWithRegexPatterns(endpoint.RouteTemplate);
 
-        var parsedRoutePattern = this.parser.ReplaceTokensWithRegexPatterns(routeTemplate);
-
-        if (!IsRouteRegistered(parsedRoutePattern, httpMethod))
+        if (!IsRouteRegistered(parsedRoutePattern, endpoint.HttpMethod))
         {
-            this.endpointMappings[httpMethod].Add(new Endpoint(httpMethod, parsedRoutePattern, routeTemplate, controllerType, controllerMethod));
+            this.endpointMappings[endpoint.HttpMethod].Add(
+                new Endpoint(
+                    endpoint.HttpMethod,
+                    parsedRoutePattern,
+                    endpoint.RouteTemplate,
+                    endpoint.ControllerType,
+                    endpoint.ControllerMethod));
         }
         else
         {
@@ -97,23 +101,57 @@ public class RouteRegistry : IEndpointMapper
     /// and a bool (IsRouteRegistered) inidicating 
     /// if the requested route was even registered in the store.
     /// </returns>
-    public RoutingContext? MapRequestToEndpoint(string requestedUrl, HTTPMethod method)
+
+
+    /// 12.02.2023 21:18
+    /// IMPORTANT RoutingContext als "ref" übergeben (weiß immer noch nicht
+    /// was der Unterschied ist)
+    /// Damit im Router zuerst der context erstellt wird mit den srvEventArgs übergeben werden!!!
+    /// MapRequestToEndpoint evtl. überladen sodass die Methode einfach mit dem RoutingContext arbeitet
+    /// ==> da sind ja eigentlich schon alle Infos drin wenn in der Methode Router::HandleRequest direkt
+    /// das srvEventArgs übergeben wird
+    public IEndpoint? MapRequestToEndpoint(string requestedUrl, HTTPMethod method)
     {
         List<IEndpoint> potentialEndpoints = endpointMappings[method];
         string trimmedUrl = parser.TrimUrl(requestedUrl);
-        Dictionary<string, string> namedTokens = new();
+        Dictionary<string, string> urlParams = new();
 
-        foreach (var endpoint in potentialEndpoints)
+        foreach (var currentEndpoint in potentialEndpoints)
         {
-            namedTokens = this.parser.MatchUrlAndGetParams(trimmedUrl, endpoint.EndpointPattern);
+            urlParams = this.parser.MatchUrlAndGetParams(trimmedUrl, currentEndpoint.EndpointPattern);
 
-            if (namedTokens.Count > 0)
+            if (urlParams.Count > 0)
             {
-                return new RoutingContext(namedTokens, endpoint);
+                currentEndpoint.UrlParams = urlParams;
+
+                return currentEndpoint;
+
             }
         }
 
         return null;
+    }
+
+    public void MapRequestToEndpoint(ref RoutingContext context)
+    {
+        List<IEndpoint> potentialEndpoints = endpointMappings[context.httpMethod];
+        string trimmedUrl = parser.TrimUrl(context.RawUrl!);
+        Dictionary<string, string> namedTokens = new();
+
+        foreach (var currentEndpoint in potentialEndpoints)
+        {
+            namedTokens = this.parser.MatchUrlAndGetParams(trimmedUrl, currentEndpoint.EndpointPattern);
+
+            if (namedTokens.Count > 0)
+            {
+                currentEndpoint.UrlParams = namedTokens;
+                context.Endpoint = (Endpoint)currentEndpoint;
+
+                return;
+            }
+        }
+
+        context.RouteFound = false;
     }
 
 }

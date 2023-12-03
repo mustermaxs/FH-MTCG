@@ -24,20 +24,24 @@ public class Router : IRouter
 
         foreach (var route in routes)
         {
-            (string routeTemplate, HTTPMethod httpMethod, Type controllerType, MethodInfo controllerMethod) = route;
-            routeRegistry.RegisterEndpoint(routeTemplate, httpMethod, controllerType, controllerMethod);
+            (string RouteTemplate, HTTPMethod HttpMethod, Type ControllerType, MethodInfo ControllerMethod) = route;
+            routeRegistry.RegisterEndpoint(RouteTemplate, HttpMethod, ControllerType, ControllerMethod);
         }
     }
 
+/// 12.02.2023 21:23
+/// IMPROVE Refactoren
     public void HandleRequest(object sender, HttpSvrEventArgs svrEventArgs)
     {
         string requestedUrl = svrEventArgs.Path;
         HTTPMethod httpMethod = svrEventArgs.Method;
-        RoutingContext? routeContext = routeRegistry.MapRequestToEndpoint(requestedUrl, httpMethod);
+        RoutingContext routeContext = new RoutingContext(httpMethod, requestedUrl);
+        routeRegistry.MapRequestToEndpoint(ref routeContext);
+        routeContext.Headers = svrEventArgs.Headers;
         Type controllerType = routeContext.Endpoint!.ControllerType;
         IController controller = (IController)Activator.CreateInstance(controllerType, routeContext);
         MethodInfo controllerAction = routeContext.Endpoint.ControllerMethod;
-        var response = controllerAction.MapArgumentsAndInvoke<string, string>(controller, routeContext.UrlParams);
+        var response = controllerAction.MapArgumentsAndInvoke<string, string>(controller, routeContext.Endpoint.UrlParams);
         Console.WriteLine(response);
         svrEventArgs.Reply(200, response);
     }

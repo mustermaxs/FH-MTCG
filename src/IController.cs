@@ -1,12 +1,16 @@
 using System;
+using System.Text.Json;
 
 namespace MTCG
 {
     public abstract class IController
     {
         // TODO
-        private IRepository repo;
+        protected IRoutingContext context;
 
-        public IController(IRequest)
+        public IController(IRoutingContext context)
+        {
+            this.context = context;
+        }
     }
 }

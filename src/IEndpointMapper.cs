@@ -10,5 +10,6 @@ public interface IEndpointMapper
     /// 12.02.2023 17:15
     /// TODO rename MapRequestToEndpoint
     /// returned routing context
-    public RoutingContext? MapRequestToEndpoint(string requestedUrl, HTTPMethod method);
+    public IEndpoint? MapRequestToEndpoint(string requestedUrl, HTTPMethod method);
+    public void MapRequestToEndpoint(ref RoutingContext context);
 }

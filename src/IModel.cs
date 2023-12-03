@@ -3,12 +3,11 @@ using System.Text.Json;
 
 namespace MTCG;
 
-public abstract class IModel<T>
+public abstract class IModel
 {
-    private string? message;
-    public string? Message { get => message ?? ""; set => message = value; }
-    virtual public string ToJsonString()
-    {
-        return JsonSerializer.Serialize(this);
-    }
+    // public static T Create<T>(string jsonString)
+    // {
+    //     return JsonSerializer.Deserialize<T>(jsonString);
+    // }
+    // public static string ToJsonString(IModel model) => JsonSerializer.Serialize(model);
 }

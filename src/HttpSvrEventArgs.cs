@@ -93,7 +93,7 @@ namespace MTCG
         } = string.Empty;
 
 
-        /// <summary>Gets the HTTP hgeaders.</summary>
+        /// <summary>Gets the HTTP headers.</summary>
         public virtual HttpHeader[] Headers
         {
             get; protected set;

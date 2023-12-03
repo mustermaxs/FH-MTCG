@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using MTCG;
 
 namespace MTCG
@@ -5,7 +6,11 @@ namespace MTCG
     [Controller]
     public class UserController : IController
     {
-        public UserController() { }
+
+        protected IRepository<UserModel> repo = new UserRepo();
+
+        public UserController(IRoutingContext context) : base(context) {}
+
 
         [Route("user/{username:alpha}/age/{age:int}", HTTPMethod.GET)]
         public string Index(string username, int age)

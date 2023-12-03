@@ -16,32 +16,32 @@ namespace MTCG
         {
 
             HttpServer svr = new();
-            svr.Incoming += HandleClientRequest;
+            // svr.Incoming += HandleClientRequest;
 
             svr.Run();
 
         }
 
-        private static void HandleClientRequest(object sender, HttpSvrEventArgs e)
-        {
-            try
-            {
-            var routeRegistry = RouteRegistry.GetInstance();
-            TokenizedUrl urlObj = routeRegistry.MapRequestToEndpoint(e.Path, e.Method);
-            MethodInfo action = urlObj.Endpoint.ControllerMethod;
-            Type controllerType = urlObj.Endpoint.ControllerType;
-            var controller = (IController)Activator.CreateInstance(controllerType);
-            var attributeHandler = new AttributeHandler(Assembly.GetExecutingAssembly());
-            var response = action.MapArgumentsAndInvoke<string, string>(controller, urlObj.UrlParams);
-            e.Reply(200, response);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"{ex}");
-                e.Reply(400, "Error");
-            }
+        // private static void HandleClientRequest(object sender, HttpSvrEventArgs e)
+        // {
+        //     try
+        //     {
+        //     var routeRegistry = RouteRegistry.GetInstance(urlParser);
+        //     RoutingContext urlObj = routeRegistry.MapRequestToEndpoint(e.Path, e.Method);
+        //     MethodInfo action = urlObj.Endpoint.ControllerMethod;
+        //     Type controllerType = urlObj.Endpoint.ControllerType;
+        //     var controller = (IController)Activator.CreateInstance(controllerType);
+        //     var attributeHandler = new AttributeHandler(Assembly.GetExecutingAssembly());
+        //     var response = action.MapArgumentsAndInvoke<string, string>(controller, urlObj.UrlParams);
+        //     e.Reply(200, response);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         Console.WriteLine($"{ex}");
+        //         e.Reply(400, "Error");
+        //     }
 
-        }
+        // }
 
 
         /// <summary>Event handler for incoming server requests.</summary>

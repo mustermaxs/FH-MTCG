@@ -21,6 +21,8 @@ namespace MTCG
 
         private IEndpointMapper? routeRegistry;
 
+        private IRouter router;
+
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +54,7 @@ namespace MTCG
 
             Active = true;
             _Listener = new(IPAddress.Parse("127.0.0.1"), 12000);
-            RegisterRoutes();
+            InitRouter();
             _Listener.Start();
 
             byte[] buf = new byte[256];
@@ -68,26 +70,35 @@ namespace MTCG
                     data += Encoding.ASCII.GetString(buf, 0, n);
                 }
 
-                Incoming?.Invoke(this, new HttpSvrEventArgs(client, data));
+                // Incoming?.Invoke(this, new HttpSvrEventArgs(client, data));
+
+                router.HandleRequest(this, new HttpSvrEventArgs(client, data));
+
             }
 
             _Listener.Stop();
         }
 
-        private void RegisterRoutes()
+        public void InitRouter()
         {
-            routeRegistry = RouteRegistry.GetInstance();
-            var currentAssembly = Assembly.GetExecutingAssembly();
-            IAttributeHandler attributeHandler = new AttributeHandler(currentAssembly);
-            IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);
-            var routes = routeObtainer.ObtainRoutes();
-
-            foreach (var route in routes)
-            {
-                (HTTPMethod method, string routeTemplate, Type controllerType, MethodInfo methodName) = route;
-                routeRegistry.RegisterEndpoint(routeTemplate, method, controllerType, methodName);
-            }
+            this.router = new Router();
+            router.RegisterRoutes();
         }
+
+        // private void RegisterRoutes()
+        // {
+        //     routeRegistry = RouteRegistry.GetInstance(urlParser);
+        //     var currentAssembly = Assembly.GetExecutingAssembly();
+        //     IAttributeHandler attributeHandler = new AttributeHandler(currentAssembly);
+        //     IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);
+        //     var routes = routeObtainer.ObtainRoutes();
+
+        //     foreach (var route in routes)
+        //     {
+        //         (HTTPMethod method, string routeTemplate, Type controllerType, MethodInfo methodName) = route;
+        //         routeRegistry.RegisterEndpoint(routeTemplate, method, controllerType, methodName);
+        //     }
+        // }
 
 
         /// <summary>Stops the HTTP server.</summary>

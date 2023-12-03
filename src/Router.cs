@@ -1,4 +1,5 @@
 using System;
+using System.Security;
 using System.Reflection;
 
 namespace MTCG;
@@ -47,10 +48,23 @@ public class Router : IRouter
             Console.WriteLine(response.Payload);
             svrEventArgs.Reply(200, response.Payload);
         }
+        catch (DbTransactionFailureException ex)
+        {
+            Console.WriteLine($"Transaction failed.\n{ex.Message}");
+        }
+        catch (RouteDoesntExistException ex)
+        {
+            Console.WriteLine($"{ex}\nRequested endpoint: {ex.Url}");
+            svrEventArgs.Reply(404, $"The requested endpoint {ex.Url} doesn't seem to exist.");
+        }
+        catch (AuthenticationFailedException ex)
+        {
+            Console.WriteLine($"Authentication failed.");
+            svrEventArgs.Reply(401, $"Something went wrong");
+        }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error: {ex}");
-            svrEventArgs.Reply(400, $"Something went wrong");
+            Console.WriteLine(ex);
         }
     }
 }

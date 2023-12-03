@@ -28,4 +28,5 @@ public abstract class IRoutingContext
         get; set;
     }
   public string? RawUrl { get => rawUrl; }
+  public string Payload {get; set;}
 }

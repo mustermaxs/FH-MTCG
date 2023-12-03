@@ -19,6 +19,7 @@ public class Endpoint : IEndpoint
         this.routeTemplate = RouteTemplate;
         this.Exists = true;
     }
+    // OBSOLETE
     public void Deconstruct(out string routeTemplate, out HTTPMethod httpMethod, out Type controllerType, out MethodInfo controllerMethod)
     {
         routeTemplate = RouteTemplate;
@@ -27,7 +28,7 @@ public class Endpoint : IEndpoint
         controllerMethod = ControllerMethod;
     }
 
-    public override bool Equals(Object obj)
+    new public bool Equals(Object obj)
     {
         if (obj == null) return false;
         Endpoint endpoint = (Endpoint)obj;
@@ -85,7 +86,4 @@ public class Endpoint : IEndpoint
 
     public string EndpointPattern => endpointPattern;
     public bool Exists { get; protected set; } = true;
-
-
-
 }

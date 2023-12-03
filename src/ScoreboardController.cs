@@ -1,46 +1,32 @@
 using System;
+using System.Text.Json;
 using MTCG;
 
 namespace MTCG
 {
-// {
-//     public class Point
-//     {
-//         public Point(string user, int value)
-//         {
-//             User = user;
-//             Val = value;
-//         }
-//         public string? User { get; set; }
-//         public int Val { get; set; } = 0;
-//     }
+    public class Point
+    {
+        public Point(string user, int value)
+        {
+            User = user;
+            Val = value;
+        }
+        public string? User { get; set; }
+        public int Val { get; set; } = 0;
+    }
 
-//     [Controller]
-// public class ScoreboardController : IController
-// {
-//     private Point score;
+    [Controller]
+    public class ScoreboardController : IController
+    {
 
-//     public ScoreboardController()
-//     {
-//         // Initialize score in the constructor if you want a single instance
-//         score = new Point("Max", 100);
-//     }
+        public ScoreboardController(IRoutingContext context):base(context) {}
 
-//     public Point Score
-//     {
-//         get
-//         {
-//             // You can still use Score as a property without a routing attribute
-//             return score;
-//         }
-//     }
 
-//     [Route("score", HTTPMethod.GET)]
-//     public Point GetScore()
-//     {
-//         // You can put logic here if needed
-//         return score;
-//     }
-// }
+        [Route("score", HTTPMethod.GET)]
+        public string GetScore()
+        {
+            return JsonSerializer.Serialize<Point>(new Point("Max", 100));
+        }
+    }
 
 }

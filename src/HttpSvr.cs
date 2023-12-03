@@ -85,22 +85,6 @@ namespace MTCG
             router.RegisterRoutes();
         }
 
-        // private void RegisterRoutes()
-        // {
-        //     routeRegistry = RouteRegistry.GetInstance(urlParser);
-        //     var currentAssembly = Assembly.GetExecutingAssembly();
-        //     IAttributeHandler attributeHandler = new AttributeHandler(currentAssembly);
-        //     IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);
-        //     var routes = routeObtainer.ObtainRoutes();
-
-        //     foreach (var route in routes)
-        //     {
-        //         (HTTPMethod method, string routeTemplate, Type controllerType, MethodInfo methodName) = route;
-        //         routeRegistry.RegisterEndpoint(routeTemplate, method, controllerType, methodName);
-        //     }
-        // }
-
-
         /// <summary>Stops the HTTP server.</summary>
         public void Stop()
         {

@@ -50,5 +50,10 @@ namespace MTCG
 
             return namedGroups;
         }
+
+        public bool PatternMatches(string url, string urlPattern)
+        {
+            return Regex.Match(url, urlPattern).Success;
+        }
     }
 }

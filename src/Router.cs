@@ -9,6 +9,7 @@ public class Router : IRouter
     private IUrlParser urlParser;
     private IAttributeHandler attributeHandler;
     private IRouteObtainer routeObtainer;
+    // private IAuthenticator authenticator;
 
     public Router()
     {
@@ -29,20 +30,27 @@ public class Router : IRouter
         }
     }
 
-/// 12.02.2023 21:23
-/// IMPROVE Refactoren
+    /// 12.02.2023 21:23
+    /// IMPROVE Refactoren
     public void HandleRequest(object sender, HttpSvrEventArgs svrEventArgs)
     {
-        string requestedUrl = svrEventArgs.Path;
-        HTTPMethod httpMethod = svrEventArgs.Method;
-        RoutingContext routeContext = new RoutingContext(httpMethod, requestedUrl);
-        routeRegistry.MapRequestToEndpoint(ref routeContext);
-        routeContext.Headers = svrEventArgs.Headers;
-        Type controllerType = routeContext.Endpoint!.ControllerType;
-        IController controller = (IController)Activator.CreateInstance(controllerType, routeContext);
-        MethodInfo controllerAction = routeContext.Endpoint.ControllerMethod;
-        var response = controllerAction.MapArgumentsAndInvoke<string, string>(controller, routeContext.Endpoint.UrlParams);
-        Console.WriteLine(response);
-        svrEventArgs.Reply(200, response);
+        try
+        {
+            RoutingContext routeContext = new RoutingContext(svrEventArgs.Method, svrEventArgs.Path);
+            routeContext.Headers = svrEventArgs.Headers;
+            routeRegistry.MapRequestToEndpoint(ref routeContext);
+            Type controllerType = routeContext.Endpoint!.ControllerType;
+            IController controller = (IController)Activator.CreateInstance(controllerType, routeContext);
+            MethodInfo controllerAction = routeContext.Endpoint.ControllerMethod;
+
+            var response = controllerAction.MapArgumentsAndInvoke<string, string>(controller, routeContext.Endpoint.UrlParams);
+            Console.WriteLine(response);
+            svrEventArgs.Reply(200, response);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex}");
+            svrEventArgs.Reply(400, $"Something went wrong");
+        }
     }
 }

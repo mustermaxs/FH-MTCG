@@ -136,15 +136,15 @@ public class RouteRegistry : IEndpointMapper
     {
         List<IEndpoint> potentialEndpoints = endpointMappings[context.httpMethod];
         string trimmedUrl = parser.TrimUrl(context.RawUrl!);
-        Dictionary<string, string> namedTokens = new();
+        Dictionary<string, string> urlParams = new();
 
         foreach (var currentEndpoint in potentialEndpoints)
         {
-            namedTokens = this.parser.MatchUrlAndGetParams(trimmedUrl, currentEndpoint.EndpointPattern);
 
-            if (namedTokens.Count > 0)
+            if (parser.PatternMatches(trimmedUrl, currentEndpoint.EndpointPattern))
             {
-                currentEndpoint.UrlParams = namedTokens;
+                urlParams = this.parser.MatchUrlAndGetParams(trimmedUrl, currentEndpoint.EndpointPattern);
+                currentEndpoint.UrlParams = urlParams;
                 context.Endpoint = (Endpoint)currentEndpoint;
 
                 return;

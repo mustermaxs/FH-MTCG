@@ -43,9 +43,9 @@ public class Router : IRouter
             IController controller = (IController)Activator.CreateInstance(controllerType, routeContext);
             MethodInfo controllerAction = routeContext.Endpoint.ControllerMethod;
 
-            var response = controllerAction.MapArgumentsAndInvoke<string, string>(controller, routeContext.Endpoint.UrlParams);
-            Console.WriteLine(response);
-            svrEventArgs.Reply(200, response);
+            IResponse response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, routeContext.Endpoint.UrlParams);
+            Console.WriteLine(response.Payload);
+            svrEventArgs.Reply(200, response.Payload);
         }
         catch (Exception ex)
         {

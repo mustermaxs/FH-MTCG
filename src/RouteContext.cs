@@ -82,9 +82,9 @@ public class RoutingContext : IRoutingContext
     }
 
     private Dictionary<string, string> urlParams = new Dictionary<string, string>();
-      protected string? rawUrl;
+    protected string? rawUrl;
 
-  public HTTPMethod httpMethod { get; protected set; }
+    public HTTPMethod httpMethod { get; protected set; }
 
     protected bool routeFound = false;
 
@@ -105,6 +105,6 @@ public class RoutingContext : IRoutingContext
     {
         get; set;
     }
-  public string? RawUrl { get => rawUrl; }
-  public string Payload {get; set;}
+    public string? RawUrl { get => rawUrl; }
+    public string Payload { get; set; }
 }

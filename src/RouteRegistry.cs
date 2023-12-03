@@ -115,20 +115,26 @@ public class RouteRegistry : IEndpointMapper
         List<IEndpoint> potentialEndpoints = endpointMappings[method];
         string trimmedUrl = parser.TrimUrl(requestedUrl);
         Dictionary<string, string> urlParams = new();
+        bool routeFound = false;
 
-        foreach (var currentEndpoint in potentialEndpoints)
+        foreach (var endpoint in potentialEndpoints)
         {
-            urlParams = this.parser.MatchUrlAndGetParams(trimmedUrl, currentEndpoint.EndpointPattern);
 
-            if (urlParams.Count > 0)
+            if (parser.PatternMatches(trimmedUrl, endpoint.EndpointPattern))
             {
-                currentEndpoint.UrlParams = urlParams;
+                urlParams = this.parser.MatchUrlAndGetParams(trimmedUrl, endpoint.EndpointPattern);
+                endpoint.UrlParams = urlParams;
+                routeFound = true;
 
-                return currentEndpoint;
-
+                return endpoint;
             }
         }
 
+        if (!routeFound)
+        {
+            throw new RouteDoesntExistException(requestedUrl);
+        }
+        
         return null;
     }
 
@@ -138,20 +144,25 @@ public class RouteRegistry : IEndpointMapper
         string trimmedUrl = parser.TrimUrl(context.RawUrl!);
         Dictionary<string, string> urlParams = new();
 
-        foreach (var currentEndpoint in potentialEndpoints)
+        foreach (var endpoint in potentialEndpoints)
         {
 
-            if (parser.PatternMatches(trimmedUrl, currentEndpoint.EndpointPattern))
+            if (parser.PatternMatches(trimmedUrl, endpoint.EndpointPattern))
             {
-                urlParams = this.parser.MatchUrlAndGetParams(trimmedUrl, currentEndpoint.EndpointPattern);
-                currentEndpoint.UrlParams = urlParams;
-                context.Endpoint = (Endpoint)currentEndpoint;
+                urlParams = this.parser.MatchUrlAndGetParams(trimmedUrl, endpoint.EndpointPattern);
+                endpoint.UrlParams = urlParams;
+                context.Endpoint = (Endpoint)endpoint;
+                context.RouteFound = true;
 
                 return;
             }
         }
 
-        context.RouteFound = false;
+
+        if (!context.RouteFound)
+        {
+            throw new RouteDoesntExistException(context.RawUrl!);
+        }
     }
 
 }

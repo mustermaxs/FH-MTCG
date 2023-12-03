@@ -101,15 +101,6 @@ public class RouteRegistry : IEndpointMapper
     /// and a bool (IsRouteRegistered) inidicating 
     /// if the requested route was even registered in the store.
     /// </returns>
-
-
-    /// 12.02.2023 21:18
-    /// IMPORTANT RoutingContext als "ref" übergeben (weiß immer noch nicht
-    /// was der Unterschied ist)
-    /// Damit im Router zuerst der context erstellt wird mit den srvEventArgs übergeben werden!!!
-    /// MapRequestToEndpoint evtl. überladen sodass die Methode einfach mit dem RoutingContext arbeitet
-    /// ==> da sind ja eigentlich schon alle Infos drin wenn in der Methode Router::HandleRequest direkt
-    /// das srvEventArgs übergeben wird
     public IEndpoint? MapRequestToEndpoint(string requestedUrl, HTTPMethod method)
     {
         List<IEndpoint> potentialEndpoints = endpointMappings[method];
@@ -134,7 +125,7 @@ public class RouteRegistry : IEndpointMapper
         {
             throw new RouteDoesntExistException(requestedUrl);
         }
-        
+
         return null;
     }
 

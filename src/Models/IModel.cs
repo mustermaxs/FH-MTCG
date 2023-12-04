@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace MTCG;
 
-public abstract class IModel
+public interface IModel
 {
     // public static T Create<T>(string jsonString)
     // {

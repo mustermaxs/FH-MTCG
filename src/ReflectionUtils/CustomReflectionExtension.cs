@@ -28,9 +28,51 @@ public static class ReflectionUtils
         }
         else
         {
-            return (TReturnType)self.Invoke(classInstance, MapProvidedArgumentsToSignature(self, providedParams));
+            return (TReturnType)self.Invoke(
+                classInstance,
+                MapProvidedArgumentsToSignature<TValueType>(self, providedParams)); // CHANGED
         }
     }
+
+
+
+    /// <summary>
+    /// Maps keys from dictionary according to the expected paramaters
+    /// defined in the constructor of the class 
+    /// </summary>
+    
+    /// <returns>
+    /// Instance of class.
+    /// </returns>
+    
+    // public static TReturnType? MapArgumentsAndCreateInstance<TReturnType>(
+    //     this ConstructorInfo self, Dictionary<string, )
+    // {
+
+    //         return (TReturnType)self.Invoke(null);
+
+    // }
+    public static TReturnType? MapArgumentsAndCreateInstance<TReturnType>(
+        this ConstructorInfo self)
+    {
+
+            return (TReturnType)self.Invoke(null);
+
+    }
+    // public static TReturnType? MapArgumentsAndCreateInstance<TReturnType, TValueType>(
+    //     this ConstructorInfo self, object classInstance, Dictionary<string, TValueType>? providedParams)
+    // {
+    //     if (providedParams == null || providedParams.Count == 0)
+    //     {
+    //         return (TReturnType)self.Invoke(null);
+    //     }
+    //     // else
+    //     // {
+    //     //     return (TReturnType)self.Invoke(
+    //     //         MapProvidedArgumentsToSignature(providedParams));
+    //     // }
+    // }
+
 
     public static object[]? MapProvidedArgumentsToSignature<TValueType>(
         MethodBase classInstanceMethod, Dictionary<string, TValueType> providedParams)

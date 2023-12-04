@@ -4,6 +4,11 @@ namespace MTCG;
 
 public interface IRepository<T>
 {
-    // public IEnumerable<T> GetAll();
     public T? Get(int id);
+
+    public IEnumerable<T> GetAll();
+
+    public void Delete(T obj);
+
+    public void Save(T obj);
 }

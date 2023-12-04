@@ -8,35 +8,46 @@ namespace MTCG
     public class UserController : IController
     {
 
-        protected IRepository<UserModel> repo = new UserRepo();
+        protected static IRepository<User> repo = new UserRepository();
 
         public UserController(IRoutingContext context) : base(context) { }
 
-        [Route("users/{userid:int}", HTTPMethod.GET)]
-        public IResponse GetNameById(int userid)
+        [Route("/users/", HTTPMethod.POST)]
+        public IResponse AddUser()
         {
-            var mockUser1 = new UserModel("John", "Software Developer");
+            var user = JsonSerializer.Deserialize<User>(context.Payload);
 
-            // return new Response(200, JsonSerializer.Serialize<UserModel>(mockUser1), "es geht");
-            return ResponseHandler.Create<UserModel>(200, mockUser1, "es geht!!!");
+            try
+            {
+                repo.Save(user);
+                return new SuccessResponse<User>(user, "");
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex}");
+                return new ErrorResponse<User>(user, $"{ex}");
+            }
+
         }
 
 
-        [Route("users/", HTTPMethod.GET)]
-        public IResponse GetNames()
+        [Route("/users/", HTTPMethod.GET)]
+        public IResponse GetAllUsers()
         {
-            var mockUser1 = new UserModel("John", "Software Developer");
-            var mockUser2 = new UserModel("Alice", "Data Scientist");
-            var mockUser3 = new UserModel("Bob", "UX Designer");
-            var mockUser4 = new UserModel();
+            IEnumerable<User> users = repo.GetAll();
 
-            var list = new List<UserModel>();
-            list.Add(mockUser4);
-            list.Add(mockUser1);
-            list.Add(mockUser3);
+            return new SuccessResponse<IEnumerable<User>>(users, "");
+        }
 
-            // return ResponseHandler.Create<List<UserModel>>(200, list, "Es funktioniert");
-            return new Response(200, JsonSerializer.Serialize<List<UserModel>>(list), "es geht");
+        [Route("/users/{userid:int}", HTTPMethod.GET)]
+        public IResponse GetUserById(int userid)
+        {
+
+            User? user = repo.Get(userid);
+
+            return new SuccessResponse<User>(user, "");
+
         }
     }
 }

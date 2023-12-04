@@ -39,6 +39,7 @@ namespace MTCG
             {
                 if(i == 0)
                 {
+                    //IMPORTANT HTTPMETHODE FALSCH GESETZT
                     string[] inc = lines[0].Split(' ');
                     HTTPMethod method;
                     if (Enum.TryParse("HTTPMethod", out method))
@@ -83,7 +84,7 @@ namespace MTCG
         public virtual HTTPMethod Method
         {
             get; protected set;
-        } = HTTPMethod.GET;
+        }
 
 
         /// <summary>Gets the request path.</summary>

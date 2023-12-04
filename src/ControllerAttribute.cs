@@ -1,5 +1,5 @@
 using System;
-//IMPROVE could check if class implements IController interface
+//IMPROVE return controller instance?
 namespace MTCG
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]

@@ -38,6 +38,7 @@ public class Router : IRouter
         try
         {
             RoutingContext routeContext = new RoutingContext(svrEventArgs.Method, svrEventArgs.Path);
+            routeContext.Payload = svrEventArgs.Payload;
             routeContext.Headers = svrEventArgs.Headers;
             routeRegistry.MapRequestToEndpoint(ref routeContext);
             Type controllerType = routeContext.Endpoint!.ControllerType;
@@ -45,8 +46,10 @@ public class Router : IRouter
             MethodInfo controllerAction = routeContext.Endpoint.ControllerMethod;
 
             IResponse response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, routeContext.Endpoint.UrlParams);
-            Console.WriteLine(response.Payload);
-            svrEventArgs.Reply(200, response.Payload);
+            Console.WriteLine(response.PayloadAsJson());
+            svrEventArgs.Reply(200, response.PayloadAsJson());
+
+
         }
         catch (DbTransactionFailureException ex)
         {

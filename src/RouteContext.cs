@@ -98,7 +98,7 @@ public class RoutingContext : IRoutingContext
 
     /// 12.02.2023 21:13
     /// FIXME default value
-    public virtual HttpHeader[] Headers { protected get; set; } = new HttpHeader[0];
+    public virtual HttpHeader[] Headers { get; set; } = new HttpHeader[0];
 
 
     public IEndpoint? Endpoint

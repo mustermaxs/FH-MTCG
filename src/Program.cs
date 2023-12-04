@@ -18,6 +18,9 @@ namespace MTCG
             HttpServer svr = new();
             svr.Run();
 
+            // ConstructorInfo info = typeof(User).GetConstructors()[0];
+            // User user = info.MapArgumentsAndCreateInstance<User>();
+            // Console.WriteLine("test");
         }
     }
 }

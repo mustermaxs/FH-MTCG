@@ -39,7 +39,7 @@ public class EndpointConfig
 }
 
 /// <summary>
-/// Obtains valid endpoint definitions via custom attributes
+/// Obtains valid endpoint definitions from controllers via custom attributes
 /// (RouteAttribute, ControllerAttribute)
 /// </summary>
 
@@ -53,11 +53,13 @@ public class ReflectionRouteObtainer : IRouteObtainer
         this.attributeHandler = attributeHandler;
     }
 
+    /// 12.04.2023 18:21
+    /// REFACTOR
     public List<Endpoint> ObtainRoutes()
     {
         var endpointList = new List<Endpoint>();
 
-        var controllerTypes = attributeHandler.GetAttributeOfType<ControllerAttribute>(typeof(IController));
+        var controllerTypes = attributeHandler.GetAttributesOfType<ControllerAttribute>();
 
         foreach (var controllerType in controllerTypes)
         {

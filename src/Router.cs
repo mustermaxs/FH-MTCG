@@ -47,7 +47,7 @@ public class Router : IRouter
 
             IResponse response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, routeContext.Endpoint.UrlParams);
             Console.WriteLine(response.PayloadAsJson());
-            svrEventArgs.Reply(200, response.PayloadAsJson());
+            svrEventArgs.Reply(response.StatusCode, response.PayloadAsJson());
 
 
         }

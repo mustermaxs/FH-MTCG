@@ -124,20 +124,27 @@ namespace MTCG
         /// <param name="payload">Payload.</param>
         public virtual void Reply(int status, string? payload = null)
         {
-            string data;
+            string protocol = "HTTP/1.1";
+            string statusMsg = string.Empty;
 
             switch(status)
             {
                 case 200:
-                    data = "HTTP/1.1 200 OK\n"; break;
+                    statusMsg = "OK"; break;
                 case 400:
-                    data = "HTTP/1.1 400 Bad Request\n"; break;
+                    statusMsg = "Bad Request"; break;
+                case 401:
+                    statusMsg = "Unauthorized"; break;
                 case 404:
-                    data = "HTTP/1.1 404 Not Found\n"; break;
+                    statusMsg = "Not Found"; break;
+                case 500:
+                    statusMsg = "Internal Server Error"; break;
                 default:
-                    data = "HTTP/1.1 418 I'm a Teapot\n"; break;
+                    statusMsg = "I'm a Teapot"; break;
             }
             
+            string data = $"{protocol} {status} {statusMsg}\n";
+
             if(string.IsNullOrEmpty(payload)) 
             {
                 data += "Content-Length: 0\n";

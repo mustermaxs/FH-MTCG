@@ -16,10 +16,7 @@ namespace MTCG
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /// <summary>Database connection.</summary>
-        protected readonly static NpgsqlConnection connection = _Connect();
-
-
-
+        // protected readonly NpgsqlConnection? connection = _Connect();
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // protected members                                                                                                //
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,13 +46,24 @@ namespace MTCG
 
         /// <summary>Creates and returns a valid database connection.</summary>
         /// <returns>Database connection.</returns>
-        private static NpgsqlConnection _Connect()
+        protected NpgsqlConnection? _Connect()
         {
-            Console.WriteLine("openend connection");
-            NpgsqlConnection connection = new NpgsqlConnection("Host=localhost;Username=admin;Password=12345;Database=mtc");
+            try
+            {
+                NpgsqlConnection connection = new NpgsqlConnection("Host=localhost;Username=admin;Password=12345;Database=mtc");
 
-            connection.Open();
-            return connection;
+                connection.Open();
+                Console.WriteLine("openend connection");
+
+                return connection;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to open connection to DB. {ex}");
+
+                return null;
+            }
+
         }
 
         public static void closeConnectionToDataBase(IDbConnection connection)
@@ -72,23 +80,26 @@ namespace MTCG
         /// <returns>Returns the retrieved object or NULL if there is no object with the given ID..</returns>
         public virtual T? Get(int id)
         {
-
-            var command = new NpgsqlCommand($"SELECT {_Fields} FROM {_Table} WHERE id = @id", connection);
-            T? rval = new();
-            command.Parameters.AddWithValue("id", id);
-
-            IDataReader re = command.ExecuteReader();
-
-            if (re.Read())
+            using (var connection = this._Connect())
             {
-                rval = new();
-                _Fill(rval, re);
+                var command = new NpgsqlCommand($"SELECT {_Fields} FROM {_Table} WHERE id = @id", connection);
+                T? rval = new();
+                command.Parameters.AddWithValue("id", id);
+
+                IDataReader re = command.ExecuteReader();
+
+                if (re.Read())
+                {
+                    rval = new();
+                    _Fill(rval, re);
+                }
+
+                re.Close();
+                re.Dispose(); command.Dispose();
+
+                return rval;
             }
 
-            re.Close();
-            re.Dispose(); command.Dispose();
-
-            return rval;
         }
 
 
@@ -98,6 +109,7 @@ namespace MTCG
         /// REFACTOR
         public virtual IEnumerable<T> GetAll()
         {
+            using (var connection = this._Connect())
             using (var command = new NpgsqlCommand($"SELECT * FROM {_Table}", connection))
             {
                 Dictionary<string, string> dbParams = new Dictionary<string, string>();
@@ -115,7 +127,7 @@ namespace MTCG
                 }
 
                 re.Close();
-                re.Dispose(); command.Dispose();
+                re.Dispose();
 
                 return rval;
             }
@@ -126,10 +138,14 @@ namespace MTCG
         /// <param name="obj">Object.</param>
         public virtual void Delete(T obj)
         {
-            IDbCommand cmd = connection.CreateCommand();
-            cmd.CommandText = $"SELECT {_Fields} FROM {_Table}";
-            cmd.ExecuteNonQuery();
-            cmd.Dispose();
+            using (var connection = this._Connect())
+            {
+                IDbCommand cmd = connection.CreateCommand();
+                cmd.CommandText = $"SELECT {_Fields} FROM {_Table}";
+                cmd.ExecuteNonQuery();
+                cmd.Dispose();
+            }
+
         }
 
 

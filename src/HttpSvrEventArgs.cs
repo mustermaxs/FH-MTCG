@@ -41,10 +41,16 @@ namespace MTCG
                 {
                     //IMPORTANT HTTPMETHODE FALSCH GESETZT
                     string[] inc = lines[0].Split(' ');
+
                     HTTPMethod method;
-                    if (Enum.TryParse("HTTPMethod", out method))
+
+                    if (Enum.TryParse(inc[0], out method))
                     {
                         Method = method;
+                    }
+                    else
+                    {
+                        throw new RouteDoesntExistException($"The HTTP method {inc[0]} was not recognized.");
                     }
                     Path = inc[1];
                 }

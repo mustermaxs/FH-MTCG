@@ -17,15 +17,17 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
   {
     try
     {
-      using (var command = new NpgsqlCommand($"INSERT INTO {_Table} (name, password, coins, bio, image) VALUES (@name, @password, @coins, @bio, @image);"))
+      using(NpgsqlConnection? connection = this._Connect())
+      using (var command = new NpgsqlCommand($"INSERT INTO {_Table} (name, password, coins, bio, image) VALUES (@name, @password, @coins, @bio, @image);", connection))
       {
-        command.Parameters.AddWithValue("@username", user.Name);
+        command.Parameters.AddWithValue("@name", user.Name);
         command.Parameters.AddWithValue("@password", user.Password);
         command.Parameters.AddWithValue("@coins", user.Coins);
         command.Parameters.AddWithValue("@bio", user.Bio);
         command.Parameters.AddWithValue("@image", user.Image);
 
         command.ExecuteNonQuery();
+
         command.Dispose(); connection.Dispose();
       }
     }

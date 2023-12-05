@@ -15,6 +15,8 @@
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/ref/MTCG.Tests.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/MTCG.Tests.pdb
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.VisualStudio.CodeCoverage.Shim.dll
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.Extensions.Logging.Abstractions.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.TestPlatform.CoreUtilities.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.VisualStudio.TestPlatform.ObjectModel.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.TestPlatform.CommunicationUtilities.dll
@@ -23,8 +25,12 @@
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.VisualStudio.TestPlatform.Common.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/testhost.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Newtonsoft.Json.dll
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Npgsql.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/NuGet.Frameworks.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/nunit.framework.dll
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/System.Diagnostics.DiagnosticSource.dll
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/System.Text.Encodings.Web.dll
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/System.Text.Json.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/cs/Microsoft.TestPlatform.CoreUtilities.resources.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/cs/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/de/Microsoft.TestPlatform.CoreUtilities.resources.dll
@@ -90,6 +96,7 @@
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/zh-Hant/Microsoft.TestPlatform.CommunicationUtilities.resources.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/zh-Hant/Microsoft.TestPlatform.CrossPlatEngine.resources.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/zh-Hant/Microsoft.VisualStudio.TestPlatform.Common.resources.dll
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/runtimes/browser/lib/net6.0/System.Text.Encodings.Web.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/MTCG.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/MTCG.pdb
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.csproj.AssemblyReference.cache
@@ -102,10 +109,3 @@
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/ref/MTCG.Tests.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.pdb
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.genruntimeconfig.cache
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.Extensions.Logging.Abstractions.dll
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Npgsql.dll
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/System.Diagnostics.DiagnosticSource.dll
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/System.Text.Encodings.Web.dll
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/System.Text.Json.dll
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/runtimes/browser/lib/net6.0/System.Text.Encodings.Web.dll

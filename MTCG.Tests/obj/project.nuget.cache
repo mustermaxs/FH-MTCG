@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "GHC5lsPSVs6Ou05E/jxpJs0vEHxNksYvUQVOTCR/vS3FR6+kXGYR4XSf5SL2XP6WBoCPqtC9n+K+7TgRJyqpjQ==",
+  "dgSpecHash": "mnbqFAIIkzVMAA2z4HH6t+mQd+vCCrra+39V4ML7DweGFst/hfziCsw1hMCpBI4SsI3EZ7LRmtz8TCE4yIK+Cw==",
   "success": true,
   "projectFilePath": "/home/mustermax/vscode_projects/MTCG/MTCG.Tests/MTCG.Tests.csproj",
   "expectedPackageFiles": [

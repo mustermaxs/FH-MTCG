@@ -26,7 +26,7 @@ namespace MTCG
             catch (Exception ex)
             {
                 Console.WriteLine($"{ex}");
-                return new ErrorResponse<User>(user, $"{ex}");
+                return new ErrorResponse<User>("Failed to add user.", 500);
             }
 
         }
@@ -43,7 +43,6 @@ namespace MTCG
         [Route("/users/{userid:int}", HTTPMethod.GET)]
         public IResponse GetUserById(int userid)
         {
-
             User? user = repo.Get(userid);
 
             return new SuccessResponse<User>(user, "");

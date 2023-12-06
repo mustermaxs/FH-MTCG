@@ -11,7 +11,7 @@ public interface IRoutingContext
     T GetParam<T>(string key);
     bool SetParam(string key, string value);
 
-    HTTPMethod Method { get; }
+    HTTPMethod HttpMethod { get; }
     HttpHeader[] Headers { get; set; }
     IEndpoint? Endpoint { get; set; }
     string? RawUrl { get; }

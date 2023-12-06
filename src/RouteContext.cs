@@ -14,7 +14,7 @@ public class RoutingContext : IRoutingContext
     }
     public RoutingContext(HTTPMethod method, string rawUrl, HttpHeader[] headers)
     {
-        this.httpMethod = method;
+        this.HttpMethod = method;
         this.routeFound = false;
         this.rawUrl = rawUrl;
         this.Headers = headers;
@@ -85,8 +85,6 @@ public class RoutingContext : IRoutingContext
     private Dictionary<string, string> urlParams = new Dictionary<string, string>();
     protected string? rawUrl;
 
-    public HTTPMethod httpMethod { get; protected set; }
-
     protected bool routeFound = false;
 
     public bool RouteFound
@@ -95,7 +93,7 @@ public class RoutingContext : IRoutingContext
         set { routeFound = value; }
     }
 
-    public HTTPMethod Method => this.httpMethod;
+    public HTTPMethod HttpMethod {get; protected set;}
 
     /// 12.02.2023 21:13
     /// FIXME default value

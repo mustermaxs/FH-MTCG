@@ -20,7 +20,7 @@ namespace MTCG
             IAttributeHandler attributeHandler = new AttributeHandler();
             IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);
             
-            var router = new Router();
+            var router = new Router(routeRegistry, routeObtainer);
             HttpServer svr = new(router);
             svr.Run();
 

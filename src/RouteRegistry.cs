@@ -247,9 +247,9 @@ public class RouteRegistry : IEndpointMapper
     /// Throws a RouteDoesntExistException in case the requested endpoint wasn't found.
     /// </returns>
     
-    public void MapRequestToEndpoint(ref RoutingContext context)
+    public void MapRequestToEndpoint(ref IRoutingContext context)
     {
-        List<IEndpoint> potentialEndpoints = endpointMappings[context.httpMethod];
+        List<IEndpoint> potentialEndpoints = endpointMappings[context.HttpMethod];
         string trimmedUrl = parser.TrimUrl(context.RawUrl!);
         Dictionary<string, string> urlParams = new();
 

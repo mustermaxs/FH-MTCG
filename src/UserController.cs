@@ -54,7 +54,6 @@ namespace MTCG
         {
             try
             {
-                Thread.Sleep(2000);
                 IEnumerable<User> users = repo.GetAll();
 
                 return new SuccessResponse<IEnumerable<User>>(users, "");

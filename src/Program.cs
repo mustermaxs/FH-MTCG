@@ -13,11 +13,16 @@ namespace MTCG
 
         /// <summary>Main entry point.</summary>
         /// <param name="args">Arguments.</param>
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-
-            HttpServer svr = new();
-            await svr.Run();
+            IUrlParser urlParser = new UrlParser();
+            IEndpointMapper routeRegistry = RouteRegistry.GetInstance(urlParser);
+            IAttributeHandler attributeHandler = new AttributeHandler();
+            IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);
+            
+            var router = new Router();
+            HttpServer svr = new(router);
+            svr.Run();
 
             // ConstructorInfo info = typeof(User).GetConstructors()[0];
             // User user = info.MapArgumentsAndCreateInstance<User>();

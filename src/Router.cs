@@ -28,13 +28,22 @@ public class Router : IRouter
     /// Instantiates necessary dependencies like URL-Parser, RouteRegistry,
     /// AttributeHandler (for obtaining the endpoints to be registered via reflection/custom attributes).
     /// </summary>
+    /// <param name="routeRegistry">
+    /// An object implementing the IEndpointMapper interface.
+    /// Responsible for mapping requests to registered endpoints.
+    /// </param>
+    /// <param name="routeObtainer">
+    /// Gets 
+    /// </param>
     
-    public Router()
+    
+    /// 06.12.2023 20:40
+    /// IMPROVE routeObtainer sollte nicht direkt im router verwendet werden
+    /// router sollte in RegisterRoutes
+    public Router(IEndpointMapper routeRegistry, IRouteObtainer routeObtainer)
     {
-        urlParser = new UrlParser();
-        routeRegistry = RouteRegistry.GetInstance(urlParser);
-        attributeHandler = new AttributeHandler();
-        routeObtainer = new ReflectionRouteObtainer(attributeHandler);
+        this.routeRegistry = routeRegistry;
+        this.routeObtainer = routeObtainer;
     }
 
 
@@ -73,6 +82,9 @@ public class Router : IRouter
     /// RoutingContext instance specific to a single client request.
     /// </returns>
     
+    /// 06.12.2023 20:42
+    /// IMPROVE RoutingContext irgedwo anders konstruieren und
+    /// statt svrEventArgs in HandleRequest übergeben
     protected RoutingContext CreateRoutingContext(HttpSvrEventArgs svrEventArgs)
     {
         var context = new RoutingContext(svrEventArgs.Method, svrEventArgs.Path);
@@ -95,11 +107,13 @@ public class Router : IRouter
     /// Object containing the received client request.
     /// </param>
     
-    public void HandleRequest(HttpSvrEventArgs svrEventArgs)
+    /// 06.12.2023 20:42
+    /// IMPROVE RoutingContext irgedwo anders konstruieren und
+    /// statt svrEventArgs in HandleRequest übergeben
+    public IResponse HandleRequest(IRoutingContext context)
     {
         try
         {
-            var context = this.CreateRoutingContext(svrEventArgs);
             routeRegistry.MapRequestToEndpoint(ref context);
 
             var controllerType = context.Endpoint!.ControllerType;
@@ -111,7 +125,9 @@ public class Router : IRouter
 
             IResponse response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, context.Endpoint.UrlParams);
 
-            svrEventArgs.Reply(response.StatusCode, response.PayloadAsJson());
+            // svrEventArgs.Reply(response.StatusCode, response.PayloadAsJson());
+
+            return response;
         }
         catch (DbTransactionFailureException ex)
         {

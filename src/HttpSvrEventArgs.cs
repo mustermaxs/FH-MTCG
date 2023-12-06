@@ -85,7 +85,6 @@ namespace MTCG
 
 
         /// <summary>Gets the HTTP method.</summary>
-        /// TODO FIX DEFAULT VALUE
         public virtual HTTPMethod Method
         {
             get; protected set;

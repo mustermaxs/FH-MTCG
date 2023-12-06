@@ -8,11 +8,11 @@ namespace MTCG;
 /// TODO in Router-Implementierung Methoden um Controller zu instanziieren
 public interface IRouter
 {
-    public void RegisterRoutes();
+    void RegisterRoutes();
     /// 12.02.2023 02:24
     /// ? um request object zu instantiieren
     // public IRequest ObtainClientRequest();
-    Task HandleRequest( HttpSvrEventArgs svrEventArgs);
+    IResponse HandleRequest(IRoutingContext context);
     /// 12.02.2023 02:11
     /// ? brauch ich das
     // public void HandleResponse();

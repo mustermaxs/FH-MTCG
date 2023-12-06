@@ -50,11 +50,11 @@ namespace MTCG
 
 
         [Route("/users/", HTTPMethod.GET)]
-        public async Task<IResponse> GetAllUsers()
+        public IResponse GetAllUsers()
         {
             try
             {
-                await Task.Delay(3000);
+                Thread.Sleep(2000);
                 IEnumerable<User> users = repo.GetAll();
 
                 return new SuccessResponse<IEnumerable<User>>(users, "");
@@ -69,9 +69,9 @@ namespace MTCG
         }
 
         [Route("/users/{userid:int}", HTTPMethod.GET)]
-        public async Task<IResponse> GetUserById(int userid)
+        public IResponse GetUserById(int userid)
         {
-            await Task.Delay(3000);
+            Thread.Sleep(2000);
 
             User? user = repo.Get(userid);
 

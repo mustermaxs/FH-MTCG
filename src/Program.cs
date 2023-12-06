@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace MTCG
 {
@@ -14,8 +15,13 @@ namespace MTCG
         /// <param name="args">Arguments.</param>
         static void Main(string[] args)
         {
-
-            HttpServer svr = new();
+            IUrlParser urlParser = new UrlParser();
+            IEndpointMapper routeRegistry = RouteRegistry.GetInstance(urlParser);
+            IAttributeHandler attributeHandler = new AttributeHandler();
+            IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);
+            
+            var router = new Router();
+            HttpServer svr = new(router);
             svr.Run();
 
             // ConstructorInfo info = typeof(User).GetConstructors()[0];

@@ -12,11 +12,12 @@ public class RoutingContext : IRoutingContext
     {
         this.routeFound = false;
     }
-    public RoutingContext(HTTPMethod method, string rawUrl)
+    public RoutingContext(HTTPMethod method, string rawUrl, HttpHeader[] headers)
     {
         this.httpMethod = method;
         this.routeFound = false;
         this.rawUrl = rawUrl;
+        this.Headers = headers;
     }
     public RoutingContext(string rawUrl)
     {

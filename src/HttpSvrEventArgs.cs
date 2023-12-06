@@ -39,7 +39,6 @@ namespace MTCG
             {
                 if(i == 0)
                 {
-                    //IMPORTANT HTTPMETHODE FALSCH GESETZT
                     string[] inc = lines[0].Split(' ');
 
                     HTTPMethod method;
@@ -86,7 +85,6 @@ namespace MTCG
 
 
         /// <summary>Gets the HTTP method.</summary>
-        /// TODO FIX DEFAULT VALUE
         public virtual HTTPMethod Method
         {
             get; protected set;

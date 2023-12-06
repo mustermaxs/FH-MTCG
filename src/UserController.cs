@@ -12,32 +12,60 @@ namespace MTCG
 
         public UserController(IRoutingContext context) : base(context) { }
 
-        [Route("/users/", HTTPMethod.POST)]
-        public IResponse AddUser()
-        {
-            var user = JsonSerializer.Deserialize<User>(context.Payload);
+        // [Route("/users/", HTTPMethod.POST)]
+        // public IResponse RegisterUser()
+        // {
+        //     try
+        //     {
+        //         var user = JsonSerializer.Deserialize<User>(context.Payload);
 
-            try
-            {
-                repo.Save(user);
-                return new SuccessResponse<User>(user, "");
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"{ex}");
-                return new ErrorResponse<User>("Failed to add user.", 500);
-            }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         Console.WriteLine(ex);
 
-        }
+        //     }
+        // }
+
+
+        // public IResponse AddUser()
+        // {
+        //     var user = JsonSerializer.Deserialize<User>(context.Payload);
+
+        //     try
+        //     {
+        //         repo.Save(user);
+        //         return new SuccessResponse<User>(user, "");
+
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         Console.WriteLine($"Failed to register new user. {ex.Message}");
+
+        //         return new CustomResponse<User>(500, null, $"{ex}");
+        //     }
+
+        // }
 
 
         [Route("/users/", HTTPMethod.GET)]
         public IResponse GetAllUsers()
         {
-            IEnumerable<User> users = repo.GetAll();
+            try
+            {
+                Thread.Sleep(2000);
+                IEnumerable<User> users = repo.GetAll();
 
-            return new SuccessResponse<IEnumerable<User>>(users, "");
+                return new SuccessResponse<IEnumerable<User>>(users, "");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to get all users. {ex.Message}");
+
+                return new ErrorResponse<User>($"Failed to get all users.");
+            }
+
         }
 
         [Route("/users/{userid:int}", HTTPMethod.GET)]

@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Threading.Tasks;
 
 
 
@@ -22,6 +23,12 @@ namespace MTCG
         private IEndpointMapper? routeRegistry;
 
         private IRouter router;
+
+
+        public HttpServer(IRouter router)
+        {
+            this.router = router;
+        }
 
 
 
@@ -56,6 +63,7 @@ namespace MTCG
             _Listener = new(IPAddress.Parse("127.0.0.1"), 12000);
             InitRouter();
             _Listener.Start();
+            var tasks = new List<Task>();
 
             byte[] buf = new byte[256];
 
@@ -63,26 +71,39 @@ namespace MTCG
             {
                 TcpClient client = _Listener.AcceptTcpClient();
 
-                string data = string.Empty;
-                while (client.GetStream().DataAvailable || (string.IsNullOrEmpty(data)))
+                tasks.Add(Task.Run(() =>
                 {
-                    int n = client.GetStream().Read(buf, 0, buf.Length);
-                    data += Encoding.ASCII.GetString(buf, 0, n);
-                }
+                    Console.WriteLine("RUN TASK");
+                    string data = string.Empty;
+                    while (client.GetStream().DataAvailable || (string.IsNullOrEmpty(data)))
+                    {
+                        int n = client.GetStream().Read(buf, 0, buf.Length);
+                        data += Encoding.ASCII.GetString(buf, 0, n);
+                    }
+                    
+                    var svrEventArgs = new HttpSvrEventArgs(client, data);
+                    IRoutingContext context = new RoutingContext(svrEventArgs.Method, svrEventArgs.Path, svrEventArgs.Headers);
+                    IResponse response = router.HandleRequest(context);
+
+                    svrEventArgs.Reply(response.StatusCode, response.PayloadAsJson());
+                }));
+
 
                 // Incoming?.Invoke(this, new HttpSvrEventArgs(client, data));
 
-                router.HandleRequest(this, new HttpSvrEventArgs(client, data));
+            }
+            Task t = Task.WhenAll(tasks);
+
+            try
+            {
+                t.Wait();
+            }
+            catch { }
+            if (t.Status == TaskStatus.RanToCompletion)
+            {
+                _Listener.Stop();
 
             }
-
-            _Listener.Stop();
-        }
-
-        public void InitRouter()
-        {
-            this.router = new Router();
-            router.RegisterRoutes();
         }
 
         /// <summary>Stops the HTTP server.</summary>

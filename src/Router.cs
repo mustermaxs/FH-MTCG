@@ -16,8 +16,6 @@ namespace MTCG;
 public class Router : IRouter
 {
     private IEndpointMapper routeRegistry;
-    private IUrlParser urlParser;
-    private IAttributeHandler attributeHandler;
     private IRouteObtainer routeObtainer;
     // private IAuthenticator authenticator;
 
@@ -35,8 +33,8 @@ public class Router : IRouter
     /// <param name="routeObtainer">
     /// Gets 
     /// </param>
-    
-    
+
+
     /// 06.12.2023 20:40
     /// IMPROVE routeObtainer sollte nicht direkt im router verwendet werden
     /// router sollte in RegisterRoutes
@@ -54,7 +52,7 @@ public class Router : IRouter
     /// looking for the RouteAttribute that marks a controller method as
     /// the responsible method for handling a specific client request.
     /// </summary>
-    
+
     public void RegisterRoutes()
     {
         var routes = routeObtainer.ObtainRoutes();
@@ -81,18 +79,18 @@ public class Router : IRouter
     /// <returns>
     /// RoutingContext instance specific to a single client request.
     /// </returns>
-    
+
     /// 06.12.2023 20:42
     /// IMPROVE RoutingContext irgedwo anders konstruieren und
     /// statt svrEventArgs in HandleRequest übergeben
-    protected RoutingContext CreateRoutingContext(HttpSvrEventArgs svrEventArgs)
-    {
-        var context = new RoutingContext(svrEventArgs.Method, svrEventArgs.Path);
-        context.Payload = svrEventArgs.Payload;
-        context.Headers = svrEventArgs.Headers;
+    // protected RoutingContext CreateRoutingContext(HttpSvrEventArgs svrEventArgs)
+    // {
+    //     var context = new RoutingContext(svrEventArgs.Method, svrEventArgs.Path);
+    //     context.Payload = svrEventArgs.Payload;
+    //     context.Headers = svrEventArgs.Headers;
 
-        return context;
-    }
+    //     return context;
+    // }
 
 
 
@@ -106,11 +104,11 @@ public class Router : IRouter
     /// <param name="svrEventArgs">
     /// Object containing the received client request.
     /// </param>
-    
+
     /// 06.12.2023 20:42
     /// IMPROVE RoutingContext irgedwo anders konstruieren und
     /// statt svrEventArgs in HandleRequest übergeben
-    public IResponse HandleRequest(IRoutingContext context)
+    public IResponse HandleRequest(ref IRoutingContext context)
     {
         try
         {
@@ -132,20 +130,31 @@ public class Router : IRouter
         catch (DbTransactionFailureException ex)
         {
             Console.WriteLine($"Transaction failed.\n{ex.Message}");
+
+            return new ErrorResponse<string>($"Transaction failed.", 500);
+
         }
         catch (RouteDoesntExistException ex)
         {
             Console.WriteLine($"{ex}\nRequested endpoint: {ex.Url}");
-            svrEventArgs.Reply(404, $"The requested endpoint {ex.Url} doesn't seem to exist.");
+
+            return new ErrorResponse<string>($"The requested endpoint {ex.Url} doesn't seem to exist.", 404);
+            // svrEventArgs.Reply(404, $"The requested endpoint {ex.Url} doesn't seem to exist.");
         }
         catch (AuthenticationFailedException ex)
         {
             Console.WriteLine($"Authentication failed.");
-            svrEventArgs.Reply(401, $"Something went wrong");
+
+            return new ErrorResponse<string>($"Something went wrong", 404);
+
+            // svrEventArgs.Reply(401, $"Something went wrong");
         }
         catch (Exception ex)
         {
-            svrEventArgs.Reply(500, $"Something went wrong. {ex}");
+
+            return new ErrorResponse<string>($"Something went wrong. {ex}", 500);
+
+            // svrEventArgs.Reply(500, $"Something went wrong. {ex}");
         }
     }
 }

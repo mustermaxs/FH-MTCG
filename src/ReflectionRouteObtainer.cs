@@ -38,12 +38,13 @@ public class EndpointConfig
     }
 }
 
+
+
+
 /// <summary>
 /// Obtains valid endpoint definitions from controllers via custom attributes
 /// (RouteAttribute, ControllerAttribute)
 /// </summary>
-
-
 public class ReflectionRouteObtainer : IRouteObtainer
 {
     private IAttributeHandler attributeHandler;

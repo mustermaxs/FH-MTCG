@@ -28,6 +28,16 @@ namespace MTCG
         public HttpServer(IRouter router)
         {
             this.router = router;
+
+            try
+            {
+                router.RegisterRoutes();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Router failed to register routes.");
+            }
+
         }
 
 
@@ -61,7 +71,6 @@ namespace MTCG
 
             Active = true;
             _Listener = new(IPAddress.Parse("127.0.0.1"), 12000);
-            InitRouter();
             _Listener.Start();
             var tasks = new List<Task>();
 
@@ -80,10 +89,10 @@ namespace MTCG
                         int n = client.GetStream().Read(buf, 0, buf.Length);
                         data += Encoding.ASCII.GetString(buf, 0, n);
                     }
-                    
+
                     var svrEventArgs = new HttpSvrEventArgs(client, data);
                     IRoutingContext context = new RoutingContext(svrEventArgs.Method, svrEventArgs.Path, svrEventArgs.Headers);
-                    IResponse response = router.HandleRequest(context);
+                    IResponse response = router.HandleRequest(ref context);
 
                     svrEventArgs.Reply(response.StatusCode, response.PayloadAsJson());
                 }));
@@ -104,6 +113,11 @@ namespace MTCG
                 _Listener.Stop();
 
             }
+        }
+
+        protected void SetUpRouter()
+        {
+            router.RegisterRoutes();
         }
 
         /// <summary>Stops the HTTP server.</summary>

@@ -11,5 +11,5 @@ public interface IEndpointMapper
     /// TODO rename MapRequestToEndpoint
     /// returned routing context
     public IEndpoint? MapRequestToEndpoint(string requestedUrl, HTTPMethod method);
-    public void MapRequestToEndpoint(ref RoutingContext context);
+    public void MapRequestToEndpoint(ref IRoutingContext context);
 }

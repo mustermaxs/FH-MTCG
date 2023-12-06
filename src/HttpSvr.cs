@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Threading.Tasks;
 
 
 
@@ -48,7 +49,7 @@ namespace MTCG
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /// <summary>Runs the HTTP server.</summary>
-        public void Run()
+        public async Task Run()
         {
             if (Active) return;
 
@@ -71,8 +72,8 @@ namespace MTCG
                 }
 
                 // Incoming?.Invoke(this, new HttpSvrEventArgs(client, data));
-
-                router.HandleRequest(this, new HttpSvrEventArgs(client, data));
+                Task.Run(() => router.HandleRequest(new HttpSvrEventArgs(client, data)));
+                
 
             }
 

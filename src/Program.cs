@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace MTCG
 {
@@ -12,11 +13,11 @@ namespace MTCG
 
         /// <summary>Main entry point.</summary>
         /// <param name="args">Arguments.</param>
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
 
             HttpServer svr = new();
-            svr.Run();
+            await svr.Run();
 
             // ConstructorInfo info = typeof(User).GetConstructors()[0];
             // User user = info.MapArgumentsAndCreateInstance<User>();

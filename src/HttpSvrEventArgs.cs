@@ -39,7 +39,6 @@ namespace MTCG
             {
                 if(i == 0)
                 {
-                    //IMPORTANT HTTPMETHODE FALSCH GESETZT
                     string[] inc = lines[0].Split(' ');
 
                     HTTPMethod method;

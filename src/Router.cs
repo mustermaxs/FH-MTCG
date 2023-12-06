@@ -1,6 +1,7 @@
 using System;
 using System.Security;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace MTCG;
 
@@ -33,7 +34,7 @@ public class Router : IRouter
 
     /// 12.02.2023 21:23
     /// IMPROVE Refactoren
-    public void HandleRequest(object sender, HttpSvrEventArgs svrEventArgs)
+    public async Task HandleRequest(HttpSvrEventArgs svrEventArgs)
     {
         try
         {
@@ -45,11 +46,10 @@ public class Router : IRouter
             IController controller = (IController)Activator.CreateInstance(controllerType, routeContext);
             MethodInfo controllerAction = routeContext.Endpoint.ControllerMethod;
 
-            IResponse response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, routeContext.Endpoint.UrlParams);
+            Task<IResponse> responseTask = controllerAction.MapArgumentsAndInvoke<Task<IResponse>, string>(controller, routeContext.Endpoint.UrlParams);
+            IResponse response = await responseTask;
             Console.WriteLine(response.PayloadAsJson());
             svrEventArgs.Reply(response.StatusCode, response.PayloadAsJson());
-
-
         }
         catch (DbTransactionFailureException ex)
         {

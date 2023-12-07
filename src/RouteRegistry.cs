@@ -246,7 +246,6 @@ public class RouteRegistry : IEndpointMapper
     /// inside the RoutingContext object.
     /// Throws a RouteDoesntExistException in case the requested endpoint wasn't found.
     /// </returns>
-    
     public void MapRequestToEndpoint(ref IRoutingContext context)
     {
         List<IEndpoint> potentialEndpoints = endpointMappings[context.HttpMethod];

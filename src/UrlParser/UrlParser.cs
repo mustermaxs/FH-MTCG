@@ -12,11 +12,31 @@ namespace MTCG
             return url.Trim('/');
         }
 
+
+
+        /// <summary>
+        /// Removes trailing slaches from URL.
+        /// </summary>
         public string TrimUrl(string url)
         {
             return RemoveTrailingSlashes(url);
         }
 
+
+
+
+        /// <summary>
+        /// Replaces the variable parameters in the URL template with regex patterns so that named
+        /// tokens can be accessed by their name.
+        /// </summary>
+        /// <param name="urlTemplate">
+        /// URL template for example like:
+        /// - /api/without/named/params
+        /// - /api/user/{userid:int} -> userid can only be an integer
+        /// - /api/user/{username:alpha} -> username can only be letters from the alphabet
+        /// - /api/token/{accesstoken:alphanum} -> accesstoken can be any string
+        /// </param>
+        /// <returns>The URL template with replaced regex patterns.</returns>
         public string ReplaceTokensWithRegexPatterns(string url)
         {
             string urlPattern = TrimUrl(url);
@@ -29,6 +49,13 @@ namespace MTCG
 
             return urlPattern;
         }
+
+
+
+        /// <summary>Performs regex match to check if requested url matches provided pattern urlPattern</summary>
+        /// <param name="urlPattern">Regex pattern (string)</param>
+        /// <param name="url">Requested URL string. should be preprocessed with CleanUrl</param>
+        /// <returns>Dictionary with param names as key and value as its value.</returns>
         public Dictionary<string, string> MatchUrlAndGetParams(string url, string urlPattern)
         {
             Match match = Regex.Match(url, urlPattern);
@@ -51,6 +78,21 @@ namespace MTCG
             return namedGroups;
         }
 
+
+
+        /// <summary>
+        /// Checks if the provided URL matches
+        /// a specific url pattern (regex).
+        /// </summary>
+        /// <param name="url">
+        /// Raw url string.
+        /// </param>
+        /// <param name="urlPattern">
+        /// Regex version of a url template.
+        /// </param>
+        /// <returns>
+        /// Boolean
+        /// </returns>
         public bool PatternMatches(string url, string urlPattern)
         {
             return Regex.Match(url, urlPattern).Success;

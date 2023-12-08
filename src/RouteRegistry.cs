@@ -21,9 +21,6 @@ namespace MTCG;
 public class RouteRegistry : IEndpointMapper
 {
 
-
-
-
     /// <summary>
     /// Stores a dictionary of all the registered endpoints in the application.
     /// Associates them with their HTTP-method for faster lookup and structure.
@@ -39,8 +36,6 @@ public class RouteRegistry : IEndpointMapper
     /// </summary>
     
     private static IEndpointMapper? _this = null;
-
-
 
 
     /// <summary>

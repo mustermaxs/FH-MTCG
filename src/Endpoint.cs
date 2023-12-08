@@ -6,7 +6,7 @@ namespace MTCG;
 public class Endpoint : IEndpoint
 {
     public Endpoint(HTTPMethod HttpMethod, string? routePattern, string RouteTemplate, Type controllerType, MethodInfo controllerMethod)
-    :base()
+    : base()
     {
         if (!typeof(IController).IsAssignableFrom(controllerType))
         {
@@ -65,7 +65,7 @@ public class Endpoint : IEndpoint
 
     public override int GetHashCode()
     {
-        return base.GetHashCode();
+        return HashCode.Combine(HttpMethod, RouteTemplate, ControllerType, ControllerMethod);
     }
     public Dictionary<string, string> UrlParams { get; set; }
 

@@ -1,39 +1,75 @@
 namespace MTCG;
 
 /// <summary>
-/// Wrapper to store named params and theirs
+/// Wrapper to store named params and their
 /// corresponding values (among other things).
 /// </summary>
 
-public class RoutingContext : IRoutingContext
+public class Request : IRequest
 {
 
-    public RoutingContext(IEndpoint endpoint)
+    public Request(IEndpoint endpoint)
     {
         this.routeFound = false;
     }
-    public RoutingContext(HTTPMethod method, string rawUrl, HttpHeader[] headers)
+
+
+
+
+    public Request(HTTPMethod? method, string? rawUrl, HttpHeader[]? headers, string? payload)
     {
-        this.HttpMethod = method;
         this.routeFound = false;
+        this.HttpMethod = method;
         this.rawUrl = rawUrl;
         this.Headers = headers;
+        this.Payload = payload ?? string.Empty;
     }
-    public RoutingContext(string rawUrl)
+
+    public IRequest SetPayload(string payload)
     {
-        this.routeFound = false;
+        this.Payload = payload;
+
+        return this;
     }
+
+    // private HTTPMethod GetHttpMethodFromHeaders(HttpHeader[] headers)
+    // {
+    //     var headerHttpMethod = Array.Find(headers, header => header.Name == "Method");
+
+    //     if (headerHttpMethod is null)
+    //     {
+    //         throw new Exception("No HTTP method provided.");
+    //     }
+
+    //     if (Enum.TryParse(headerHttpMethod.Value, out HTTPMethod method))
+    //     {
+    //         return method;
+    //     }
+    //     else
+    //     {
+    //         throw new Exception($"Invalid HTTP method: {headerHttpMethod.Value}");
+    //     }
+    // }
+
+
     public Dictionary<string, string> UrlParams
     {
         get { return urlParams; }
         set { urlParams = value; }
     }
+
+
+
+
     public bool TryGetHeader(string key, out string value)
     {
         value = this.Headers.SingleOrDefault<HttpHeader>(header => header.Name == key)?.Value ?? string.Empty;
 
         return value != string.Empty;
     }
+
+
+
 
     /// <summary>
     /// Gets value of named parameter by parameter name and tries to convert it to 
@@ -45,15 +81,11 @@ public class RoutingContext : IRoutingContext
     /// </returns>
     /// IMPROVE GetParam methode verwenden um value zu konvertieren
     /// und NICHT die von CustomReflectionExtension
-
     public T GetParam<T>(string key)
     {
         string? value;
 
-        if (!routeFound)
-        {
-            throw new Exception("Route not registered.");
-        }
+        if (!routeFound) { throw new Exception("Route not registered."); }
 
         if (this.urlParams.TryGetValue(key, out value))
         {
@@ -84,26 +116,14 @@ public class RoutingContext : IRoutingContext
 
     private Dictionary<string, string> urlParams = new Dictionary<string, string>();
     protected string? rawUrl;
-
     protected bool routeFound = false;
-
-    public bool RouteFound
-    {
-        get => routeFound;
-        set { routeFound = value; }
-    }
-
-    public HTTPMethod HttpMethod {get; protected set;}
+    public bool RouteFound { get => routeFound; set { routeFound = value; } }
+    public HTTPMethod HttpMethod { get; protected set; }
 
     /// 12.02.2023 21:13
     /// FIXME default value
-    public virtual HttpHeader[] Headers { get; set; } = new HttpHeader[0];
-
-
-    public IEndpoint? Endpoint
-    {
-        get; set;
-    }
+    public virtual HttpHeader[]? Headers { get; set; }
+    public IEndpoint? Endpoint { get; set; }
     public string? RawUrl { get => rawUrl; }
-    public string Payload { get; set; }
+    public string? Payload { get; set; } = string.Empty;
 }

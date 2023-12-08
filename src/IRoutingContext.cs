@@ -4,7 +4,7 @@ namespace MTCG;
 
 /// 12.03.2023 17:25
 /// TODO
-public interface IRoutingContext
+public interface IRequest
 {
     Dictionary<string, string> UrlParams { get; set; }
     bool TryGetHeader(string key, out string value);

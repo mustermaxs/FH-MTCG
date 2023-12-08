@@ -90,16 +90,24 @@ namespace MTCG
                         data += Encoding.ASCII.GetString(buf, 0, n);
                     }
 
+                    /// 07.12.2023 14:47
+                    /// IMPROVE RoutingContext nimmt zu viele Argumente entgegen.
+                    /// Setter sind ok. zusammmen mit HttpSvrEventArgs wirkts aber etwas
+                    /// redundant
                     var svrEventArgs = new HttpSvrEventArgs(client, data);
-                    IRoutingContext context = new RoutingContext(svrEventArgs.Method, svrEventArgs.Path, svrEventArgs.Headers);
-                    IResponse response = router.HandleRequest(ref context);
+                    var requestBuilder = new RequestBuilder();
 
-                    svrEventArgs.Reply(response.StatusCode, response.PayloadAsJson());
+                    IRequest request = requestBuilder
+                    .WithHeaders(svrEventArgs.Headers)
+                    .WithHttpMethod(svrEventArgs.Method)
+                    .WithPayload(svrEventArgs.Payload)
+                    .WithRoute(svrEventArgs.Path)
+                    .Build();
+
+                    IResponse response = router.HandleRequest(ref request);
+
+                    svrEventArgs.Reply(response);
                 }));
-
-
-                // Incoming?.Invoke(this, new HttpSvrEventArgs(client, data));
-
             }
             Task t = Task.WhenAll(tasks);
 

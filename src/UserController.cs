@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using MTCG;
+using Npgsql;
 
 namespace MTCG
 {
@@ -10,43 +11,40 @@ namespace MTCG
 
         protected static IRepository<User> repo = new UserRepository();
 
-        public UserController(IRoutingContext context) : base(context) { }
-
-        // [Route("/users/", HTTPMethod.POST)]
-        // public IResponse RegisterUser()
-        // {
-        //     try
-        //     {
-        //         var user = JsonSerializer.Deserialize<User>(context.Payload);
+        public UserController(IRequest request) : base(request) { }
 
 
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         Console.WriteLine(ex);
 
-        //     }
-        // }
+        [Route("/users/", HTTPMethod.POST)]
+        public IResponse RegisterNewUser()
+        {
+            try
+            {
+                var user = JsonSerializer.Deserialize<User>(request.Payload);
 
+                repo.Save(user);
 
-        // public IResponse AddUser()
-        // {
-        //     var user = JsonSerializer.Deserialize<User>(context.Payload);
+                return new ResponseWithoutPayload(201, "User successfully created.");
+            }
+            catch (PostgresException pex)
+            {
+                ErrorResponse<User> errResponse = new("", 500);
 
-        //     try
-        //     {
-        //         repo.Save(user);
-        //         return new SuccessResponse<User>(user, "");
+                if (pex.SqlState == "23505") errResponse = new($"User with same username already registered", 500);
+                else errResponse = new($"Failed to register new user.");
 
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         Console.WriteLine($"Failed to register new user. {ex.Message}");
+                Console.WriteLine($"{errResponse.Description}. {pex}");
 
-        //         return new CustomResponse<User>(500, null, $"{ex}");
-        //     }
+                return errResponse;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
 
-        // }
+                return new ErrorResponse<User>($"Failed to register new user. {ex}", 500);
+            }
+        }
+
 
 
         [Route("/users/", HTTPMethod.GET)]
@@ -56,7 +54,7 @@ namespace MTCG
             {
                 IEnumerable<User> users = repo.GetAll();
 
-                return new SuccessResponse<IEnumerable<User>>(users, "");
+                return new SuccessResponse<IEnumerable<User>>(200, users, "");
             }
             catch (Exception ex)
             {
@@ -71,8 +69,9 @@ namespace MTCG
         public IResponse GetUserById(int userid)
         {
             User? user = repo.Get(userid);
+            Thread.Sleep(2000);
 
-            return new SuccessResponse<User>(user, "");
+            return new SuccessResponse<User>(200, user, "");
 
         }
     }

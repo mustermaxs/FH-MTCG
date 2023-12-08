@@ -6,11 +6,11 @@ namespace MTCG
     public abstract class IController
     {
         // TODO
-        protected IRoutingContext context;
+        protected IRequest request;
 
-        public IController(IRoutingContext context)
+        public IController(IRequest request)
         {
-            this.context = context;
+            this.request = request;
         }
     }
 }

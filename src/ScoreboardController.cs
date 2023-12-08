@@ -19,7 +19,7 @@ namespace MTCG
     public class ScoreboardController : IController
     {
 
-        public ScoreboardController(IRoutingContext context):base(context) {}
+        public ScoreboardController(IRequest context):base(context) {}
 
 
         [Route("score", HTTPMethod.GET)]

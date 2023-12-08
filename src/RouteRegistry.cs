@@ -241,10 +241,10 @@ public class RouteRegistry : IEndpointMapper
     /// inside the RoutingContext object.
     /// Throws a RouteDoesntExistException in case the requested endpoint wasn't found.
     /// </returns>
-    public void MapRequestToEndpoint(ref IRoutingContext context)
+    public void MapRequestToEndpoint(ref IRequest request)
     {
-        List<IEndpoint> potentialEndpoints = endpointMappings[context.HttpMethod];
-        string trimmedUrl = parser.TrimUrl(context.RawUrl!);
+        List<IEndpoint> potentialEndpoints = endpointMappings[request.HttpMethod];
+        string trimmedUrl = parser.TrimUrl(request.RawUrl!);
         Dictionary<string, string> urlParams = new();
 
         foreach (var endpoint in potentialEndpoints)
@@ -254,16 +254,16 @@ public class RouteRegistry : IEndpointMapper
             {
                 urlParams = this.parser.MatchUrlAndGetParams(trimmedUrl, endpoint.EndpointPattern);
                 endpoint.UrlParams = urlParams;
-                context.Endpoint = (Endpoint)endpoint;
-                context.RouteFound = true;
+                request.Endpoint = (Endpoint)endpoint;
+                request.RouteFound = true;
 
                 return;
             }
         }
 
-        if (!context.RouteFound)
+        if (!request.RouteFound)
         {
-            throw new RouteDoesntExistException(context.RawUrl!);
+            throw new RouteDoesntExistException(request.RawUrl!);
         }
     }
 

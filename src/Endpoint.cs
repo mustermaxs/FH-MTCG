@@ -3,8 +3,14 @@ using System.Reflection;
 
 namespace MTCG;
 
+/// 08.12.2023 13:56
+/// DOCUMENT
+
 public class Endpoint : IEndpoint
 {
+
+
+
     public Endpoint(HTTPMethod HttpMethod, string? routePattern, string RouteTemplate, Type controllerType, MethodInfo controllerMethod)
     : base()
     {
@@ -19,6 +25,10 @@ public class Endpoint : IEndpoint
         this.routeTemplate = RouteTemplate;
         this.Exists = true;
     }
+
+
+
+
     // OBSOLETE
     public void Deconstruct(out string routeTemplate, out HTTPMethod httpMethod, out Type controllerType, out MethodInfo controllerMethod)
     {

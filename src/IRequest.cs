@@ -1,13 +1,20 @@
-using System.Text.Json.Serialization;
+using System;
 
 namespace MTCG;
 
-public abstract class IRequest
+/// 12.03.2023 17:25
+/// TODO
+public interface IRequest
 {
-    /// IMPORTANT
-    /// ? wann, wo und wie JSON deserialisieren
-    /// wann, wo und wie serialisieren für response
-    /// IDEE: model hat eigene ToJsonString methode
-    protected string? payload;
-    public string? Payload => payload ?? "";
+    Dictionary<string, string> UrlParams { get; set; }
+    bool TryGetHeader(string key, out string value);
+    T GetParam<T>(string key);
+    bool SetParam(string key, string value);
+
+    HTTPMethod HttpMethod { get; }
+    HttpHeader[] Headers { get; set; }
+    IEndpoint? Endpoint { get; set; }
+    string? RawUrl { get; }
+    string Payload { get; set; }
+    bool RouteFound { get; set; }
 }

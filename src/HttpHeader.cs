@@ -9,6 +9,14 @@ namespace MTCG
     {
         /// <summary>Creates a new instance of this class.</summary>
         /// <param name="header">Header text.</param>
+        /// 
+
+        public HttpHeader()
+        {
+
+        }
+
+
         public HttpHeader(string header) 
         {
             Name = Value = string.Empty;
@@ -29,16 +37,16 @@ namespace MTCG
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
         /// <summary>Gets the header name.</summary>
-        public string Name
+        virtual public string Name
         {
             get; protected set;
-        }
+        } = string.Empty;
 
 
         /// <summary>Gets the header value.</summary>
-        public string Value 
+        virtual public string Value 
         { 
             get; protected set; 
-        }
+        } = string.Empty;
     }
 }

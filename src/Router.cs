@@ -81,14 +81,14 @@ public class Router : IRouter
     /// <param name="svrEventArgs">
     /// Object containing the received client request.
     /// </param>
-    public IResponse HandleRequest(ref IRoutingContext context)
+    public IResponse HandleRequest(ref IRequest request)
     {
         try
         {
-            routeRegistry.MapRequestToEndpoint(ref context);
+            routeRegistry.MapRequestToEndpoint(ref request);
 
-            var controllerType = context.Endpoint!.ControllerType;
-            var controller = (IController)Activator.CreateInstance(controllerType, context);
+            var controllerType = request.Endpoint!.ControllerType;
+            var controller = (IController)Activator.CreateInstance(controllerType, request);
 
             if (controller == null)
             {
@@ -96,8 +96,8 @@ public class Router : IRouter
             }
 
 
-            MethodInfo controllerAction = context.Endpoint.ControllerMethod;
-            IResponse response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, context.Endpoint.UrlParams);
+            MethodInfo controllerAction = request.Endpoint.ControllerMethod;
+            IResponse response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, request.Endpoint.UrlParams);
 
             Console.WriteLine($"Response: {response.Description}\nStatus: {response.StatusCode}");
 

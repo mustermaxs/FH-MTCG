@@ -4,7 +4,7 @@ namespace MTCG;
 
 public interface IRepository<T>
 {
-    public T? Get(int id);
+    public T? Get(Guid id);
 
     public IEnumerable<T> GetAll();
 

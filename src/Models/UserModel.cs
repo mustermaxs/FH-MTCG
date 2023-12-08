@@ -9,7 +9,7 @@ public class User : IModel
     public string Password { get; set; } = string.Empty;
     public string Image { get; set; } = string.Empty;
     public int Coins { get; set; }
-    public int ID { get; set; }
+    public Guid ID { get; set; }
 
     public User()
     {

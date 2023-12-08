@@ -66,7 +66,7 @@ namespace MTCG
         }
 
         [Route("/users/{userid:int}", HTTPMethod.GET)]
-        public IResponse GetUserById(int userid)
+        public IResponse GetUserById(Guid userid)
         {
             User? user = repo.Get(userid);
             Thread.Sleep(2000);

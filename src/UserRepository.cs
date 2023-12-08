@@ -33,7 +33,7 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
 
 
 
-  public override User? Get(int id)
+  public override User? Get(Guid id)
   {
     return base.Get(id);
   }
@@ -41,7 +41,7 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
 
   protected override void _Fill(User user, IDataReader re)
   {
-    user.ID = re.GetInt32(re.GetOrdinal("id"));
+    user.ID = re.GetGuid(re.GetOrdinal("id"));
     user.Name = re.GetString(re.GetOrdinal("name"));
     user.Password = re.GetString(re.GetOrdinal("password"));
     user.Bio = re.GetString(re.GetOrdinal("bio"));

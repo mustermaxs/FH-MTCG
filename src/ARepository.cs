@@ -78,7 +78,7 @@ namespace MTCG
         /// <summary>Gets the object by its ID.</summary>
         /// <param name="id">ID.</param>
         /// <returns>Returns the retrieved object or NULL if there is no object with the given ID..</returns>
-        public virtual T? Get(int id)
+        public virtual T? Get(Guid id)
         {
             using (var connection = this._Connect())
             {

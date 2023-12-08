@@ -3,13 +3,14 @@ using System.Text.Json;
 
 namespace MTCG;
 
-public abstract class PayloadResponse<T> : IResponse where T : class?
+public abstract class BaseJsonResponse<T> : IResponse where T : class?
 {
     public T? Payload { get; }
     virtual public int StatusCode { get; }
     virtual public string Description { get; }
+    virtual public string ContentType { get; } = "application/json";
 
-    public PayloadResponse(int statusCode, T? payload, string? description)
+    public BaseJsonResponse(int statusCode, T? payload, string? description)
     {
         this.Payload = payload;
         this.StatusCode = statusCode;

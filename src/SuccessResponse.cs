@@ -3,10 +3,10 @@ using System.Text.Json;
 
 namespace MTCG;
 
-public class SuccessResponse<T> : PayloadResponse<T> where T : class?
+public class SuccessResponse<T> : BaseJsonResponse<T> where T : class?
 {
-    public SuccessResponse(T payload, string description)
-        : base(200, payload, description)
+    public SuccessResponse(int statusCode, T? payload, string description)
+        : base(statusCode, payload, description)
     {
     }
 }

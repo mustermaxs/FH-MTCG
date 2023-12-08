@@ -7,9 +7,9 @@ namespace MTCG;
 
 public class TextResponse : IResponse
 {
-    public int StatusCode { get; }
-    public string Description { get; }
-    public string ContentType { get; } = "text/html";
+    public int StatusCode { get; protected set; }
+    public string Description { get; protected set; }
+    public string ContentType { get; protected set; } = "text/html";
 
 
 

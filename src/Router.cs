@@ -52,45 +52,22 @@ public class Router : IRouter
     /// looking for the RouteAttribute that marks a controller method as
     /// the responsible method for handling a specific client request.
     /// </summary>
-
     public void RegisterRoutes()
     {
         var routes = routeObtainer.ObtainRoutes();
 
         foreach (var route in routes)
         {
-            (string RouteTemplate,
-            HTTPMethod HttpMethod,
-            Type ControllerType,
-            MethodInfo ControllerMethod) = route;
+            (
+                var RouteTemplate,
+                var HttpMethod,
+                var ControllerType,
+                var ControllerMethod
+            ) = route;
 
             routeRegistry.RegisterEndpoint(RouteTemplate, HttpMethod, ControllerType, ControllerMethod);
         }
     }
-
-
-
-    /// <summary>
-    /// Creates the context for a specific client request.
-    /// </summary>
-    /// <param name="svrEventArgs">
-    /// Object that contains all the information received via the HttpSvr class.
-    /// </param>
-    /// <returns>
-    /// RoutingContext instance specific to a single client request.
-    /// </returns>
-
-    /// 06.12.2023 20:42
-    /// IMPROVE RoutingContext irgedwo anders konstruieren und
-    /// statt svrEventArgs in HandleRequest übergeben
-    // protected RoutingContext CreateRoutingContext(HttpSvrEventArgs svrEventArgs)
-    // {
-    //     var context = new RoutingContext(svrEventArgs.Method, svrEventArgs.Path);
-    //     context.Payload = svrEventArgs.Payload;
-    //     context.Headers = svrEventArgs.Headers;
-
-    //     return context;
-    // }
 
 
 
@@ -104,10 +81,6 @@ public class Router : IRouter
     /// <param name="svrEventArgs">
     /// Object containing the received client request.
     /// </param>
-
-    /// 06.12.2023 20:42
-    /// IMPROVE RoutingContext irgedwo anders konstruieren und
-    /// statt svrEventArgs in HandleRequest übergeben
     public IResponse HandleRequest(ref IRoutingContext context)
     {
         try
@@ -117,44 +90,45 @@ public class Router : IRouter
             var controllerType = context.Endpoint!.ControllerType;
             var controller = (IController)Activator.CreateInstance(controllerType, context);
 
-            if (controller == null) throw new Exception("Failed to instantiate controller.");
+            if (controller == null)
+            {
+                throw new Exception("Failed to instantiate controller.");
+            }
+
 
             MethodInfo controllerAction = context.Endpoint.ControllerMethod;
-
             IResponse response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, context.Endpoint.UrlParams);
 
-            // svrEventArgs.Reply(response.StatusCode, response.PayloadAsJson());
+            Console.WriteLine($"Response: {response.Description}\nStatus: {response.StatusCode}");
 
             return response;
         }
+
         catch (DbTransactionFailureException ex)
         {
             Console.WriteLine($"Transaction failed.\n{ex.Message}");
 
-            return new ErrorResponse<string>($"Transaction failed.", 500);
+            return new ResponseWithoutPayload(500, $"Transaction failed.\n{ex.Message}");
 
         }
+
         catch (RouteDoesntExistException ex)
         {
             Console.WriteLine($"{ex}\nRequested endpoint: {ex.Url}");
 
-            return new ErrorResponse<string>($"The requested endpoint {ex.Url} doesn't seem to exist.", 404);
-            // svrEventArgs.Reply(404, $"The requested endpoint {ex.Url} doesn't seem to exist.");
+            return new ResponseWithoutPayload(404, $"The requested endpoint {ex.Url} doesn't seem to exist.");
         }
+
         catch (AuthenticationFailedException ex)
         {
             Console.WriteLine($"Authentication failed.");
 
-            return new ErrorResponse<string>($"Something went wrong", 404);
-
-            // svrEventArgs.Reply(401, $"Something went wrong");
+            return new ResponseWithoutPayload(404, $"Something went wrong.\n{ex.Message}");
         }
+
         catch (Exception ex)
         {
-
-            return new ErrorResponse<string>($"Something went wrong. {ex}", 500);
-
-            // svrEventArgs.Reply(500, $"Something went wrong. {ex}");
+            return new ResponseWithoutPayload(500, $"Something went wrong.\n{ex.Message}");
         }
     }
 }

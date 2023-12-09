@@ -129,7 +129,7 @@ public class RouteRegistry : IEndpointMapper
     /// Controller method that's supposed to handle the request.
     /// </param>
 
-    public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, MethodInfo controllerMethod, Permission accesslevel)
+    public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, MethodInfo controllerMethod, ACCESS accesslevel)
     {
         var parsedRoutePattern = this.parser.ReplaceTokensWithRegexPatterns(routePattern);
 

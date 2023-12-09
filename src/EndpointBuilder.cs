@@ -10,7 +10,7 @@ namespace MTCG;
         private string routeTemplate;
         private Type controllerType;
         private MethodInfo controllerMethod;
-        private Permission accessLevel;
+        private ACCESS accessLevel;
         private Dictionary<string, string> urlParams;
 
         public EndpointBuilder WithHttpMethod(HTTPMethod method)
@@ -47,7 +47,7 @@ namespace MTCG;
             return this;
         }
 
-        public EndpointBuilder WithAccessLevel(Permission level)
+        public EndpointBuilder WithAccessLevel(ACCESS level)
         {
             accessLevel = level;
             return this;

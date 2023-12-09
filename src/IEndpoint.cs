@@ -15,6 +15,6 @@ public interface IEndpoint
     public string EndpointPattern { get; }
     public Type ControllerType { get; }
     public MethodInfo ControllerMethod { get; }
-    public Permission AccessLevel { get; set; }
+    public ACCESS AccessLevel { get; set; }
 
 }

@@ -4,16 +4,27 @@ using MTCG;
 
 namespace MTCG
 {
+    public enum ACCESS
+    {
+        USER,
+        ADMIN,
+        ALL,
+        NOT_LOGGEDIN
+    }
+
+
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class RouteAttribute : Attribute
     {
         private string routeTemplate;
         private HTTPMethod method;
+        private ACCESS accessLevel;
 
-        public RouteAttribute(string route, HTTPMethod method)
+        public RouteAttribute(string route, HTTPMethod method, ACCESS accessLevel)
         {
             this.routeTemplate = route;
-            this.method = method; // Add this line to assign the value of method
+            this.method = method;
+            this.accessLevel = accessLevel;
         }
 
         public string RouteTemplate
@@ -22,5 +33,6 @@ namespace MTCG
         }
 
         public HTTPMethod Method => method;
+        public ACCESS AccessLevel => accessLevel;
     }
 }

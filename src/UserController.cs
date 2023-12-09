@@ -15,7 +15,7 @@ namespace MTCG
 
 
 
-        [Route("/users/", HTTPMethod.POST)]
+        [Route("/users/", HTTPMethod.POST, ACCESS.NOT_LOGGEDIN)]
         public IResponse RegisterNewUser()
         {
             try
@@ -47,7 +47,7 @@ namespace MTCG
 
 
 
-        [Route("/users/", HTTPMethod.GET)]
+        [Route("/users/", HTTPMethod.GET, ACCESS.ALL)]
         public IResponse GetAllUsers()
         {
             try
@@ -65,7 +65,7 @@ namespace MTCG
 
         }
 
-        [Route("/users/{userid:int}", HTTPMethod.GET)]
+        [Route("/users/{userid:alphanum}", HTTPMethod.GET, ACCESS.ALL)]
         public IResponse GetUserById(Guid userid)
         {
             User? user = repo.Get(userid);

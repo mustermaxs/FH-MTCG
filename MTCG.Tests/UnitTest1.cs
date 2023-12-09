@@ -177,7 +177,7 @@ public class EndpointTests
         endpointBuilder
             .WithHttpMethod(HTTPMethod.GET)
             .WithControllerType(typeof(TestController))
-            .WithAccessLevel(Permission.USER)
+            .WithAccessLevel(ACCESS.USER)
             .WithRoutePattern("/api/{id:int}")
             .WithControllerMethod(typeof(TestController).GetMethod("TestMethod")!);
 
@@ -185,7 +185,7 @@ public class EndpointTests
 
         Assert.That(endpoint.HttpMethod, Is.EqualTo(HTTPMethod.GET));
         Assert.That(endpoint.ControllerType, Is.EqualTo(typeof(TestController)));
-        Assert.That(endpoint.AccessLevel, Is.EqualTo(Permission.USER));
+        Assert.That(endpoint.AccessLevel, Is.EqualTo(ACCESS.USER));
         Assert.That(endpoint.EndpointPattern, Is.EqualTo("/api/{id:int}"));
         Assert.That(endpoint.ControllerMethod, Is.EqualTo(typeof(TestController).GetMethod("TestMethod")));
         Assert.That(endpoint.Exists, Is.True);

@@ -54,6 +54,8 @@ public class ReflectionRouteObtainer : IRouteObtainer
         this.attributeHandler = attributeHandler;
     }
 
+
+
     /// 12.04.2023 18:21
     /// REFACTOR
     public List<Endpoint> ObtainRoutes()
@@ -77,7 +79,8 @@ public class ReflectionRouteObtainer : IRouteObtainer
                     null,
                     routeAttribute!.RouteTemplate,
                     (Type)controllerType,
-                    (MethodInfo)methodInfo
+                    (MethodInfo)methodInfo,
+                    (ACCESS)routeAttribute!.AccessLevel
                 ));
             }
         }

@@ -65,7 +65,7 @@ namespace MTCG
 
         }
 
-        [Route("/users/{userid:int}", HTTPMethod.GET)]
+        [Route("/users/{userid:alphanum}", HTTPMethod.GET)]
         public IResponse GetUserById(Guid userid)
         {
             User? user = repo.Get(userid);

@@ -128,6 +128,8 @@ public class Router : IRouter
 
         catch (Exception ex)
         {
+            Console.WriteLine($"ERROR\n{ex}");
+            
             return new ResponseWithoutPayload(500, $"Something went wrong.\n{ex.Message}");
         }
     }

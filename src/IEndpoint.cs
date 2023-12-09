@@ -13,6 +13,8 @@ public interface IEndpoint
     public string RouteTemplate { get; }
     public HTTPMethod HttpMethod { get; set; }
     public string EndpointPattern { get; }
-    Type ControllerType { get; }
-    MethodInfo ControllerMethod { get; }
+    public Type ControllerType { get; }
+    public MethodInfo ControllerMethod { get; }
+    public Permission AccessLevel { get; set; }
+
 }

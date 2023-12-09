@@ -54,7 +54,7 @@ public class Router : IRouter
     /// </summary>
     public void RegisterRoutes()
     {
-        var routes = routeObtainer.ObtainRoutes();
+        List<Endpoint> routes = routeObtainer.ObtainRoutes();
 
         foreach (var route in routes)
         {
@@ -62,10 +62,21 @@ public class Router : IRouter
                 var RouteTemplate,
                 var HttpMethod,
                 var ControllerType,
-                var ControllerMethod
+                var ControllerMethod,
+                var AccessLevel
             ) = route;
 
-            routeRegistry.RegisterEndpoint(RouteTemplate, HttpMethod, ControllerType, ControllerMethod);
+            var endpointBuilder = new EndpointBuilder();
+            endpointBuilder
+            .WithRouteTemplate(RouteTemplate)
+            .WithHttpMethod(HttpMethod)
+            .WithControllerType(ControllerType)
+            .WithControllerMethod(ControllerMethod)
+            .WithAccessLevel(AccessLevel);
+
+            Endpoint endpoint = endpointBuilder.Build();
+            Console.WriteLine(endpoint.RouteTemplate);
+            routeRegistry.RegisterEndpoint(endpoint);
         }
     }
 

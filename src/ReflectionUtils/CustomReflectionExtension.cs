@@ -193,6 +193,21 @@ public static class ReflectionUtils
                 }
             }
 
+            else if (toType == typeof(Guid))
+            {
+                Guid guidVal;
+
+                if (Guid.TryParse((string)value, out guidVal))
+                {
+                    return guidVal;
+                }
+
+                else
+                {
+                    throw new InvalidOperationException($"Cannot convert {value.GetType()} to {toType}");
+                }
+            }
+
             return Convert.ChangeType(value, toType);
         }
         catch (InvalidCastException)

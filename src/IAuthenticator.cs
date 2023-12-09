@@ -24,11 +24,8 @@ public abstract class BaseSessionManager
     {
         
     }
-    
-    private static Dictionary<string, Session> sessions;
-    abstract Session CreateSession(IRequest request);
-    virtual public Session GetSessionById(string sessionId);
 
-
-
+    protected static Dictionary<string, Session> sessions;
+    public abstract Session CreateSession(IRequest request);
+    abstract public Session GetSessionById(string sessionId);
 }

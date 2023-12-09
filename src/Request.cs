@@ -14,7 +14,8 @@ public class Request : IRequest
     }
 
 
-
+    private string sessionId;
+    public string SessionId { get => sessionId; }
 
     public Request(HTTPMethod method, string? rawUrl, HttpHeader[]? headers, string? payload)
     {

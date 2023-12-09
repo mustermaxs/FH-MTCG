@@ -17,4 +17,5 @@ public interface IRequest
     string? RawUrl { get; }
     string Payload { get; set; }
     bool RouteFound { get; set; }
+    string SessionId { get; }
 }

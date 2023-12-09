@@ -70,46 +70,47 @@ public class Test_Request
 }
 
 
-// [TestFixture]
-// public class MTCG_RouteRegistry
-// {
-//     IEndpointMapper? routeRegistry;
-//     private IUrlParser parser = new UrlParser();
+[TestFixture]
+public class MTCG_RouteRegistry
+{
+    IEndpointMapper? routeRegistry;
+    private IUrlParser parser = new UrlParser();
 
-//     [SetUp]
-//     public void SetUp()
-//     {
+    [SetUp]
+    public void SetUp()
+    {
 
-//         routeRegistry = RouteRegistry.GetInstance(parser);
-//     }
-
-
-//     [TestCase("/mtcg/user/{userid:int}/", "mtcg/user/23", true, HTTPMethod.GET)]
-//     [TestCase("/mtcg/user/{username:alpha}/", "mtcg/user/maximilian", true, HTTPMethod.PUT)]
-//     [TestCase("/mtcg/security/{token:alphanum}/", "mtcg/security/testtoken12398sdfkj98", true, HTTPMethod.POST)]
-//     [TestCase("/mtcg/route/without/params/", "/mtcg/route/without/params/", true, HTTPMethod.DELETE)]
-//     public void RouteRegistry_FindsRegisteredRoute(string routeTemplate, string requestedUrl, bool foundRoute, HTTPMethod method)
-//     {
-//         if (parser != null && routeRegistry != null)
-//         {
-//             string regexRoutePattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
-//             MethodInfo controllerMethod = typeof(TestController).GetMethod("TestMethod")!;
-//             IEndpoint endpoint = new Endpoint(method, routeTemplate, regexRoutePattern, typeof(TestController), controllerMethod, Permission.USER);
-
-//             routeRegistry.RegisterEndpoint(endpoint);
-
-//             var resEndpoint = routeRegistry.MapRequestToEndpoint(requestedUrl, method);
-
-//             Assert.IsTrue(resEndpoint != null, $"{routeRegistry.GetType().Name} wasn't able to map the requested route.\n" +
-//             $"Requested Url: {requestedUrl}\n" +
-//             $"Template:     {routeTemplate}\n" +
-//             $"Pattern:      {regexRoutePattern}");
-//         }
-
-//     }
+        routeRegistry = RouteRegistry.GetInstance(parser);
+    }
 
 
-// }
+    [TestCase("/mtcg/user/{userid:int}/", "mtcg/user/23", true, HTTPMethod.GET)]
+    [TestCase("/mtcg/user/{username:alpha}/", "mtcg/user/maximilian", true, HTTPMethod.PUT)]
+    [TestCase("/mtcg/security/{token:alphanum}/", "mtcg/security/testtoken12398sdfkj98", true, HTTPMethod.POST)]
+    [TestCase("/mtcg/route/without/params/", "/mtcg/route/without/params/", true, HTTPMethod.DELETE)]
+    public void RouteRegistry_FindsRegisteredRoute(string routeTemplate, string requestedUrl, bool foundRoute, HTTPMethod method)
+    {
+        if (parser != null && routeRegistry != null)
+        {
+            string pattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
+            string regexRoutePattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
+            MethodInfo controllerMethod = typeof(TestController).GetMethod("TestMethod")!;
+            IEndpoint endpoint = new Endpoint(method, routeTemplate, regexRoutePattern, typeof(TestController), controllerMethod);
+
+            routeRegistry.RegisterEndpoint(endpoint);
+
+            var resEndpoint = routeRegistry.MapRequestToEndpoint(requestedUrl, method);
+
+            Assert.IsTrue(resEndpoint != null, $"{routeRegistry.GetType().Name} wasn't able to map the requested route.\n" +
+            $"Requested Url: {requestedUrl}\n" +
+            $"Template:     {routeTemplate}\n" +
+            $"Pattern:      {pattern}");
+        }
+
+    }
+
+
+}
 
 public class TestController : IController
 {
@@ -120,75 +121,72 @@ public class TestController : IController
     }
 }
 
-// [TestFixture]
-// public class ControllerTests
-// {
-//     private IRequest mockRequest;
-//     private IEndpointMapper mockRouteRegistry;
-//     private IRouteObtainer mockRouteObtainer;
-//     private string responsePayload;
+[TestFixture]
+public class ControllerTests
+{
+    private IRequest mockRequest;
+    private IEndpointMapper mockRouteRegistry;
+    private IRouteObtainer mockRouteObtainer;
+    private string responsePayload;
 
-//     [SetUp]
-//     public void Setup()
-//     {
-//         this.responsePayload = "{\"Name\":\"Michael\",\"Bio\":\"Halloooo.\",\"Password\":\"mikey\",\"Image\":\"###\",\"Coins\":32,\"ID\":\"897cb65a-4381-4c14-afda-65ff2cd291a4\"}";
+    [SetUp]
+    public void Setup()
+    {
+        this.responsePayload = $"{{\"Name\":\"mustermax\",\"Bio\":\"\",\"Password\":\"12345\",\"Image\":\":-)\",\"Coins\":10,\"ID\":1}}";
 
-//         var mockRouteObtainer = new Mock<IRouteObtainer>();
-//         this.mockRouteObtainer = mockRouteObtainer.Object;
+        var mockRouteObtainer = new Mock<IRouteObtainer>();
+        this.mockRouteObtainer = mockRouteObtainer.Object;
 
-//         var mockEndpoint = new Mock<IEndpoint>();
-//         mockEndpoint.Setup(m => m.ControllerType).Returns(typeof(UserController));
-//         mockEndpoint.Setup(m => m.ControllerMethod).Returns(typeof(UserController).GetMethod("GetUserById")!);
-//         mockEndpoint.Setup(m => m.EndpointPattern).Returns("^users/([a-zA-Z0-9-]+)$");
-//         mockEndpoint.Setup(m => m.UrlParams).Returns(new Dictionary<string, string> { { "userid", "897cb65a-4381-4c14-afda-65ff2cd291a4" } });
+        var mockEndpoint = new Mock<IEndpoint>();
+        mockEndpoint.Setup(m => m.ControllerType).Returns(typeof(UserController));
+        mockEndpoint.Setup(m => m.ControllerMethod).Returns(typeof(UserController).GetMethod("GetUserById")!);
+        mockEndpoint.Setup(m => m.EndpointPattern).Returns("^users/([0-9]+)$");
+        mockEndpoint.Setup(m => m.UrlParams).Returns(new Dictionary<string, string> { { "userid", "1" } });
 
-//         var mockRequest = new Mock<IRequest>();
-//         mockRequest.Setup(m => m.HttpMethod).Returns(HTTPMethod.GET);
-//         mockRequest.Setup(m => m.Payload).Returns(this.responsePayload);
-//         mockRequest.Setup(m => m.Endpoint).Returns(mockEndpoint.Object);
-//         mockRequest.Setup(m => m.RawUrl).Returns("/users/897cb65a-4381-4c14-afda-65ff2cd291a4");
-//         this.mockRequest = mockRequest.Object;
+        var mockRequest = new Mock<IRequest>();
+        mockRequest.Setup(m => m.HttpMethod).Returns(HTTPMethod.GET);
+        mockRequest.Setup(m => m.Payload).Returns(this.responsePayload);
+        mockRequest.Setup(m => m.Endpoint).Returns(mockEndpoint.Object);
+        mockRequest.Setup(m => m.RawUrl).Returns("/users/1");
+        this.mockRequest = mockRequest.Object;
 
-//         var mockRouteRegistry = new Mock<IEndpointMapper>();
-//         mockRouteRegistry.Setup(m => m.MapRequestToEndpoint(ref this.mockRequest));
-//         this.mockRouteRegistry = mockRouteRegistry.Object;
-//     }
+        var mockRouteRegistry = new Mock<IEndpointMapper>();
+        mockRouteRegistry.Setup(m => m.MapRequestToEndpoint(ref this.mockRequest));
+        this.mockRouteRegistry = mockRouteRegistry.Object;
+    }
 
-//     [TestCase]
-//     public void HandleRequest_ReturnsResponseObject()
-//     {
-//         var router = new Router(this.mockRouteRegistry, this.mockRouteObtainer);
+    [TestCase]
+    public void HandleRequest_ReturnsResponseObject()
+    {
+        var router = new Router(this.mockRouteRegistry, this.mockRouteObtainer);
 
-//         IResponse response = router.HandleRequest(ref this.mockRequest);
+        IResponse response = router.HandleRequest(ref this.mockRequest);
 
-//         Assert.IsTrue(response.PayloadAsJson() == this.mockRequest.Payload, $"{response.PayloadAsJson()} != {mockRequest.Payload}");
-//     }
-// }
-
+        Assert.IsTrue(response.PayloadAsJson() == this.mockRequest.Payload, $"{response.PayloadAsJson()} != {mockRequest.Payload}");
+    }
+}
 
 [TestFixture]
-public class EndpointTests
+public class Test_ReflectionUtils
 {
-    [Test]
-    public void Endpoint_BuilderCreatesCompleteEndpoint()
+    public static IEnumerable<object[]> ConvertToTypeTestCases()
     {
-        var endpointBuilder = new EndpointBuilder();
+        yield return new object[] { "897cb65a-4381-4c14-afda-65ff2cd291a4", typeof(Guid), new Guid("897cb65a-4381-4c14-afda-65ff2cd291a4") };
+        // Add more test cases here
+    }
 
-        endpointBuilder
-            .WithHttpMethod(HTTPMethod.GET)
-            .WithControllerType(typeof(TestController))
-            .WithAccessLevel(ACCESS.USER)
-            .WithRoutePattern("/api/{id:int}")
-            .WithControllerMethod(typeof(TestController).GetMethod("TestMethod")!);
+    [TestCaseSource(nameof(ConvertToTypeTestCases))]
+    [TestCase("23", typeof(int), (int)23)]
+    [TestCase("abc", typeof(string), (string)"abc")]
+    [TestCase("true", typeof(bool), (bool)true)]
+    [TestCase("false", typeof(bool), (bool)false)]
+    [TestCase("false", typeof(bool), (bool)false)]
+    [TestCase("3.1415", typeof(float), (float)3.1415)]
+    public void Test_ConvertStringToExpectedTypes(string provided, Type expectedType, dynamic expectedValue)
+    {
+        var res = ReflectionUtils.ConvertToType(provided, expectedType);
 
-        Endpoint endpoint = endpointBuilder.Build();
-
-        Assert.That(endpoint.HttpMethod, Is.EqualTo(HTTPMethod.GET));
-        Assert.That(endpoint.ControllerType, Is.EqualTo(typeof(TestController)));
-        Assert.That(endpoint.AccessLevel, Is.EqualTo(ACCESS.USER));
-        Assert.That(endpoint.EndpointPattern, Is.EqualTo("/api/{id:int}"));
-        Assert.That(endpoint.ControllerMethod, Is.EqualTo(typeof(TestController).GetMethod("TestMethod")));
-        Assert.That(endpoint.Exists, Is.True);
+        Assert.That(res == expectedValue, $"Converting string to {expectedType} failed.\nProvided: {provided}\nExpected: {expectedValue}");
     }
 }
 
@@ -263,53 +261,58 @@ public class EndpointTests
 //         // Add more tests for other exceptions and scenarios
 //     }
 
-[TestFixture]
-public class RouteRegistryTests
-{
-    private IUrlParser urlParser;
-    private IEndpointMapper routeRegistry;
+// // [TestFixture]
+// // public class RouteRegistryTests
+// // {
+// //     private IUrlParser urlParser;
+// //     private IEndpointMapper routeRegistry;
 
-    [SetUp]
-    public void Setup()
-    {
-        var urlParser = new UrlParser();
-        routeRegistry = RouteRegistry.GetInstance(urlParser);
-    }
+// //     [SetUp]
+// //     public void Setup()
+// //     {
+// //         var urlParser = new UrlParser();
+// //         routeRegistry = RouteRegistry.GetInstance(urlParser);
+// //     }
 
-    // [Test]
-    // public void RegisterEndpoint_Success()
-    // {
-    //     string routePattern = "/api/test/{id:int}/";
-    //     HTTPMethod httpMethod = HTTPMethod.GET;
-    //     Type controllerType = typeof(TestController);
-    //     MethodInfo controllerMethod = typeof(TestController).GetMethod("TestMethod")!;
+// //     [Test]
+// //     public void RegisterEndpoint_Success()
+// //     {
+// //         string routePattern = "/api/test/{id:int}/";
+// //         HTTPMethod httpMethod = HTTPMethod.GET;
+// //         Type controllerType = typeof(TestController);
+// //         MethodInfo controllerMethod = typeof(TestController).GetMethod("TestMethod")!;
 
-    //     routeRegistry.RegisterEndpoint(routePattern, httpMethod, controllerType, controllerMethod);
+// //         routeRegistry.RegisterEndpoint(routePattern, httpMethod, controllerType, controllerMethod);
 
-    //     var registeredEndpoints = routeRegistry.RegisteredEndpoints[httpMethod];
-    //     Assert.AreEqual(1, registeredEndpoints.Count);
+// //         var registeredEndpoints = routeRegistry.RegisteredEndpoints[httpMethod];
+// //         Assert.AreEqual(1, registeredEndpoints.Count);
 
-    //     var endpoint = (Endpoint)registeredEndpoints[0];
+// //         var endpoint = (Endpoint)registeredEndpoints[0];
 
-    //     Assert.AreEqual(httpMethod, endpoint.HttpMethod);
-    //     Assert.AreEqual(routePattern, endpoint.RouteTemplate);
-    //     Assert.AreEqual(controllerType, endpoint.ControllerType);
-    //     Assert.AreEqual(controllerMethod, endpoint.ControllerMethod);
-    // }
+// //         Assert.AreEqual(httpMethod, endpoint.HttpMethod);
+// //         Assert.AreEqual(routePattern, endpoint.RouteTemplate);
+// //         Assert.AreEqual(controllerType, endpoint.ControllerType);
+// //         Assert.AreEqual(controllerMethod, endpoint.ControllerMethod);
+// //     }
 
-    // [Test]
-    // public void RegisterEndpoint_DuplicateRoute()
-    // {
-    //     string routePattern = "/api/test/{id:int}/";
-    //     HTTPMethod httpMethod = HTTPMethod.GET;
-    //     Type controllerType = typeof(TestController);
-    //     MethodInfo controllerMethod = typeof(TestController).GetMethod("TestMethod")!;
+// //     [Test]
+// //     public void RegisterEndpoint_DuplicateRoute()
+// //     {
+// //         string routePattern = "/api/test/{id:int}/";
+// //         HTTPMethod httpMethod = HTTPMethod.GET;
+// //         Type controllerType = typeof(TestController);
+// //         MethodInfo controllerMethod = typeof(TestController).GetMethod("TestMethod")!;
 
-    //     routeRegistry.RegisterEndpoint(routePattern, httpMethod, controllerType, controllerMethod, Permission.USER);
+// //         routeRegistry.RegisterEndpoint(routePattern, httpMethod, controllerType, controllerMethod);
 
-    //     Assert.IsTrue(routeRegistry.IsRouteRegistered(routePattern, httpMethod));
-    // }
-}
+// //         Assert.Throws<ArgumentException>(() =>
+// //         {
+// //             routeRegistry.RegisterEndpoint(routePattern, httpMethod, controllerType, controllerMethod);
+// //         });
+// //     }
+
+// //     // Add more tests as needed
+// // }
 
 
 

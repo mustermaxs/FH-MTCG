@@ -127,18 +127,42 @@ public class SessionTests
     [Test]
     public void SessionManager_CreatesAndReturnsSessionBySessionId()
     {
+        Session session;
         var mockUser = new Mock<User>();
         mockUser.Setup(m => m.Name).Returns("Max");
         mockUser.Setup(m => m.Bio).Returns("Das ist die Bio");
 
         var sessionId = "mtcg-token-12345";
         var mockUserObj = mockUser.Object;
-        Session session;
 
         SessionManager.CreateSession(sessionId, mockUserObj);
         Assert.True((SessionManager.TryGetSession(sessionId, out session)), $"Failed to get session");
         Assert.That(session.User.Name == "Max");
+        Assert.That(session.User.Bio == "Das ist die Bio");
         Assert.That(session.Id == sessionId, $"SessionId is incorrect.");
+    }
+
+    [TestCase]
+    public void Session_IsAbleToAccessMultipleSessionsStatically()
+    {
+        var mockUser1 = new Mock<User>();
+        var mockUser2 = new Mock<User>();
+        var mockUser3 = new Mock<User>();
+
+        SessionManager.CreateSession("123", mockUser1.Object);
+        SessionManager.CreateSession("234", mockUser2.Object);
+        SessionManager.CreateSession("345", mockUser3.Object);
+        Session s1;
+        Session s2;
+        Session s3;
+
+        SessionManager.TryGetSession("123", out s1);
+        SessionManager.TryGetSession("234", out s2);
+        SessionManager.TryGetSession("345", out s3);
+
+        Assert.That(s1.Id == "123", $"Failed to get session from SessionManager.");
+        Assert.That(s2.Id == "234", $"Failed to get session from SessionManager.");
+        Assert.That(s3.Id == "345", $"Failed to get session from SessionManager.");
     }
 }
 
@@ -153,7 +177,7 @@ public class ControllerTests
     [SetUp]
     public void Setup()
     {
-        this.responsePayload = $"{{\"Name\":\"mustermax\",\"Bio\":\"\",\"Password\":\"12345\",\"Image\":\":-)\",\"Coins\":10,\"ID\":1}}";
+        this.responsePayload = $"{{\"Name\":\"Michael\",\"Bio\":\"Halloooo.\",\"Password\":\"mikey\",\"Image\":\"###\",\"Coins\":32,\"ID\":\"897cb65a-4381-4c14-afda-65ff2cd291a4\"}}";
 
         var mockRouteObtainer = new Mock<IRouteObtainer>();
         this.mockRouteObtainer = mockRouteObtainer.Object;
@@ -161,15 +185,16 @@ public class ControllerTests
         var mockEndpoint = new Mock<IEndpoint>();
         mockEndpoint.Setup(m => m.ControllerType).Returns(typeof(UserController));
         mockEndpoint.Setup(m => m.ControllerMethod).Returns(typeof(UserController).GetMethod("GetUserById")!);
-        mockEndpoint.Setup(m => m.EndpointPattern).Returns("^users/([0-9]+)$");
-        mockEndpoint.Setup(m => m.UrlParams).Returns(new Dictionary<string, string> { { "userid", "1" } });
+        mockEndpoint.Setup(m => m.EndpointPattern).Returns("^users/([a-zA-Z0-9-]+)$");
+
+        mockEndpoint.Setup(m => m.UrlParams).Returns(new Dictionary<string, string> { { "userid", "897cb65a-4381-4c14-afda-65ff2cd291a4" } });
 
         var mockRequest = new Mock<IRequest>();
         mockRequest.Setup(m => m.HttpMethod).Returns(HTTPMethod.GET);
         mockRequest.Setup(m => m.SessionId).Returns("123");
         mockRequest.Setup(m => m.Payload).Returns(this.responsePayload);
         mockRequest.Setup(m => m.Endpoint).Returns(mockEndpoint.Object);
-        mockRequest.Setup(m => m.RawUrl).Returns("/users/1");
+        mockRequest.Setup(m => m.RawUrl).Returns("/users/897cb65a-4381-4c14-afda-65ff2cd291a4");
         this.mockRequest = mockRequest.Object;
 
         var mockRouteRegistry = new Mock<IEndpointMapper>();
@@ -191,6 +216,16 @@ public class ControllerTests
     }
 }
 
+[Controller]
+public class ReflectionRouteObtainerTest : IController
+{
+    public ReflectionRouteObtainerTest(IRequest request) : base(request) { }
+
+    [Route("/test/route", HTTPMethod.GET, ACCESS.USER)]
+    public void TestMethod()
+    {
+    }
+}
 
 
 
@@ -215,6 +250,25 @@ public class Test_ReflectionUtils
         var res = ReflectionUtils.ConvertToType(provided, expectedType);
 
         Assert.That(res == expectedValue, $"Converting string to {expectedType} failed.\nProvided: {provided}\nExpected: {expectedValue}");
+    }
+
+    [TestCase]
+    public void ReflectionRouteObtainer_GetsPermissionAttributes()
+    {
+        var attrHandler = new AttributeHandler(Assembly.GetExecutingAssembly());
+        var routeObtainer = new ReflectionRouteObtainer(attrHandler);
+
+        List<Endpoint> endpoints = routeObtainer.ObtainRoutes();
+
+        if (endpoints.Count <= 0)
+        {
+            Assert.Fail($"Failed to get endpoints.");
+
+            return;
+        }
+
+        Assert.That(endpoints[0].AccessLevel == ACCESS.USER && endpoints[0].RouteTemplate == "/test/route", $"Failed to get permissions from route attributes.");
+
     }
 }
 

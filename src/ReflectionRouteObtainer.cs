@@ -71,7 +71,6 @@ public class ReflectionRouteObtainer : IRouteObtainer
             foreach (var methodInfo in controllerMethodsInfos)
             {
                 var routeAttribute = attributeHandler.GetMethodAttributeWithMethodInfo<RouteAttribute>(methodInfo);
-                // var endpoint = 
 
                 endpointList.Add(new Endpoint
                 (

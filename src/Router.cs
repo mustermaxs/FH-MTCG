@@ -97,14 +97,6 @@ public class Router : IRouter
         try
         {
             routeRegistry.MapRequestToEndpoint(ref request);
-            
-            // if (request.Endpoint.AccessLevel != ACCESS.ALL)
-            // {
-                /// check if token was sent
-                ///     no token -> Exception Err 401
-                /// if token valid
-                ///     
-            // }
 
             var controllerType = request.Endpoint!.ControllerType;
             var controller = (IController)Activator.CreateInstance(controllerType, request);
@@ -121,14 +113,6 @@ public class Router : IRouter
             Console.WriteLine($"Response: {response.Description}\nStatus: {response.StatusCode}");
 
             return response;
-        }
-
-        catch (DbTransactionFailureException ex)
-        {
-            Console.WriteLine($"Transaction failed.\n{ex.Message}");
-
-            return new ResponseWithoutPayload(500, $"Transaction failed.\n{ex.Message}");
-
         }
 
         catch (RouteDoesntExistException ex)

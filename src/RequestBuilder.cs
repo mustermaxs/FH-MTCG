@@ -9,6 +9,7 @@ public class RequestBuilder
   private HttpHeader[] httpHeaders;
   private string payload;
   private string route;
+  private string sessionId;
 
   public RequestBuilder() {}
 
@@ -22,6 +23,13 @@ public class RequestBuilder
     public RequestBuilder WithHeaders(HttpHeader[] headers)
     {
         this.httpHeaders = headers;
+
+        return this;
+    }
+
+    public RequestBuilder WithSessionId(string sessionId)
+    {
+        this.sessionId = sessionId;
 
         return this;
     }
@@ -43,6 +51,6 @@ public class RequestBuilder
 
     public Request Build()
     {
-        return new Request(httpMethod, route, httpHeaders, payload);
+        return new Request(httpMethod, route, httpHeaders, payload, sessionId);
     }
 }

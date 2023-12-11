@@ -17,13 +17,14 @@ public class Request : IRequest
     private string sessionId;
     public string SessionId { get => sessionId; }
 
-    public Request(HTTPMethod method, string? rawUrl, HttpHeader[]? headers, string? payload)
+    public Request(HTTPMethod method, string? rawUrl, HttpHeader[]? headers, string? payload, string sessionId)
     {
         this.routeFound = false;
         this.HttpMethod = method;
         this.rawUrl = rawUrl;
         this.Headers = headers;
         this.Payload = payload ?? string.Empty;
+        this.sessionId = sessionId;
     }
 
     public IRequest SetPayload(string payload)

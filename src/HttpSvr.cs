@@ -95,6 +95,7 @@ namespace MTCG
                     /// Setter sind ok. zusammmen mit HttpSvrEventArgs wirkts aber etwas
                     /// redundant
                     var svrEventArgs = new HttpSvrEventArgs(client, data);
+                    // var session = new Session
                     var requestBuilder = new RequestBuilder();
 
                     IRequest request = requestBuilder
@@ -102,6 +103,7 @@ namespace MTCG
                     .WithHttpMethod(svrEventArgs.Method)
                     .WithPayload(svrEventArgs.Payload)
                     .WithRoute(svrEventArgs.Path)
+                    .WithSessionId("mtcg-test")
                     .Build();
 
                     IResponse response = router.HandleRequest(ref request);

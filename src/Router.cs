@@ -97,6 +97,14 @@ public class Router : IRouter
         try
         {
             routeRegistry.MapRequestToEndpoint(ref request);
+            
+            // if (request.Endpoint.AccessLevel != ACCESS.ALL)
+            // {
+                /// check if token was sent
+                ///     no token -> Exception Err 401
+                /// if token valid
+                ///     
+            // }
 
             var controllerType = request.Endpoint!.ControllerType;
             var controller = (IController)Activator.CreateInstance(controllerType, request);

@@ -90,12 +90,8 @@ namespace MTCG
                         data += Encoding.ASCII.GetString(buf, 0, n);
                     }
 
-                    /// 07.12.2023 14:47
-                    /// IMPROVE RoutingContext nimmt zu viele Argumente entgegen.
-                    /// Setter sind ok. zusammmen mit HttpSvrEventArgs wirkts aber etwas
-                    /// redundant
+
                     var svrEventArgs = new HttpSvrEventArgs(client, data);
-                    // var session = new Session
                     var requestBuilder = new RequestBuilder();
 
                     IRequest request = requestBuilder

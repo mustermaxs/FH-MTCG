@@ -122,6 +122,27 @@ public class TestController : IController
 }
 
 [TestFixture]
+public class SessionTests
+{
+    [Test]
+    public void SessionManager_CreatesAndReturnsSessionBySessionId()
+    {
+        var mockUser = new Mock<User>();
+        mockUser.Setup(m => m.Name).Returns("Max");
+        mockUser.Setup(m => m.Bio).Returns("Das ist die Bio");
+
+        var sessionId = "mtcg-token-12345";
+        var mockUserObj = mockUser.Object;
+        Session session;
+
+        SessionManager.CreateSession(sessionId, mockUserObj);
+        Assert.True((SessionManager.TryGetSession(sessionId, out session)), $"Failed to get session");
+        Assert.That(session.User.Name == "Max");
+        Assert.That(session.Id == sessionId, $"SessionId is incorrect.");
+    }
+}
+
+[TestFixture]
 public class ControllerTests
 {
     private IRequest mockRequest;
@@ -145,6 +166,7 @@ public class ControllerTests
 
         var mockRequest = new Mock<IRequest>();
         mockRequest.Setup(m => m.HttpMethod).Returns(HTTPMethod.GET);
+        mockRequest.Setup(m => m.SessionId).Returns("123");
         mockRequest.Setup(m => m.Payload).Returns(this.responsePayload);
         mockRequest.Setup(m => m.Endpoint).Returns(mockEndpoint.Object);
         mockRequest.Setup(m => m.RawUrl).Returns("/users/1");
@@ -154,6 +176,9 @@ public class ControllerTests
         mockRouteRegistry.Setup(m => m.MapRequestToEndpoint(ref this.mockRequest));
         this.mockRouteRegistry = mockRouteRegistry.Object;
     }
+
+
+
 
     [TestCase]
     public void HandleRequest_ReturnsResponseObject()
@@ -165,6 +190,9 @@ public class ControllerTests
         Assert.IsTrue(response.PayloadAsJson() == this.mockRequest.Payload, $"{response.PayloadAsJson()} != {mockRequest.Payload}");
     }
 }
+
+
+
 
 [TestFixture]
 public class Test_ReflectionUtils

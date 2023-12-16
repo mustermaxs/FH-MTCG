@@ -2,25 +2,6 @@ using System;
 
 namespace MTCG;
 
-public interface ITokenHandler
-{
-    public bool ValidateToken(string token);
-    public bool TokenIsValid(string token);
-    public User GetClientModel();
-}
-
-public class Session
-{
-    public Session(string sessionId, User client)
-    {
-        Id = sessionId;
-        this.User = client;
-    }
-    public readonly string Id;
-    public readonly User User;
-
-}
-
 // public abstract class BaseSessionManager
 // {
 
@@ -67,6 +48,29 @@ public class Session
 
 public abstract class BaseSessionManager
 {
+    private const int LENGTH_AUTH_TOKEN = 10;
+    static protected IRepository<User>? userRepository;
+
+    protected static string CreateSessionIdFromAuthToken(string authToken)
+    {
+        return CryptoHandler.Encode(authToken);
+    }
+
+    public static string CreateAuthToken()
+    {
+        Random random = new Random();
+        string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        char[] stringChars = new char[LENGTH_AUTH_TOKEN];
+
+        for (int i = 0; i < stringChars.Length; i++)
+        {
+            stringChars[i] = chars[random.Next(chars.Length)];
+        }
+
+        return new String(stringChars);
+    }
+
+    public static void UseRepo(IRepository<User> repo) { BaseSessionManager.userRepository = repo; }
     private static Dictionary<string, Session> sessions = new Dictionary<string, Session>();
 
     protected static Dictionary<string, Session> Sessions => sessions;

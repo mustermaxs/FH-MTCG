@@ -16,6 +16,7 @@ public class SessionManager : BaseSessionManager
 {
 
 
+    private static object _sessionLock = new object();
 
     /// <summary>
     /// Creates a new session object and stores it
@@ -23,34 +24,55 @@ public class SessionManager : BaseSessionManager
     /// </summary>
     /// <param name="sessionId"></param>
     /// <param name="client"></param>
-    /// <returns></returns>
-    public static string CreateSession(string sessionId, User client)
+    /// <returns>
+    /// string - session id that can be used to access session
+    /// in static session dictionary.
+    /// </returns>
+    public static string CreateSession(string authToken, User user)
     {
-        var session = new Session(sessionId, client);
-        Sessions.Add(sessionId, session);
-        
+        string sessionId = SessionManager.CreateSessionIdFromAuthToken(authToken);
+        Session session = new Session(sessionId).WithAuthToken(authToken).WithUser(user);
+
+        try
+        {
+            Sessions.TryAdd(sessionId, session);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error creating session: {e.Message}. Already exists.");
+        }
+
         return sessionId;
     }
 
-
-
-
-    public static void EndSession(string sessionId)
+    public static void EndSession(string authToken)
     {
-        Sessions.Remove(sessionId);
+        var sessionId = SessionManager.CreateSessionIdFromAuthToken(authToken);
+
+        lock (_sessionLock)
+        {
+            Sessions.Remove(sessionId, out _);
+        }
     }
 
-
-
-
-    public static bool TryGetSession(string sessionId, out Session session)
+    public static bool TryGetSession(string unencryptedSessionId, out Session session)
     {
-        session = null;
-        if (Sessions.TryGetValue(sessionId, out Session retrievedSession))
+        string sessionId = CryptoHandler.Encode(unencryptedSessionId);
+
+        lock (_sessionLock)
         {
-            session = retrievedSession;
-            return true;
+            Session retrievedSession;
+
+            if (Sessions.TryGetValue(sessionId, out retrievedSession))
+            {
+                session = retrievedSession;
+
+                return true;
+            }
+
+            session = null!;
+
+            return false;
         }
-        return false;
     }
 }

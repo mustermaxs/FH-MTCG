@@ -132,14 +132,14 @@ public class SessionTests
         mockUser.Setup(m => m.Name).Returns("Max");
         mockUser.Setup(m => m.Bio).Returns("Das ist die Bio");
 
-        var sessionId = "mtcg-token-12345";
+        var authToken = "mtcg-token-12345";
         var mockUserObj = mockUser.Object;
 
-        SessionManager.CreateSession(sessionId, mockUserObj);
-        Assert.True((SessionManager.TryGetSession(sessionId, out session)), $"Failed to get session");
-        Assert.That(session.User.Name == "Max");
+        SessionManager.CreateSession(authToken, mockUserObj);
+        Assert.True(SessionManager.TryGetSession(authToken, out session), $"Failed to get session");
+        Assert.That(session.User!.Name == "Max");
         Assert.That(session.User.Bio == "Das ist die Bio");
-        Assert.That(session.Id == sessionId, $"SessionId is incorrect.");
+        Assert.That(session.AuthToken == authToken, $"SessionId is incorrect.");
     }
 
     [TestCase]
@@ -160,10 +160,41 @@ public class SessionTests
         SessionManager.TryGetSession("234", out s2);
         SessionManager.TryGetSession("345", out s3);
 
-        Assert.That(s1.Id == "123", $"Failed to get session from SessionManager.");
-        Assert.That(s2.Id == "234", $"Failed to get session from SessionManager.");
-        Assert.That(s3.Id == "345", $"Failed to get session from SessionManager.");
+        Assert.That(s1.AuthToken == "123", $"Failed to get session from SessionManager.");
+        Assert.That(s2.AuthToken == "234", $"Failed to get session from SessionManager.");
+        Assert.That(s3.AuthToken == "345", $"Failed to get session from SessionManager.");
     }
+
+    [TestCase]
+    public void SessionManager_EndsSession()
+    {
+        var mockUser = new Mock<User>();
+        var mockUserObj = mockUser.Object;
+
+        SessionManager.CreateSession("123", mockUserObj);
+        SessionManager.EndSession("123");
+
+        Assert.IsFalse(SessionManager.TryGetSession("123", out _), $"Session was not ended.");
+    }
+
+    [TestCase]
+    public void SessionManager_EndsSessionWithInvalidAuthToken()
+    {
+        var mockUser = new Mock<User>();
+        var mockUserObj = mockUser.Object;
+
+        SessionManager.CreateSession("123", mockUserObj);
+        SessionManager.EndSession("invalid authToken");
+
+        Assert.IsTrue(SessionManager.TryGetSession("123", out _), $"Session was not ended.");
+    }
+
+    // [TestCase("password123")]
+    // public void PasswordValidator_ValidatesCorrectPassword()
+    // {
+    //     IValidator passwordValidator = new PasswordValidator();
+        
+    // }
 }
 
 [TestFixture]
@@ -271,6 +302,8 @@ public class Test_ReflectionUtils
 
     }
 }
+
+
 
 
 //    [TestFixture]

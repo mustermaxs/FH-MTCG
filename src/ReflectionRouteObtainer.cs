@@ -54,10 +54,10 @@ public class ReflectionRouteObtainer : IRouteObtainer
         this.attributeHandler = attributeHandler;
     }
 
-
-
-    /// 12.04.2023 18:21
-    /// REFACTOR
+    /// <summary>
+    /// Obtains the routes by using reflection to scan the controllers and their methods.
+    /// </summary>
+    /// <returns>A list of endpoints representing the obtained routes.</returns>
     public List<Endpoint> ObtainRoutes()
     {
         var endpointList = new List<Endpoint>();
@@ -79,7 +79,7 @@ public class ReflectionRouteObtainer : IRouteObtainer
                     routeAttribute!.RouteTemplate,
                     (Type)controllerType,
                     (MethodInfo)methodInfo,
-                    (ACCESS)routeAttribute!.AccessLevel
+                    (Role)routeAttribute!.AccessLevel
                 ));
             }
         }

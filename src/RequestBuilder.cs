@@ -3,6 +3,9 @@ using System;
 
 namespace MTCG;
 
+/// <summary>
+/// Represents a builder class for constructing HTTP requests.
+/// </summary>
 public class RequestBuilder
 {
   private HTTPMethod httpMethod;

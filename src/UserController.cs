@@ -9,18 +9,51 @@ namespace MTCG
     public class UserController : IController
     {
 
-        protected static IRepository<User> repo = new UserRepository();
+        protected static UserRepository repo = new UserRepository();
 
         public UserController(IRequest request) : base(request) { }
 
+        [Route("/session/", HTTPMethod.POST, Role.ANONYMOUS)]
+        public IResponse Login()
+        {
+            try
+            {
+                User? payload = request.PayloadAsObject<User>();
+                string username = payload?.Name;
+                string password = payload?.Password;
+                
+                User? user = repo.GetByName(username);
+                var hashedPwd = CryptoHandler.Encode(password);
+
+                if (user == null || hashedPwd != user.Password)
+                    return new Response<User>(401, "Invalid username/password provided");
+
+                string authToken = SessionManager.CreateAuthToken(user.ID.ToString());
+                SessionManager.CreateSessionForUser(authToken, user);
+
+                return new SuccessResponse<object>(200, new { authToken }, "");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to login user. {ex.Message}");
+
+                return new ErrorResponse<User>($"Failed to login user.");
+            }
+        }
 
 
-        [Route("/users/", HTTPMethod.POST, ACCESS.NOT_LOGGEDIN)]
+
+        [Route("/users/", HTTPMethod.POST, Role.ANONYMOUS)]
         public IResponse RegisterNewUser()
         {
             try
             {
                 var user = JsonSerializer.Deserialize<User>(request.Payload);
+
+                if (user == null)
+                    return new ErrorResponse<User>($"No or wrong user provided", 500);
+
+                user.Password = CryptoHandler.Encode(user.Password);
 
                 repo.Save(user);
 
@@ -47,7 +80,7 @@ namespace MTCG
 
 
 
-        [Route("/users/", HTTPMethod.GET, ACCESS.ALL)]
+        [Route("/users/", HTTPMethod.GET, Role.USER | Role.ADMIN)]
         public IResponse GetAllUsers()
         {
             try
@@ -65,7 +98,7 @@ namespace MTCG
 
         }
 
-        [Route("/users/{userid:alphanum}", HTTPMethod.GET, ACCESS.ALL)]
+        [Route("/users/{userid:alphanum}", HTTPMethod.GET, Role.ALL)]
         public IResponse GetUserById(Guid userid)
         {
             User? user = repo.Get(userid);

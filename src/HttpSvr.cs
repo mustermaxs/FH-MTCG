@@ -70,7 +70,7 @@ namespace MTCG
             if (Active) return;
 
             Active = true;
-            _Listener = new(IPAddress.Parse("127.0.0.1"), 12000);
+            _Listener = new(IPAddress.Parse("192.168.0.4"), 12000);
             _Listener.Start();
             var tasks = new List<Task>();
 
@@ -90,6 +90,8 @@ namespace MTCG
                         data += Encoding.ASCII.GetString(buf, 0, n);
                     }
 
+                    CookieContainer cookieContainer = new CookieContainer();
+                    
 
                     var svrEventArgs = new HttpSvrEventArgs(client, data);
                     var requestBuilder = new RequestBuilder();

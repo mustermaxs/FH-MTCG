@@ -14,6 +14,7 @@
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/MTCG.Tests.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/ref/MTCG.Tests.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/MTCG.Tests.pdb
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Castle.Core.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.VisualStudio.CodeCoverage.Shim.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.Extensions.Logging.Abstractions.dll
@@ -24,6 +25,7 @@
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.TestPlatform.Utilities.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Microsoft.VisualStudio.TestPlatform.Common.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/testhost.dll
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Moq.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Newtonsoft.Json.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Npgsql.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/NuGet.Frameworks.dll
@@ -109,5 +111,3 @@
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/ref/MTCG.Tests.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.pdb
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.genruntimeconfig.cache
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Castle.Core.dll
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/Moq.dll

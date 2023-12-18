@@ -19,7 +19,8 @@ public class Router : IRouter
     private IRouteObtainer routeObtainer;
     // private IAuthenticator authenticator;
 
-
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
     /// <summary>
     /// Constructor for the router.
@@ -33,11 +34,6 @@ public class Router : IRouter
     /// <param name="routeObtainer">
     /// Gets 
     /// </param>
-
-
-    /// 06.12.2023 20:40
-    /// IMPROVE routeObtainer sollte nicht direkt im router verwendet werden
-    /// router sollte in RegisterRoutes
     public Router(IEndpointMapper routeRegistry, IRouteObtainer routeObtainer)
     {
         this.routeRegistry = routeRegistry;
@@ -45,6 +41,8 @@ public class Router : IRouter
     }
 
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
 
     /// <summary>
@@ -80,8 +78,45 @@ public class Router : IRouter
         }
     }
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+    protected bool CompareAccessLevels(Role clientAccessLevel, Role requiredAccessLevel)
+    {
+        return clientAccessLevel >= requiredAccessLevel;
+    }
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
 
+    public bool ClientHasPermissionToRequest(IRequest request)
+    {
+        Role requestAccessLevel = request.Endpoint!.AccessLevel;
+
+        Session session = null;
+
+
+        if (requestAccessLevel == Role.ALL)
+        {
+            return true;
+        }
+
+
+        if (!request.TryGetHeader("Authorization", out string authToken)
+            || !SessionManager.TryGetSession(authToken, out session))
+        {
+            if (session == null && requestAccessLevel == Role.ANONYMOUS) return true;
+
+            return false;
+        }
+
+
+        return session.User?.GetUserAccessLevel() >= requestAccessLevel;
+    }
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
     /// <summary>
     /// Responsible for getting the necessary ressources to process the request.
@@ -97,6 +132,8 @@ public class Router : IRouter
         try
         {
             routeRegistry.MapRequestToEndpoint(ref request);
+
+            if (!ClientHasPermissionToRequest(request)) throw new AuthenticationFailedException($"Client doesn't have access to ressource.");
 
             var controllerType = request.Endpoint!.ControllerType;
             var controller = (IController)Activator.CreateInstance(controllerType, request);
@@ -126,13 +163,13 @@ public class Router : IRouter
         {
             Console.WriteLine($"Authentication failed.");
 
-            return new ResponseWithoutPayload(404, $"Something went wrong.\n{ex.Message}");
+            return new ResponseWithoutPayload(404, $"Access token is missing or invalid.\n{ex.Message}");
         }
 
         catch (Exception ex)
         {
             Console.WriteLine($"ERROR\n{ex}");
-            
+
             return new ResponseWithoutPayload(500, $"Something went wrong.\n{ex.Message}");
         }
     }

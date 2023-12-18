@@ -10,7 +10,7 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
   : base()
   {
     _Table = "users";
-    _Fields = "id, name, password, coins, bio, image";
+    _Fields = "id, name, password, coins, bio, image, role";
   }
 
   public override void Save(User user)
@@ -27,7 +27,29 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
 
       command.ExecuteNonQuery();
 
-      command.Dispose(); connection.Dispose();
+      command.Dispose(); connection!.Dispose();
+    }
+  }
+
+  public User? GetByName(string username)
+  {
+    using (NpgsqlConnection? connection = this._Connect())
+    using (var command = new NpgsqlCommand($"SELECT * FROM {_Table} WHERE name=@name", connection))
+    {
+      command.Parameters.AddWithValue("@name", username);
+
+      IDataReader re = command.ExecuteReader();
+      User? user = null;
+
+      if (re.Read())
+      {
+        user = new User();
+        _Fill(user, re);
+      }
+
+      command.Dispose(); connection!.Dispose();
+
+      return user;
     }
   }
 

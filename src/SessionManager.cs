@@ -28,7 +28,7 @@ public class SessionManager : BaseSessionManager
     /// string - session id that can be used to access session
     /// in static session dictionary.
     /// </returns>
-    public static string CreateSession(string authToken, User user)
+    public static string CreateSessionForUser(string authToken, User user)
     {
         string sessionId = SessionManager.CreateSessionIdFromAuthToken(authToken);
         Session session = new Session(sessionId).WithAuthToken(authToken).WithUser(user);
@@ -45,6 +45,9 @@ public class SessionManager : BaseSessionManager
         return sessionId;
     }
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
     public static void EndSession(string authToken)
     {
         var sessionId = SessionManager.CreateSessionIdFromAuthToken(authToken);
@@ -55,9 +58,12 @@ public class SessionManager : BaseSessionManager
         }
     }
 
-    public static bool TryGetSession(string unencryptedSessionId, out Session session)
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+    public static bool TryGetSession(string authToken, out Session session)
     {
-        string sessionId = CryptoHandler.Encode(unencryptedSessionId);
+        string sessionId = CryptoHandler.Encode(authToken);
 
         lock (_sessionLock)
         {

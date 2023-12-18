@@ -5,7 +5,7 @@ namespace MTCG;
 
 public interface IEndpointMapper
 {
-    public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, MethodInfo controllerMethodName, ACCESS accessLevel);
+    public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, MethodInfo controllerMethodName, Role accessLevel);
     public void RegisterEndpoint(IEndpoint endpoint);
     public bool IsRouteRegistered(string routeTemplate, HTTPMethod method);
     /// 12.02.2023 17:15

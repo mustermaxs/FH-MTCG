@@ -4,12 +4,13 @@ using MTCG;
 
 namespace MTCG
 {
-    public enum ACCESS
+    [Flags]
+    public enum Role
     {
-        USER,
-        ADMIN,
-        ALL,
-        NOT_LOGGEDIN
+        ANONYMOUS = 1,
+        USER = 2,
+        ADMIN = 4,
+        ALL = ANONYMOUS | USER | ADMIN
     }
 
 
@@ -18,9 +19,9 @@ namespace MTCG
     {
         private string routeTemplate;
         private HTTPMethod method;
-        private ACCESS accessLevel;
+        private Role accessLevel;
 
-        public RouteAttribute(string route, HTTPMethod method, ACCESS accessLevel)
+        public RouteAttribute(string route, HTTPMethod method, Role accessLevel)
         {
             this.routeTemplate = route;
             this.method = method;
@@ -33,6 +34,6 @@ namespace MTCG
         }
 
         public HTTPMethod Method => method;
-        public ACCESS AccessLevel => accessLevel;
+        public Role AccessLevel => accessLevel;
     }
 }

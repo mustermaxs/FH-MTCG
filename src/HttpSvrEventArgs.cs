@@ -59,7 +59,10 @@ namespace MTCG
                     {
                         inheaders = false;
                     }
-                    else { headers.Add(new HttpHeader(lines[i])); }
+                    else
+                    {
+                        headers.Add(new HttpHeader(lines[i]));
+                    }
                 }
                 else
                 {
@@ -70,6 +73,7 @@ namespace MTCG
 
             Headers = headers.ToArray();
         }
+
 
 
 
@@ -172,8 +176,8 @@ namespace MTCG
             string protocol = "HTTP/1.1";
             var payload = response.PayloadAsJson();
             var status = response.StatusCode;
-            string statusMsg = 
-                string.IsNullOrEmpty(response.Description) ? 
+            string statusMsg =
+                string.IsNullOrEmpty(response.Description) ?
                 GetDefaultResponseMsgForStatus(status) :
                 response.Description;
 

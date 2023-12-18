@@ -11,7 +11,7 @@ public class Endpoint : IEndpoint
 
 
 
-    public Endpoint(HTTPMethod HttpMethod, string? routePattern, string RouteTemplate, Type controllerType, MethodInfo controllerMethod)
+    public Endpoint(HTTPMethod HttpMethod, string? routePattern, string RouteTemplate, Type controllerType, MethodInfo controllerMethod, Role accessLevel=Role.ADMIN)
     : base()
     {
         if (!typeof(IController).IsAssignableFrom(controllerType))
@@ -23,6 +23,7 @@ public class Endpoint : IEndpoint
         this.controllerMethod = controllerMethod;
         this.controllerType = controllerType;
         this.routeTemplate = RouteTemplate;
+        this.AccessLevel = accessLevel;
         this.Exists = true;
     }
 
@@ -30,12 +31,13 @@ public class Endpoint : IEndpoint
 
 
     // OBSOLETE
-    public void Deconstruct(out string routeTemplate, out HTTPMethod httpMethod, out Type controllerType, out MethodInfo controllerMethod)
+    public void Deconstruct(out string routeTemplate, out HTTPMethod httpMethod, out Type controllerType, out MethodInfo controllerMethod, out Role accessLevel)
     {
         routeTemplate = RouteTemplate;
         httpMethod = HttpMethod;
         controllerType = ControllerType;
         controllerMethod = ControllerMethod;
+        accessLevel = AccessLevel;
     }
 
     new public bool Equals(Object obj)
@@ -47,6 +49,7 @@ public class Endpoint : IEndpoint
             HttpMethod == (HTTPMethod)endpoint.HttpMethod &&
             RouteTemplate == (string)endpoint.RouteTemplate &&
             ControllerType == (Type)endpoint.ControllerType &&
+            AccessLevel == (Role)endpoint.AccessLevel &&
             ControllerMethod == (MethodInfo)endpoint.ControllerMethod;
     }
 
@@ -58,6 +61,7 @@ public class Endpoint : IEndpoint
             e1.HttpMethod == (HTTPMethod)e2.HttpMethod &&
             e1.RouteTemplate == (string)e2.RouteTemplate &&
             e1.ControllerType == (Type)e2.ControllerType &&
+            e1.AccessLevel == (Role)e2.AccessLevel &&
             e1.ControllerMethod == (MethodInfo)e2.ControllerMethod;
     }
 
@@ -70,6 +74,7 @@ public class Endpoint : IEndpoint
             e1.HttpMethod != (HTTPMethod)e2.HttpMethod ||
             e1.RouteTemplate != (string)e2.RouteTemplate ||
             e1.ControllerType != (Type)e2.ControllerType ||
+            e1.AccessLevel == (Role)e2.AccessLevel ||
             e1.ControllerMethod != (MethodInfo)e2.ControllerMethod;
     }
 
@@ -95,5 +100,6 @@ public class Endpoint : IEndpoint
     public HTTPMethod HttpMethod { get; set; }
 
     public string EndpointPattern => endpointPattern;
+    public Role AccessLevel { get; set; } = Role.ADMIN;
     public bool Exists { get; protected set; } = true;
 }

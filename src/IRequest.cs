@@ -15,6 +15,8 @@ public interface IRequest
     HttpHeader[] Headers { get; set; }
     IEndpoint? Endpoint { get; set; }
     string? RawUrl { get; }
-    string Payload { get; set; }
+    string? Payload { get; set; }
     bool RouteFound { get; set; }
+    string? SessionId { get; }
+    public T? PayloadAsObject<T>() where T : class;
 }

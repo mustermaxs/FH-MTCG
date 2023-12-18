@@ -140,64 +140,85 @@ public static class ReflectionUtils
             throw new InvalidOperationException($"Cannot convert {value.GetType()} to {typeof(TExpectedType)}");
         }
     }
-    public static dynamic ConvertToType(object value, Type toType)
+public static dynamic ConvertToType(object value, Type toType)
+{
+    if (value == null)
     {
-        if (value == null)
-        {
-            throw new ArgumentNullException(nameof(value));
-        }
-
-        if (toType.IsAssignableFrom(value.GetType()))
-        {
-            return Convert.ChangeType(value, toType);
-        }
-
-        try
-        {
-            if (toType == typeof(bool))
-            {
-                string stringValue = value!.ToString()?.Trim().ToLower();
-                if (stringValue == "true" || stringValue == "yes" || stringValue == "1")
-                {
-                    return (bool)(object)true;
-                }
-                else if (stringValue == "false" || stringValue == "no" || stringValue == "0")
-                {
-                    return (bool)(object)false;
-                }
-            }
-            else if (toType == typeof(int))
-            {
-                int intVal;
-
-                if (Int32.TryParse((string)value, out intVal))
-                {
-                    return intVal;
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Cannot convert {value.GetType()} to {toType}");
-                }
-            }
-            else if (toType == typeof(float))
-            {
-                float floatVal;
-
-                if (float.TryParse((string)value, out floatVal))
-                {
-                    return floatVal;
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Cannot convert {value.GetType()} to {toType}");
-                }
-            }
-
-            return Convert.ChangeType(value, toType);
-        }
-        catch (InvalidCastException)
-        {
-            throw new InvalidOperationException($"Cannot convert {value.GetType()} to {toType}");
-        }
+        throw new ArgumentNullException(nameof(value));
     }
+
+    if (toType.IsAssignableFrom(value.GetType()))
+    {
+        return Convert.ChangeType(value, toType);
+    }
+
+    Dictionary<Type, Func<object, dynamic>> converters = new Dictionary<Type, Func<object, dynamic>>
+    {
+        { typeof(bool), ConvertToBoolean },
+        { typeof(int), ConvertToInt },
+        { typeof(float), ConvertToFloat },
+        { typeof(Guid), ConvertToGuid },
+    };
+
+    if (converters.TryGetValue(toType, out var conversionFunc))
+    {
+        return conversionFunc(value);
+    }
+
+    throw new InvalidOperationException($"Cannot convert {value.GetType()} to {toType}");
+}
+
+private static dynamic ConvertToBoolean(object value)
+{
+    string stringValue = value!.ToString()?.Trim().ToLower();
+    switch (stringValue)
+    {
+        case "true":
+        case "yes":
+        case "1":
+            return true;
+        case "false":
+        case "no":
+        case "0":
+            return false;
+        default:
+            throw new InvalidOperationException($"Cannot convert {value.GetType()} to boolean");
+    }
+}
+
+private static dynamic ConvertToInt(object value)
+{
+    if (Int32.TryParse(value!.ToString(), out int intVal))
+    {
+        return intVal;
+    }
+    else
+    {
+        throw new InvalidOperationException($"Cannot convert {value.GetType()} to int");
+    }
+}
+
+private static dynamic ConvertToFloat(object value)
+{
+    if (float.TryParse(value!.ToString(), out float floatVal))
+    {
+        return floatVal;
+    }
+    else
+    {
+        throw new InvalidOperationException($"Cannot convert {value.GetType()} to float");
+    }
+}
+
+private static dynamic ConvertToGuid(object value)
+{
+    if (Guid.TryParse(value!.ToString(), out Guid guidVal))
+    {
+        return guidVal;
+    }
+    else
+    {
+        throw new InvalidOperationException($"Cannot convert {value.GetType()} to Guid");
+    }
+}
 }

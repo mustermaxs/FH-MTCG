@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace MTCG;
 
 /// <summary>
@@ -11,18 +13,19 @@ public class Request : IRequest
     public Request(IEndpoint endpoint)
     {
         this.routeFound = false;
+        this.sessionId = string.Empty;
     }
+    private string? sessionId;
+    public string? SessionId { get => sessionId; }
 
-
-
-
-    public Request(HTTPMethod method, string? rawUrl, HttpHeader[]? headers, string? payload)
+    public Request(HTTPMethod method, string? rawUrl, HttpHeader[]? headers, string? payload, string? sessionId)
     {
         this.routeFound = false;
         this.HttpMethod = method;
         this.rawUrl = rawUrl;
         this.Headers = headers;
         this.Payload = payload ?? string.Empty;
+        this.sessionId = sessionId;
     }
 
     public IRequest SetPayload(string payload)
@@ -125,5 +128,13 @@ public class Request : IRequest
     public virtual HttpHeader[]? Headers { get; set; }
     public IEndpoint? Endpoint { get; set; }
     public string? RawUrl { get => rawUrl; }
-    public string? Payload { get; set; } = string.Empty;
+    public string? Payload
+    {
+        get;
+        set;
+    }
+    public T? PayloadAsObject<T>() where T : class
+    {
+        return !string.IsNullOrEmpty(Payload) ? JsonSerializer.Deserialize<T>(Payload) : null;
+    }
 }

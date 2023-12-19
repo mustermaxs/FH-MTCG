@@ -26,6 +26,7 @@ public class QueryBuilder
 
         return this;
     }
+    
 
     public void Reset()
     {
@@ -114,6 +115,7 @@ public class QueryBuilder
         return this._connection != null;
     }
 
+    [Obsolete("Eig. könnte ichs gleich rauslöschen. Aber der Trennungsschmerz")]
     private void AddParamsWithValue(Dictionary<string, string> paramMappings)
     {
         foreach (var mapping in paramMappings)
@@ -198,6 +200,8 @@ public class QueryBuilder
 
     public int ExecuteNonQuery()
     {
+        using var command = new NpgsqlCommand(queryString, _connection);
+
         return command.ExecuteNonQuery();
     }
 
@@ -222,14 +226,10 @@ public class QueryBuilder
 
         using (var command = new NpgsqlCommand(queryString, _connection))
         {
-            return ExecuteNonQuery()
+            return ExecuteNonQuery();
         }
     }
 
-    public int Run()
-    {
-
-    }
 
     public T Read<T>(ObjectBuilder<T> callback) where T : new()
     {

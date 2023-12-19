@@ -27,10 +27,10 @@ public enum CardName
 public class Card : IModel
 {
     public Guid Id { get; set; }
-    public string Description { get; set; }
-    public float Damage { get; set; }
+    public string? Description { get; set; } = string.Empty;
+    public float Damage { get; set; } = 0.0f;
     [JsonConverter(typeof(StringEnumConverter))]
     public CardName Name { get; set; }
-    public string Element { get; set; }
-    public string Type { get; set; }
+    public string? Element { get; set; } = string.Empty;
+    public string? Type { get; set; } = string.Empty;
 }

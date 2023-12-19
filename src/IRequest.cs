@@ -19,4 +19,7 @@ public interface IRequest
     bool RouteFound { get; set; }
     string? SessionId { get; }
     public T? PayloadAsObject<T>() where T : class;
+    public IEnumerable<T>? PayloadAsEnumerable<T>() where T : class;
+    public List<T>? PayloadAsList<T>() where T : class;
+
 }

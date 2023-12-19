@@ -79,18 +79,18 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     //TODO
     public void AddCardToStack(Card card, Guid userid)
     {
-        using (NpgsqlConnection? connection = this.Connect())
-        using (var command = new NpgsqlCommand($"INSERT INTO stack (userid, cardid) VALUES(@userid, @cardid)", connection))
-        {
-            command.Parameters.AddWithValue("@cardid", card.Id);
-            command.Parameters.AddWithValue("@userid", userid);
+        // using (NpgsqlConnection? connection = this.Connect())
+        // using (var command = new NpgsqlCommand($"INSERT INTO stack (userid, cardid) VALUES(@userid, @cardid)", connection))
+        // {
+        //     command.Parameters.AddWithValue("@cardid", card.Id);
+        //     command.Parameters.AddWithValue("@userid", userid);
 
-            command.ExecuteNonQuery();
-            command.Dispose(); connection!.Dispose();
+        //     command.ExecuteNonQuery();
+        //     command.Dispose(); connection!.Dispose();
 
-            // return cards;
+        //     // return cards;
 
-        }
+        // }
 
         var query = new QueryBuilder(Connect());
         query
@@ -98,7 +98,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         .AddParam("userid", userid)
         .AddParam("cardid", card.Id);
 
-        query.R
+        query.Run();
     }
     public IEnumerable<Card> GetAllByUserId(Guid userid)
     {
@@ -129,6 +129,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         // }
 
         var builder = new QueryBuilder(this.Connect());
+        ObjectBuilder<Card> fill = Fill;
 
         builder
         .Select(new string[] { "s.cardid", "s.userid", "c.id", "c.name", "c.descr", "c.type", "c.element", "c.damage" })
@@ -138,7 +139,6 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         .Where("s.userid=@userid")
         .AddParam("userid", userid);
 
-        ObjectBuilder<Card> fill = Fill;
         var cards = builder.ReadMultiple<Card>(fill);
 
         return cards;

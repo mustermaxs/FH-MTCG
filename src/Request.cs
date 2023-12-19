@@ -1,4 +1,10 @@
 using System.Text.Json;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
+
+// using Newtonsoft.Json;
+// using Newtonsoft.Json.Converters;
+
 
 namespace MTCG;
 
@@ -133,8 +139,29 @@ public class Request : IRequest
         get;
         set;
     }
+
     public T? PayloadAsObject<T>() where T : class
     {
-        return !string.IsNullOrEmpty(Payload) ? JsonSerializer.Deserialize<T>(Payload) : null;
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter() }
+        };
+        return !string.IsNullOrEmpty(Payload) ? JsonSerializer.Deserialize<T>(Payload, options) : null;
+    }
+
+    [Obsolete("Könnt ich eig gleich löschen... aber vlt brauch ichs noch")]
+    public IEnumerable<T>? PayloadAsEnumerable<T>() where T : class
+    {
+        return !string.IsNullOrEmpty(Payload) ? JsonSerializer.Deserialize<IEnumerable<T>>(Payload) : null;
+    }
+
+    [Obsolete("Könnt ich eig gleich löschen... aber vlt brauch ichs noch")]
+    public List<T>? PayloadAsList<T>() where T : class
+    {
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter() }
+        };
+        return !string.IsNullOrEmpty(Payload) ? JsonSerializer.Deserialize<List<T>>(Payload, options) : null;
     }
 }

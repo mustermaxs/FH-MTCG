@@ -26,6 +26,28 @@ public class CardController : IController
         }
     }
 
+    [Route("/packages", HTTPMethod.POST, Role.ALL)]
+    public IResponse AddPackage()
+    {
+        try
+        {
+            
+            List<Card> cards = request.PayloadAsObject<List<Card>>();
+            if (cards == null) return new Response<string>(400, "Package must consist of 5 cards.");
+            return new Response<IEnumerable<Card>>(200, cards, "It worked.");
+
+
+            // repo.SavePackage(cards);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return new Response<string>(500, "It failed :(");
+
+        }
+    }
+
     public void AddCardToStack(Card card, Guid userId)
     {
         try

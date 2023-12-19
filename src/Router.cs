@@ -111,8 +111,9 @@ public class Router : IRouter
             return false;
         }
 
+        Role userAccessLevel = session.User!.GetUserAccessLevel();
 
-        return session.User?.GetUserAccessLevel() >= requestAccessLevel;
+        return userAccessLevel == (requestAccessLevel & userAccessLevel);
     }
 
 //////////////////////////////////////////////////////////////////////

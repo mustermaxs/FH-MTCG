@@ -1,13 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "6zi3qENGhKl12SDGmMal1NEegnyvtwTUv51bU6Ax8vxpmaIBfGjl45e2OW6TH6AjQ+YP4VV/OxU27xsGzdMVeQ==",
+  "dgSpecHash": "m+DgGkpIZCHPN4DWizqYs0nYVxkAAKAbF2zspR7R2teWxo988uTii4UjjR88f8O5gV6vsDRd8sm5G2WUQIwQ0Q==",
   "success": true,
   "projectFilePath": "/home/mustermax/vscode_projects/MTCG/MTCG.Tests/MTCG.Tests.csproj",
   "expectedPackageFiles": [
     "/home/mustermax/.nuget/packages/castle.core/4.4.0/castle.core.4.4.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/coverlet.collector/3.1.0/coverlet.collector.3.1.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/microsoft.codecoverage/16.11.0/microsoft.codecoverage.16.11.0.nupkg.sha512",
-    "/home/mustermax/.nuget/packages/microsoft.csharp/4.0.1/microsoft.csharp.4.0.1.nupkg.sha512",
     "/home/mustermax/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.0/microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.0/microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/microsoft.net.test.sdk/16.11.0/microsoft.net.test.sdk.16.11.0.nupkg.sha512",
@@ -17,7 +16,7 @@
     "/home/mustermax/.nuget/packages/microsoft.testplatform.testhost/16.11.0/microsoft.testplatform.testhost.16.11.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/moq/4.16.1/moq.4.16.1.nupkg.sha512",
     "/home/mustermax/.nuget/packages/netstandard.library/2.0.0/netstandard.library.2.0.0.nupkg.sha512",
-    "/home/mustermax/.nuget/packages/newtonsoft.json/9.0.1/newtonsoft.json.9.0.1.nupkg.sha512",
+    "/home/mustermax/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
     "/home/mustermax/.nuget/packages/npgsql/8.0.0/npgsql.8.0.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/nuget.frameworks/5.0.0/nuget.frameworks.5.0.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/nunit/3.13.2/nunit.3.13.2.nupkg.sha512",
@@ -31,7 +30,6 @@
     "/home/mustermax/.nuget/packages/system.componentmodel.typeconverter/4.3.0/system.componentmodel.typeconverter.4.3.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.diagnostics.debug/4.3.0/system.diagnostics.debug.4.3.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.diagnostics.diagnosticsource/8.0.0/system.diagnostics.diagnosticsource.8.0.0.nupkg.sha512",
-    "/home/mustermax/.nuget/packages/system.diagnostics.tools/4.0.1/system.diagnostics.tools.4.0.1.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.diagnostics.tracesource/4.3.0/system.diagnostics.tracesource.4.3.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.dynamic.runtime/4.3.0/system.dynamic.runtime.4.3.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.globalization/4.3.0/system.globalization.4.3.0.nupkg.sha512",
@@ -56,7 +54,6 @@
     "/home/mustermax/.nuget/packages/system.runtime.extensions/4.3.0/system.runtime.extensions.4.3.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.runtime.handles/4.3.0/system.runtime.handles.4.3.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.runtime.interopservices/4.3.0/system.runtime.interopservices.4.3.0.nupkg.sha512",
-    "/home/mustermax/.nuget/packages/system.runtime.serialization.primitives/4.1.1/system.runtime.serialization.primitives.4.1.1.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.text.encoding/4.3.0/system.text.encoding.4.3.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.text.encoding.extensions/4.3.0/system.text.encoding.extensions.4.3.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.text.encodings.web/8.0.0/system.text.encodings.web.8.0.0.nupkg.sha512",
@@ -66,7 +63,6 @@
     "/home/mustermax/.nuget/packages/system.threading.tasks/4.3.0/system.threading.tasks.4.3.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.threading.tasks.extensions/4.5.4/system.threading.tasks.extensions.4.5.4.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.xml.readerwriter/4.3.0/system.xml.readerwriter.4.3.0.nupkg.sha512",
-    "/home/mustermax/.nuget/packages/system.xml.xdocument/4.0.11/system.xml.xdocument.4.0.11.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.xml.xmldocument/4.3.0/system.xml.xmldocument.4.3.0.nupkg.sha512"
   ],
   "logs": []

@@ -14,7 +14,7 @@
 	// }
 	{
 		"Print to console": {
-			"prefix": "con",
+			"prefix": "conw",
 			"body": [
 				"Console.WriteLine($1);"
 			],

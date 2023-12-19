@@ -104,7 +104,7 @@ public class Router : IRouter
 
 
         if (!request.TryGetHeader("Authorization", out string authToken)
-            || !SessionManager.TryGetSession(authToken, out session))
+            || !SessionManager.TryGetSessionWithAuthToken(authToken, out session))
         {
             if (session == null && requestAccessLevel == Role.ANONYMOUS) return true;
 

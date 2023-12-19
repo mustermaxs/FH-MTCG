@@ -18,6 +18,12 @@ public class CryptoHandler
         return ToHex(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(data)));
     }
 
+    public static string Decode(string data)
+    {
+        return Encoding.UTF8.GetString(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(data)));
+    }
+
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 

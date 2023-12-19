@@ -61,13 +61,13 @@ public class SessionManager : BaseSessionManager
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-    public static bool TryGetSession(string authToken, out Session session)
+    public static bool TryGetSessionWithAuthToken(string authToken, out Session session)
     {
         string sessionId = CryptoHandler.Encode(authToken);
 
         lock (_sessionLock)
         {
-            Session retrievedSession;
+            Session? retrievedSession;
 
             if (Sessions.TryGetValue(sessionId, out retrievedSession))
             {
@@ -81,4 +81,29 @@ public class SessionManager : BaseSessionManager
             return false;
         }
     }
+
+    public static Session? GetSessionById(string sessionId)
+    {
+        lock (_sessionLock)
+        {
+            Session? retrievedSession = null;
+
+            Sessions.TryGetValue(sessionId, out retrievedSession);
+            
+            return retrievedSession;
+        }
+    }
+
+    public static User? GetUserBySessionId(string sessionId)
+    {
+        lock (_sessionLock)
+        {
+            Session? retrievedSession = null;
+
+            Sessions.TryGetValue(sessionId, out retrievedSession);
+
+            return retrievedSession?.User;
+        }
+    }
+
 }

@@ -43,7 +43,7 @@ namespace UnitTest.MTCG
             request.Setup(m => m.Endpoint.AccessLevel).Returns(Role.USER);
 
             var sessionMngr = new Mock<SessionManager>();
-            sessionMngr.Setup(m => SessionManager.TryGetSession(authToken, out It.Ref<Session>.IsAny)).Returns(true);
+            sessionMngr.Setup(m => SessionManager.TryGetSessionWithAuthToken(authToken, out It.Ref<Session>.IsAny)).Returns(true);
             // Act
             bool result = router.ClientHasPermissionToRequest(request.Object);
 

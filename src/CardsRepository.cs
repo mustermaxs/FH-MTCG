@@ -132,17 +132,42 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         ObjectBuilder<Card> fill = Fill;
 
         builder
-        .Select(new string[] { "s.cardid", "s.userid", "c.id", "c.name", "c.descr", "c.type", "c.element", "c.damage" })
-        .From("cards c")
-        .Join("stack s")
-        .On("c.id=s.cardid")
-        .Where("s.userid=@userid")
-        .AddParam("userid", userid);
+            .Select(new string[] { "s.cardid", "s.userid", "c.id", "c.name", "c.descr", "c.type", "c.element", "c.damage" })
+            .From("cards c")
+            .Join("stack s")
+            .On("c.id=s.cardid")
+            .Where("s.userid=@userid")
+            .AddParam("userid", userid);
 
         var cards = builder.ReadMultiple<Card>(fill);
 
         return cards;
 
+    }
+
+    public void AddCardsToPackage(IEnumerable<Card> cards, Guid packageId)
+    {
+        var builder = new QueryBuilder(Connect());
+
+        foreach (Card card in cards)
+        {
+            Guid cardId = card.Id;
+            builder.InsertInto("packagecards", new string[]{"packageId", "cardid"})
+            .AddParam("cardId", cardId)
+            .AddParam()
+        }
+    }
+
+    public Guid AddPackage()
+    {
+        var builder = new QueryBuilder(this.Connect());
+        builder
+            .InsertInto("packages", new string[] { "" })
+            .ShouldReturnInsertedId();
+
+        IEnumerable<Guid> insertedIds = builder.Run<Guid>();
+
+        return insertedIds.FirstOrDefault();
     }
 
     protected override void Fill(Card card, IDataReader re)

@@ -10,8 +10,12 @@ public delegate void ObjectBuilder<T>(T obj, IDataReader reader);
 public class QueryBuilder
 {
     private string queryString = string.Empty;
+    protected bool returnInsertedId;
+    protected bool insertedValues = false;
+    protected bool isInsertStatement = false;
     private NpgsqlConnection? _connection = null;
     private Dictionary<string, dynamic> paramMappings = new Dictionary<string, dynamic>();
+    protected List<string> commandSequence = new();
 
     public QueryBuilder(NpgsqlConnection? connection)
     {
@@ -22,11 +26,13 @@ public class QueryBuilder
 
     public QueryBuilder InsertInto(string tableName, string[] fields)
     {
+        isInsertStatement = true;
+
         queryString += " INSERT INTO {tableName} ({Columns(fields)}) ";
 
         return this;
     }
-    
+
 
     public void Reset()
     {
@@ -198,13 +204,21 @@ public class QueryBuilder
     }
 
 
-    public int ExecuteNonQuery()
+    public ExecuteNonQuery()
     {
+        if (returnInsertedId)
+            queryString += $" RETURNING id; ";
+
         using var command = new NpgsqlCommand(queryString, _connection);
 
         return command.ExecuteNonQuery();
     }
 
+
+    public void ShouldReturnInsertedId(bool returnsIds = true)
+    {
+        returnInsertedId = returnsIds;
+    }
 
     protected void CloseConnection()
     {
@@ -215,11 +229,65 @@ public class QueryBuilder
     {
         if (queryString == string.Empty) throw new Exception("Invalid query provided.");
 
+
         using (var command = new NpgsqlCommand(queryString, _connection))
         {
             return ReadMultiple<T>(builderDelegate);
         }
     }
+
+    public QueryBuilder InsertAddValues(IEnumerable<string[]> rows)
+    {
+        insertedValues = true;
+
+        if (rows == null || !rows.Any())
+        {
+            throw new ArgumentException("Rows collection cannot be null or empty.", nameof(rows));
+        }
+
+        string columns = Columns(rows.First());
+
+        queryString += $" VALUES {string.Join(", ", rows.Select(row => $"({Columns(row)})"))}";
+
+        return this;
+    }
+
+    public IEnumerable<T> Run<T>() where T : new()
+    {
+        if (queryString == string.Empty) throw new Exception("Invalid query provided.");
+
+        using (var command = new NpgsqlCommand(queryString, _connection))
+        {
+            if (returnInsertedId)
+            {
+                if (!insertedValues) queryString += $" DEFAULT VALUES; ";
+
+                return ReturnInsertedIds<T>(command);
+            }
+            else
+            {
+                throw new InvalidOperationException("Cannot call Run without a delegate when not returning inserted IDs.");
+            }
+        }
+    }
+
+    protected IEnumerable<T> ReturnInsertedIds<T>(NpgsqlCommand command) where T : new()
+    {
+        List<T> ids = new();
+
+        using (NpgsqlDataReader reader = command.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                T id = (T)reader[0];
+                ids.Add(id);
+            }
+        }
+
+        return ids;
+    }
+
+
     public int Run()
     {
         if (queryString == string.Empty) throw new Exception("Invalid query provided.");
@@ -229,6 +297,7 @@ public class QueryBuilder
             return ExecuteNonQuery();
         }
     }
+
 
 
     public T Read<T>(ObjectBuilder<T> callback) where T : new()

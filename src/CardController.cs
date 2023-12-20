@@ -32,8 +32,10 @@ public class CardController : IController
         try
         {
             
-            List<Card> cards = request.PayloadAsObject<List<Card>>();
+            List<Card>? cards = request.PayloadAsObject<List<Card>>();
+
             if (cards == null) return new Response<string>(400, "Package must consist of 5 cards.");
+            
             return new Response<IEnumerable<Card>>(200, cards, "It worked.");
 
 

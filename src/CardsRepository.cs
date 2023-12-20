@@ -183,11 +183,22 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         // return packageId;
     }
 
-    protected void AddPackageCards(IEnumerable<Card> cards)
+    public IEnumerable<Card>? GetDeckByUserId(Guid userId)
     {
+        ObjectBuilder<Card> objectBuilder = Fill;
+        var builder = new QueryBuilder(Connect());
+        builder
+            .Select("c.*", "d.*")
+            .From("cards c")
+            .Join("deck d")
+            .On("d.cardid=c.id")
+            .Where("d.userid=@userid")
+            .AddParam("userid", userId)
+            .Build();
+        
+        IEnumerable<Card>? cards = builder.ReadMultiple<Card>(objectBuilder);
 
-
-
+        return cards ?? null;
     }
 
     protected Guid AddToPackageTable()

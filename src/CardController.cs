@@ -46,6 +46,46 @@ public class CardController : IController
         }
     }
 
+    [Route("/deck", HTTPMethod.GET, Role.USER)]
+    public IResponse CreateDeckForUser()
+    {
+        try
+        {
+            Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
+            var userCards = repo.GetDeckByUserId(userId);
+
+            if (userCards == null) return new Response<string>(204, "The request was fine, but the deck doesn't have any cards");
+
+            return new Response<IEnumerable<Card>>(200, userCards, "The deck has cards, the response contains these");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            return new Response<string>(500, "Something went wrong :(");
+        }
+    }
+
+    [Route("/deck", HTTPMethod.PUT, Role.USER)]
+    public IResponse AddCardsToDeckByUserId()
+    {
+        try
+        {
+            Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
+            var cards = request.PayloadAsObject<IEnumerable<Card>>();
+            // TODO
+            // repo.AddCardsToDeck
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            return new Response<string>(500, "Something went wrong :(");
+        }
+    }
+
+
+
     [Route("/cards/{cardId:alphanum}", HTTPMethod.GET, Role.ALL)]
     public IResponse GetCardById(Guid cardId)
     {

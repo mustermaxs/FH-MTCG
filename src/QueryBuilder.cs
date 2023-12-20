@@ -33,7 +33,11 @@ public enum QBCommand
 public delegate void ObjectBuilder<T>(T obj, IDataReader reader);
 
 /// <summary>
-/// This is garbage. I know that. But time is really tight.
+/// This is garbage. I know that. But time is really limited.
+/// And so is my motivation at this very moment.
+/// I wish I could solely work on this instead of the whole
+/// monster card tra.. monster trading car... tradi.. tradeoff.
+/// Nobody is ever going to read this.
 /// </summary>
 public class QueryBuilder
 {

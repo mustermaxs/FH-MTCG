@@ -23,24 +23,22 @@ public enum QBCommand
     ADD_PARAM,
     ORDERBY,
     INSERT_VALUES,
-    VALUES,
+    VALUES_DECL,
     ADD_INSERT_VALUE,
     INSERT_DEFAULT,
-    BLANK
+    BLANK,
+    VALUES_DEF
 }
 
 public delegate void ObjectBuilder<T>(T obj, IDataReader reader);
 
-// public class QBParam<T>
-// {
-//     public string Name { get; set; }
-//     public T Value { get; set; }
-//     public int Index { get; set; }
-// }
-
+/// <summary>
+/// This is garbage. I know that. But time is really tight.
+/// </summary>
 public class QueryBuilder
 {
     private string queryString = string.Empty;
+    protected int paramIndex = 0;
     protected bool returnInsertedId;
     protected bool insertedValues = false;
     protected bool isInsertStatement = false;
@@ -50,7 +48,6 @@ public class QueryBuilder
     protected List<QBCommand> commandSequence = new();
     protected Dictionary<int, (int Index, string Key, dynamic Value)> paramSequence = new();
     protected Dictionary<int, string> columnSequence = new();
-    // protected Dictionary<int,
     protected int commandIndex = 0;
     protected int qsIndex = 0;
     protected List<string> qString = new();
@@ -70,9 +67,11 @@ public class QueryBuilder
         { QBCommand.OR, " OR" },
         { QBCommand.IN, " IN" },
         { QBCommand.ORDERBY, " ORDER BY" },
-        { QBCommand.VALUES, " VALUES" },
+        { QBCommand.VALUES_DEF, " " },
+        { QBCommand.VALUES_DECL, " VALUES " },
         {QBCommand.BLANK, "  "}
     };
+    private bool isFirstInsertValuesCall = true;
 
     public QueryBuilder(NpgsqlConnection? connection)
     {
@@ -86,7 +85,7 @@ public class QueryBuilder
         isInsertStatement = true;
         commandSequence.Add(QBCommand.INSERT);
         columnSequence[commandIndex] = fields != null && fields.Count() > 0
-            ? $" {tableName} VALUES({Columns(fields)}) "
+            ? $" {tableName} ({Columns(fields)}) "
             : $" {tableName} ";
         commandIndex++;
 
@@ -98,7 +97,7 @@ public class QueryBuilder
         commandSequence.Add(QBCommand.INSERT);
 
         columnSequence[commandIndex] = fields != null && fields.Count() > 0
-            ? $" {tableName} VALUES({Columns(fields)}) "
+            ? $" {tableName} ({Columns(fields)}) "
             : $" {tableName} ";
         commandIndex++;
 
@@ -180,12 +179,32 @@ public class QueryBuilder
 
     public QueryBuilder InsertValues(params string[]? columns)
     {
+
         if (columns != null && columns.Length > 0)
-            commandSequence.Add(QBCommand.VALUES);
+            commandSequence.Add(QBCommand.VALUES_DEF);
         else
             commandSequence.Add(QBCommand.BLANK);
 
-        columnSequence[commandIndex] = columns != null && columns.Length > 0 ? $" ({Columns(columns)}) " : "";
+
+        if (isFirstInsertValuesCall)
+        {
+            columnSequence[commandIndex] = columns != null && columns.Length > 0 ? $"VALUES ({Columns(columns)}) " : "";
+        }
+
+        else
+        {
+            if (commandIndex > 0 && commandSequence[commandIndex - 1] == QBCommand.VALUES_DEF)
+            {
+                columnSequence[commandIndex] = columns != null && columns.Length > 0 ? $" ,({Columns(columns)}) " : "";
+            }
+
+            else
+            {
+                columnSequence[commandIndex] = columns != null && columns.Length > 0 ? $" ({Columns(columns)}) " : "";
+            }
+        }
+
+        isFirstInsertValuesCall = false;
         commandIndex++;
 
         return this;
@@ -193,7 +212,7 @@ public class QueryBuilder
     public QueryBuilder InsertValues(IEnumerable<string>? columns)
     {
         if (columns != null && columns.Count() > 0)
-            commandSequence.Add(QBCommand.VALUES);
+            commandSequence.Add(QBCommand.VALUES_DEF);
         else
             commandSequence.Add(QBCommand.BLANK);
 
@@ -298,16 +317,12 @@ public class QueryBuilder
         {
             var command = commandSequence[i];
 
-            if (command == QBCommand.ADD_PARAM)
-            {
-                (int Index, string Key, dynamic Value) param = paramSequence[i];
-                param.Key = param.Key[0] == '@' ? param.Key : '@' + param.Key;
-            }
-            else if (command == QBCommand.RAW_QUERY)
+            if (command == QBCommand.RAW_QUERY)
             {
                 qString.Add(commandStringMappings[command]);
                 qString.Add(columnSequence[i]);
             }
+
             else
             {
                 qString.Add(commandStringMappings[command]);
@@ -319,16 +334,12 @@ public class QueryBuilder
         }
 
         queryString = qString.Aggregate((a, b) => a + b);
-
+        Console.WriteLine(queryString);
         calledBuild = true;
     }
 
-    public IEnumerable<T> ReadMultiple<T>(ObjectBuilder<T> callback) where T : new()
+    protected void AddParams(NpgsqlCommand command)
     {
-        if (!calledBuild) throw new Exception("Need to call QueryBuilder.Build first.");
-
-        using var command = new NpgsqlCommand(queryString, _connection);
-
         if (paramSequence.Count > 0)
         {
             foreach (var param in paramSequence)
@@ -338,6 +349,15 @@ public class QueryBuilder
                 command.Parameters.AddWithValue(Key, Value);
             }
         }
+    }
+
+    public IEnumerable<T> ReadMultiple<T>(ObjectBuilder<T> callback) where T : new()
+    {
+        if (!calledBuild) throw new Exception("Need to call QueryBuilder.Build first.");
+
+        using var command = new NpgsqlCommand(queryString, _connection);
+
+        AddParams(command);
 
         using var reader = command.ExecuteReader();
         List<T> list = new();
@@ -351,38 +371,13 @@ public class QueryBuilder
 
         return list;
     }
-    // public IEnumerable<T> ReadMultiple<T>(ObjectBuilder<T> callback, NpgsqlCommand command) where T : new()
-    // {
-    //     // _connection.Open();
-
-    //     if (paramMappings.Count > 0)
-    //     {
-    //         foreach (var mapping in paramMappings)
-    //         {
-    //             string key = mapping.Key[0] == '@' ? mapping.Key : '@' + mapping.Key;
-    //             command.Parameters.AddWithValue(key, mapping.Value);
-    //         }
-    //     }
-
-    //     using var reader = command.ExecuteReader();
-    //     List<T> list = new();
-
-    //     while (reader.Read())
-    //     {
-    //         T obj = new();
-    //         callback(obj, reader);
-    //         list.Add(obj);
-    //     }
-
-    //     return list;
-    // }
 
     public QueryBuilder AddParam(string key, dynamic value)
     {
-        commandSequence.Add(QBCommand.ADD_PARAM);
+        // commandSequence.Add(QBCommand.ADD_PARAM);
         var _key = key[0] == '@' ? key : '@' + key;
-        paramSequence[commandIndex] = (commandIndex, _key, value);
-        commandIndex++;
+        paramSequence[paramIndex++] = (commandIndex, _key, value);
+        // commandIndex++;
 
         return this;
     }
@@ -391,20 +386,11 @@ public class QueryBuilder
     {
         using (var command = new NpgsqlCommand(queryString, _connection))
         {
+            AddParams(command);
+
             return command.ExecuteNonQuery();
         }
     }
-
-
-    // public ExecuteNonQuery()
-    // {
-    //     if (returnInsertedId)
-    //         queryString += $" RETURNING id; ";
-
-    //     using var command = new NpgsqlCommand(queryString, _connection);
-
-    //     return command.ExecuteNonQuery();
-    // }
 
 
     public QueryBuilder GetInsertedIds(bool returnsIds = true)
@@ -421,19 +407,6 @@ public class QueryBuilder
 
     public T? Run<T>(ObjectBuilder<T> builderDelegate) where T : class, new()
     {
-
-        // if (queryString == string.Empty) throw new Exception("Invalid query provided.");
-
-        // if (paramSequence.Count > 0)
-        // {
-        //     foreach (var param in paramSequence)
-        //     {
-        //         var (_, Key, Value) = param.Value;
-
-        //         command.Parameters.AddWithValue(Key, Value);
-        //     }
-        // }
-
         using (var command = new NpgsqlCommand(queryString, _connection))
         {
             var resultArray = ReadMultiple<T>(builderDelegate).ToArray();
@@ -473,6 +446,8 @@ public class QueryBuilder
         }
     }
 
+
+
     protected IEnumerable<T> ReturnInsertedIds<T>(NpgsqlCommand command) where T : new()
     {
         List<T> ids = new();
@@ -481,15 +456,8 @@ public class QueryBuilder
         {
             if (queryString == string.Empty) throw new Exception("Invalid query provided.");
 
-            if (paramSequence.Count > 0)
-            {
-                foreach (var param in paramSequence)
-                {
-                    var (_, Key, Value) = param.Value;
+            AddParams(command);
 
-                    command.Parameters.AddWithValue(Key, Value);
-                }
-            }
             while (reader.Read())
             {
                 T id = (T)reader[0];

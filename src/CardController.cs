@@ -26,31 +26,23 @@ public class CardController : IController
         }
     }
 
-    [Route("/packages", HTTPMethod.POST, Role.ALL)]
+    [Route("/packages", HTTPMethod.POST, Role.ADMIN)]
     public IResponse AddPackage()
     {
         try
         {
-            
-
             List<Card>? cards = request.PayloadAsObject<List<Card>>();
-            Guid id = repo.AddPackage(cards);
-
-            if (cards == null) return new Response<string>(400, "Package must consist of 5 cards.");
             
+            if (cards == null || cards.Count < 5) return new Response<string>(400, "Package must consist of 5 cards");
             
+            repo.AddPackage(cards);
 
-            return new Response<string>(200, id.ToString(), "It worked.");
-
-
-            // repo.SavePackage(cards);
-
+            return new Response<string>(200, "Package and cards successfully created");
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            return new Response<string>(500, "It failed :(");
-
+            return new Response<string>(403, "At least one card in the packages already exists");
         }
     }
 

@@ -157,21 +157,41 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     //         .AddParam()
     //     }
     // }
-    [Obsolete("")]
-    public Guid AddPackage(IEnumerable<Card> cards)
+    // [Obsolete("")]
+    public void AddPackage(IEnumerable<Card> cards)
     {
-        Guid packageId = AddToPackageTable();
+        // Guid packageId = AddToPackageTable();
+        Guid packageId = Guid.Parse("d199ee35-d0bc-4701-9985-47ec7c8ee180");
 
-        return packageId;
+        var builder = new QueryBuilder(this.Connect());
+        builder
+            .InsertInto("packagecards", "packageid", "cardid");
+
+        int i = 1;
+
+        foreach (Card card in cards)
+        {
+            builder.InsertValues($"@packageid{i}", $"@cardid{i}")
+            .AddParam($"@packageid{i}", packageId)
+            .AddParam($"@cardid{i}", card.Id);
+            i++;
+        }
+
+        builder.Build();
+        builder.ExecuteNonQuery();
+
+        // return packageId;
+    }
+
+    protected void AddPackageCards(IEnumerable<Card> cards)
+    {
+
+
+
     }
 
     protected Guid AddToPackageTable()
     {
-        // var builder = new QueryBuilder(this.Connect());
-        // builder.RawQuery("INSERT INTO packages DEFAULT VALUES;")
-        // .GetInsertedIds(true).Build();
-
-        // Guid packageId = builder.Run<IEnumerable<Guid>>().ToArray()[0];
         var builder = new QueryBuilder(this.Connect());
         builder
             .InsertInto("packages")
@@ -182,7 +202,6 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         IEnumerable<Guid> insertedIds = builder.Run<Guid>();
 
         return insertedIds.FirstOrDefault();
-
     }
 
     protected override void Fill(Card card, IDataReader re)

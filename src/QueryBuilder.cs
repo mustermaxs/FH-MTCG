@@ -5,7 +5,36 @@ using Npgsql;
 
 namespace MTCG;
 // public delegate void FillMethod<T>(T obj, IDataReader reader);
+
+public enum QBCommand
+{
+    SELECT,
+    INSERT,
+    WHERE,
+    ON,
+    UPDATE,
+    SET,
+    JOIN,
+    FROM,
+    STRING_QUERY,
+    AND,
+    OR,
+    IN,
+    ADD_PARAM,
+    ORDERBY,
+    INSERT_VALUES,
+    VALUES,
+    ADD_INSERT_VALUE
+}
+
 public delegate void ObjectBuilder<T>(T obj, IDataReader reader);
+
+// public class QBParam<T>
+// {
+//     public string Name { get; set; }
+//     public T Value { get; set; }
+//     public int Index { get; set; }
+// }
 
 public class QueryBuilder
 {
@@ -15,7 +44,30 @@ public class QueryBuilder
     protected bool isInsertStatement = false;
     private NpgsqlConnection? _connection = null;
     private Dictionary<string, dynamic> paramMappings = new Dictionary<string, dynamic>();
-    protected List<string> commandSequence = new();
+    protected List<QBCommand> commandSequence = new();
+    protected Dictionary<int, (int Index, string Key, dynamic Value)> paramSequence = new();
+    protected Dictionary<int, string> columnSequence = new();
+    // protected Dictionary<int,
+    protected int commandIndex = 0;
+    protected int qsIndex = 0;
+    protected List<string> qString = new();
+    protected Dictionary<QBCommand, string> commandStringMappings = new()
+    {
+        { QBCommand.SELECT, " SELECT" },
+        { QBCommand.INSERT, " INSERT INTO " },
+        { QBCommand.WHERE, " WHERE" },
+        { QBCommand.ON, " ON" },
+        { QBCommand.UPDATE, " UPDATE" },
+        { QBCommand.SET, " SET" },
+        { QBCommand.JOIN, " JOIN" },
+        { QBCommand.FROM, " FROM" },
+        { QBCommand.STRING_QUERY, "STRING_QUERY" },
+        { QBCommand.AND, " AND" },
+        { QBCommand.OR, " OR" },
+        { QBCommand.IN, " IN" },
+        { QBCommand.ORDERBY, " ORDER BY" },
+        { QBCommand.VALUES, " VALUES" }
+    };
 
     public QueryBuilder(NpgsqlConnection? connection)
     {
@@ -27,8 +79,9 @@ public class QueryBuilder
     public QueryBuilder InsertInto(string tableName, string[] fields)
     {
         isInsertStatement = true;
-
-        queryString += " INSERT INTO {tableName} ({Columns(fields)}) ";
+        commandSequence.Add(QBCommand.INSERT);
+        queryString += " {tableName} ({Columns(fields)}) ";
+        commandIndex++;
 
         return this;
     }
@@ -36,27 +89,35 @@ public class QueryBuilder
 
     public void Reset()
     {
+        qString = new();
+        commandIndex = 0;
+        commandSequence = new();
+        columnSequence = new();
+        paramSequence = new();
         queryString = string.Empty;
         paramMappings.Clear();
     }
 
-    public string Build()
-    {
-        return queryString;
-    }
+    // public string Build()
+    // {
+    //     return queryString;
+    // }
 
     public QueryBuilder Select(string[] columns)
     {
-        queryString = queryString + $" SELECT {Columns(columns)} ";
+        commandSequence.Add(QBCommand.SELECT);
+        columnSequence[commandIndex] = Columns(columns);
+        commandIndex++;
+        // queryString = queryString + $" SELECT {Columns(columns)} ";
 
         return this;
     }
-    public QueryBuilder Select(string query)
-    {
-        queryString = queryString + $" SELECT {query} ";
+    // public QueryBuilder Select(string query)
+    // {
+    //     queryString = queryString + $" SELECT {query} ";
 
-        return this;
-    }
+    //     return this;
+    // }
 
     public string Columns(string[] columns)
     {
@@ -65,52 +126,88 @@ public class QueryBuilder
 
         for (int i = 0; i < columnsLength - 1; i++)
         {
+            qsIndex++;
             columnString += columns[i] + ", ";
         }
 
         columnString += columns[columnsLength - 1];
 
-        return columnString;
+        return $" {columnString} ";
     }
+
+    public QueryBuilder Values(string[] columns)
+    {
+        commandSequence.Add(QBCommand.VALUES);
+        columnSequence[commandIndex] = $" ({Columns(columns)}) ";
+        commandIndex++;
+
+        return this;
+    }
+
+
 
     public QueryBuilder Join(string table)
     {
-        queryString += $" JOIN {table}";
+        // queryString += $" JOIN {table}";
+        commandSequence.Add(QBCommand.JOIN);
+        columnSequence[commandIndex] = Columns(table.Split(","));
+        commandIndex++;
 
         return this;
     }
 
     public QueryBuilder On(string joiningColumns)
     {
-        queryString += $" ON {joiningColumns}";
+        // queryString += $" ON {joiningColumns}";
+        commandSequence.Add(QBCommand.ON);
+        columnSequence[commandIndex] = $" {joiningColumns} ";
+
+        commandIndex++;
 
         return this;
     }
 
     public QueryBuilder From(string table)
     {
-        queryString += $" FROM {table}";
+        // queryString += $" FROM {table}";
+        commandSequence.Add(QBCommand.FROM);
+        columnSequence[commandIndex] = $" {table} ";
+        commandIndex++;
 
         return this;
     }
 
     public QueryBuilder Where(string condition)
     {
-        queryString += $" WHERE {condition}";
+        // queryString += $" WHERE {condition}";
+        commandSequence.Add(QBCommand.WHERE);
+        columnSequence[commandIndex] = $" {condition} ";
+
+        commandIndex++;
+
 
         return this;
     }
 
     public QueryBuilder And(string condition)
     {
-        queryString += $" AND {condition}";
+        // queryString += $" AND {condition}";
+        commandSequence.Add(QBCommand.AND);
+        columnSequence[commandIndex] = $" {condition} ";
+
+        commandIndex++;
+
 
         return this;
     }
 
     public QueryBuilder Or(string condition)
     {
-        queryString += $" OR {condition}";
+        // queryString += $" OR {condition}";
+        commandSequence.Add(QBCommand.OR);
+        columnSequence[commandIndex] = $" {condition} ";
+
+        commandIndex++;
 
         return this;
     }
@@ -133,9 +230,75 @@ public class QueryBuilder
 
     public QueryBuilder OrderBy(string column)
     {
-        queryString += $" ORDER BY {column}";
+        // queryString += $" ORDER BY {column}";
+        commandSequence.Add(QBCommand.ORDERBY);
+        columnSequence[commandIndex] = $" {column} ";
+
+        commandIndex++;
 
         return this;
+    }
+
+    public void Build()
+    {
+        // var cmd = new NpgsqlCommand(queryString, _connection);
+        string[] insertValueGroups;
+        int paramIndex = 0;
+        int insertIndex = 0;
+
+        for (int i = 0; i < commandSequence.Count; i++)
+        {
+            var command = commandSequence[i];
+
+            if (command == QBCommand.ADD_PARAM)
+            {
+                (int Index, string Key, dynamic Value) param = paramSequence[i];
+                param.Key = param.Key[0] == '@' ? param.Key : '@' + param.Key;
+
+                // if (param.Value is string)
+                // {
+                //     qString.Add($" {param.Key} = '{param.Value}' ");
+                // }
+                // else
+                // {
+                //     qString.Add($" {param.Key} = {param.Value} ");
+                // }
+
+            }
+            //if insert statement, add the values from paramSequence
+            // allows insertion of multiple values
+            // e.g. INSERT INTO cards (id, name) VALUES(1,"goblin"), (3, "Knight")
+            // if (command == QBCommand.VALUES)
+            // {
+                // insertIndex = insertIndex == 0 ? i : insertIndex;
+                // int indexOfLast = paramSequence.Last(x => x.V)
+                // bool isFirstValue = insertIndex == i;
+                // string pre = isFirstValue ? "(" : "";
+                // string post = 
+
+                // qString.Add($" {pre} {paramSequence[i].Value}, {post}")
+
+                // qString = 
+
+
+
+                // continue;
+
+            // }
+            else
+            {
+                // if (command == )
+                qString.Add(commandStringMappings[command]);
+            }
+            if (columnSequence.TryGetValue(i, out var columns))
+            {
+                qString.Add(columns);
+            }
+
+            // var cmdStringVal = commandStringMappings[command];
+            // queryString += $" {cmdStringVal} ";
+        }
+        queryString = qString.Aggregate((a, b) => a + b);
     }
 
     public IEnumerable<T> ReadMultiple<T>(ObjectBuilder<T> callback) where T : new()
@@ -144,12 +307,13 @@ public class QueryBuilder
 
         using var command = new NpgsqlCommand(queryString, _connection);
 
-        if (paramMappings.Count > 0)
+        if (paramSequence.Count > 0)
         {
-            foreach (var mapping in paramMappings)
+            foreach (var param in paramSequence)
             {
-                string key = mapping.Key[0] == '@' ? mapping.Key : '@' + mapping.Key;
-                command.Parameters.AddWithValue(key, mapping.Value);
+                var (_, Key, Value) = param.Value;
+
+                command.Parameters.AddWithValue(Key, Value);
             }
         }
 
@@ -193,7 +357,9 @@ public class QueryBuilder
 
     public QueryBuilder AddParam(string key, dynamic value)
     {
-        paramMappings.Add(key, value);
+        commandSequence.Add(QBCommand.ADD_PARAM);
+        paramSequence[commandIndex] = (commandIndex, key, value);
+        commandIndex++;
 
         return this;
     }
@@ -204,15 +370,15 @@ public class QueryBuilder
     }
 
 
-    public ExecuteNonQuery()
-    {
-        if (returnInsertedId)
-            queryString += $" RETURNING id; ";
+    // public ExecuteNonQuery()
+    // {
+    //     if (returnInsertedId)
+    //         queryString += $" RETURNING id; ";
 
-        using var command = new NpgsqlCommand(queryString, _connection);
+    //     using var command = new NpgsqlCommand(queryString, _connection);
 
-        return command.ExecuteNonQuery();
-    }
+    //     return command.ExecuteNonQuery();
+    // }
 
 
     public void ShouldReturnInsertedId(bool returnsIds = true)
@@ -288,15 +454,15 @@ public class QueryBuilder
     }
 
 
-    public int Run()
-    {
-        if (queryString == string.Empty) throw new Exception("Invalid query provided.");
+    // public int Run()
+    // {
+    //     if (queryString == string.Empty) throw new Exception("Invalid query provided.");
 
-        using (var command = new NpgsqlCommand(queryString, _connection))
-        {
-            return ExecuteNonQuery();
-        }
-    }
+    //     using (var command = new NpgsqlCommand(queryString, _connection))
+    //     {
+    //         return ExecuteNonQuery();
+    //     }
+    // }
 
 
 

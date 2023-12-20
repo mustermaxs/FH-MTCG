@@ -70,8 +70,8 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
         var query = new QueryBuilder(Connect());
         query
-        .Select(_Fields)
-        .From(_Table);
+        .Select(_Fields.Split(", "))
+        .From(_Table).Build();
 
         return query.ReadMultiple<Card>(fill);
     }
@@ -92,13 +92,13 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
         // }
 
-        var query = new QueryBuilder(Connect());
-        query
-        .InsertInto("stack", new string[] { "userid", "cardid" })
-        .AddParam("userid", userid)
-        .AddParam("cardid", card.Id);
+        // var query = new QueryBuilder(Connect());
+        // query
+        // .InsertInto("stack", new string[] { "userid", "cardid" })
+        // .AddParam("userid", userid)
+        // .AddParam("cardid", card.Id);
 
-        query.Run();
+        // query.Run();
     }
     public IEnumerable<Card> GetAllByUserId(Guid userid)
     {
@@ -137,7 +137,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
             .Join("stack s")
             .On("c.id=s.cardid")
             .Where("s.userid=@userid")
-            .AddParam("userid", userid);
+            .AddParam("userid", userid).Build();
 
         var cards = builder.ReadMultiple<Card>(fill);
 
@@ -145,21 +145,22 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
     }
 
-    public void AddCardsToPackage(IEnumerable<Card> cards, Guid packageId)
-    {
-        var builder = new QueryBuilder(Connect());
+    // public void AddCardsToPackage(IEnumerable<Card> cards, Guid packageId)
+    // {
+    //     var builder = new QueryBuilder(Connect());
 
-        foreach (Card card in cards)
-        {
-            Guid cardId = card.Id;
-            builder.InsertInto("packagecards", new string[]{"packageId", "cardid"})
-            .AddParam("cardId", cardId)
-            .AddParam()
-        }
-    }
-
+    //     foreach (Card card in cards)
+    //     {
+    //         Guid cardId = card.Id;
+    //         builder.InsertInto("packagecards", new string[]{"packageId", "cardid"})
+    //         .AddParam("cardId", cardId)
+    //         .AddParam()
+    //     }
+    // }
+    [Obsolete("")]
     public Guid AddPackage()
     {
+        throw new NotImplementedException("");
         var builder = new QueryBuilder(this.Connect());
         builder
             .InsertInto("packages", new string[] { "" })

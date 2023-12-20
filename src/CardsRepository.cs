@@ -158,17 +158,31 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     //     }
     // }
     [Obsolete("")]
-    public Guid AddPackage()
+    public Guid AddPackage(IEnumerable<Card> cards)
     {
-        throw new NotImplementedException("");
+        Guid packageId = AddToPackageTable();
+
+        return packageId;
+    }
+
+    protected Guid AddToPackageTable()
+    {
+        // var builder = new QueryBuilder(this.Connect());
+        // builder.RawQuery("INSERT INTO packages DEFAULT VALUES;")
+        // .GetInsertedIds(true).Build();
+
+        // Guid packageId = builder.Run<IEnumerable<Guid>>().ToArray()[0];
         var builder = new QueryBuilder(this.Connect());
         builder
-            .InsertInto("packages", new string[] { "" })
-            .GetInsertedIds();
+            .InsertInto("packages")
+            .InsertValues()
+            .GetInsertedIds()
+            .Build();
 
         IEnumerable<Guid> insertedIds = builder.Run<Guid>();
 
         return insertedIds.FirstOrDefault();
+
     }
 
     protected override void Fill(Card card, IDataReader re)

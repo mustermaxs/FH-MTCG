@@ -32,11 +32,15 @@ public class CardController : IController
         try
         {
             
+
             List<Card>? cards = request.PayloadAsObject<List<Card>>();
+            Guid id = repo.AddPackage(cards);
 
             if (cards == null) return new Response<string>(400, "Package must consist of 5 cards.");
             
-            return new Response<IEnumerable<Card>>(200, cards, "It worked.");
+            
+
+            return new Response<string>(200, id.ToString(), "It worked.");
 
 
             // repo.SavePackage(cards);

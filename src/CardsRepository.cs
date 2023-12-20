@@ -132,7 +132,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         ObjectBuilder<Card> fill = Fill;
 
         builder
-            .Select(new string[] { "s.cardid", "s.userid", "c.id", "c.name", "c.descr", "c.type", "c.element", "c.damage" })
+            .Select("s.cardid", "s.userid", "c.id", "c.name", "c.descr", "c.type", "c.element", "c.damage")
             .From("cards c")
             .Join("stack s")
             .On("c.id=s.cardid")
@@ -164,7 +164,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         var builder = new QueryBuilder(this.Connect());
         builder
             .InsertInto("packages", new string[] { "" })
-            .ShouldReturnInsertedId();
+            .GetInsertedIds();
 
         IEnumerable<Guid> insertedIds = builder.Run<Guid>();
 
@@ -190,7 +190,19 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
     public override Card? Get(Guid id)
     {
-        return base.Get(id);
+        // return base.Get(id);
+        ObjectBuilder<Card> fill = Fill;
+
+        var builder = new QueryBuilder(Connect());
+        builder
+        .Select("*")
+        .From("cards")
+        .Where("id=@id")
+        .AddParam("id", id)
+        .Build();
+
+        return builder.Read<Card>(fill);
+
     }
     ///? Obsolete
     //   public Card? GetByName(string name)

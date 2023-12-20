@@ -50,6 +50,27 @@ public class CardController : IController
         }
     }
 
+    [Route("/cards/{cardId:alphanum}", HTTPMethod.GET, Role.ALL)]
+    public IResponse GetCardById(Guid cardId)
+    {
+        try
+        {
+            Card? card = repo.Get(cardId);
+
+            if (card != null)
+            {
+                return new Response<Card>(200, card, "Fetched card.");
+            }
+            else
+                throw new Exception("Failed");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ex");
+            return new ResponseWithoutPayload(500, $"Failed to fetch card.\n${ex}");
+        }
+    }
+
     public void AddCardToStack(Card card, Guid userId)
     {
         try

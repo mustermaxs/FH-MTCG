@@ -65,6 +65,7 @@ public class CardController : IController
         catch (Exception ex)
         {
             Console.WriteLine(ex);
+
             return new Response<string>(403, "At least one card in the packages already exists");
         }
     }
@@ -184,6 +185,7 @@ public class CardController : IController
         catch (Exception ex)
         {
             Console.WriteLine($"ex");
+            
             return new ResponseWithoutPayload(500, $"Failed to fetch card.\n${ex}");
         }
     }

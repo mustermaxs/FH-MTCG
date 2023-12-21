@@ -71,7 +71,7 @@ namespace MTCG
             if (Active) return;
 
             Active = true;
-            _Listener = new(IPAddress.Parse("192.168.0.4"), 12000);
+            _Listener = new(IPAddress.Parse("127.0.0.1"), 12000);
             _Listener.Start();
             var tasks = new List<Task>();
 

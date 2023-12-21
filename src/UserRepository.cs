@@ -31,6 +31,24 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
     }
   }
 
+  public void Update(User user)
+  {
+    var builder = new QueryBuilder(Connect());
+    builder
+      .Update("users")
+        .UpdateSet("bio", "@bio")
+        .UpdateSet("image", "@image")
+        .UpdateSet("name", "@name")
+      .Where("id=@id")
+    .AddParam("@bio", user.Bio)
+    .AddParam("@image", user.Image)
+    .AddParam("@name", user.Name)
+    .AddParam("@id", user.ID)
+    .Build();
+
+    builder.ExecuteNonQuery();
+  }
+
   public User? GetByName(string username)
   {
     using (NpgsqlConnection? connection = this.Connect())

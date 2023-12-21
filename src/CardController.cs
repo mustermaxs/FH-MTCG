@@ -2,19 +2,33 @@ using System;
 
 namespace MTCG;
 
+/// <summary>
+/// Controller for all things card related.
+/// </summary>
+
 [Controller]
 public class CardController : IController
 {
     protected static CardRepository repo = new CardRepository();
     public CardController(IRequest request) : base(request) { }
 
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    /// <summary>
+    /// Fetches cards in stack for a specific user:
+    /// </summary>
+    /// <returns></returns>
     [Route("/cards", HTTPMethod.GET, Role.USER)]
-    public IResponse GetCardsForUser()
+    public IResponse GetStackForUser()
     {
         try
         {
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
-            IEnumerable<Card> cards = repo.GetAllByUserId(userId);
+            IEnumerable<Card> cards = repo.GetAllCardsInStackByUserId(userId);
 
             return new Response<IEnumerable<Card>>(200, cards, $"The user has cards, the response contains these");
         }
@@ -25,6 +39,15 @@ public class CardController : IController
             return new Response<string>(500, "Internal server error. Something went wrong :()");
         }
     }
+
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
 
     [Route("/packages", HTTPMethod.POST, Role.ADMIN)]
     public IResponse AddPackage()
@@ -46,6 +69,13 @@ public class CardController : IController
         }
     }
 
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
     [Route("/deck", HTTPMethod.GET, Role.USER)]
     public IResponse GetUsersDeck()
     {
@@ -65,6 +95,13 @@ public class CardController : IController
             return new Response<string>(500, "Something went wrong :(");
         }
     }
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
 
     [Route("/deck", HTTPMethod.PUT, Role.USER)]
     public IResponse AddCardsToDeckByUserId()
@@ -97,11 +134,18 @@ public class CardController : IController
         }
     }
 
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
     protected bool IsValidRequestAddCardsToDeck(IEnumerable<Card> providedCards, Guid userId)
     {
         try
         {
-            var userStackCards = repo.GetAllByUserId(userId);
+            var userStackCards = repo.GetAllCardsInStackByUserId(userId);
             IEnumerable<Card>? deckCards = repo.GetCardsInDeckByUserId(userId);
 
             var userOwnsProvidedCards = providedCards.All<Card>(pc => userStackCards.Any<Card>(uc => uc.Id == pc.Id));
@@ -115,6 +159,12 @@ public class CardController : IController
         }
 
     }
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
 
 
     [Route("/cards/{cardId:alphanum}", HTTPMethod.GET, Role.ALL)]
@@ -138,6 +188,13 @@ public class CardController : IController
         }
     }
 
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
     public void AddCardToStack(Card card, Guid userId)
     {
         try
@@ -150,17 +207,39 @@ public class CardController : IController
         }
     }
 
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
     //TODO
     protected Card GetCardByUserId(Guid userId)
     {
         throw new NotImplementedException("");
     }
 
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
     //TODO
     protected bool DeleteCardFromStack(Guid cardId, Guid userId)
     {
         throw new NotImplementedException("");
     }
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
 
     //TODO
     [Route("/transactions/packages", HTTPMethod.POST, Role.USER | Role.ADMIN)]
@@ -183,6 +262,13 @@ public class CardController : IController
         //     return new Response<string>(500, "Internal server error. Something went wrong :()");
         // }
     }
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
 
     // TODO
     protected bool CardExists(Card card)

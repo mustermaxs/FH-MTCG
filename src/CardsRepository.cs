@@ -100,7 +100,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
         // query.Run();
     }
-    public IEnumerable<Card> GetAllByUserId(Guid userid)
+    public IEnumerable<Card> GetAllCardsInStackByUserId(Guid userid)
     {
         var builder = new QueryBuilder(this.Connect());
         ObjectBuilder<Card> fill = Fill;

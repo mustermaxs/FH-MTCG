@@ -32,9 +32,9 @@ public class CardController : IController
         try
         {
             List<Card>? cards = request.PayloadAsObject<List<Card>>();
-            
+
             if (cards == null || cards.Count < 5) return new Response<string>(400, "Package must consist of 5 cards");
-            
+
             repo.AddPackage(cards);
 
             return new Response<string>(200, "Package and cards successfully created");
@@ -47,12 +47,12 @@ public class CardController : IController
     }
 
     [Route("/deck", HTTPMethod.GET, Role.USER)]
-    public IResponse CreateDeckForUser()
+    public IResponse GetUsersDeck()
     {
         try
         {
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
-            var userCards = repo.GetDeckByUserId(userId);
+            var userCards = repo.GetCardsInDeckByUserId(userId);
 
             if (userCards == null) return new Response<string>(204, "The request was fine, but the deck doesn't have any cards");
 
@@ -71,10 +71,23 @@ public class CardController : IController
     {
         try
         {
+            List<Card> providedCards = new();
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
-            var cards = request.PayloadAsObject<IEnumerable<Card>>();
-            // TODO
-            // repo.AddCardsToDeck
+            var providedCardIds = request.PayloadAsObject<List<Guid>>();
+
+            if (providedCardIds == null || providedCardIds.Count() < 4)
+                return new Response<string>(400, "The provided deck did not include the required amount of cards");
+
+            // create cards from ids, bc for whatever reason, the requestbody
+            // only contains the ids w/out keys indicating where the value belongs
+            foreach (var id in providedCardIds) { providedCards.Add(new Card { Id = id }); }
+
+            if (!IsValidRequestAddCardsToDeck(providedCards, userId))
+                return new Response<string>(403, "At least one of the provided cards does not belong to the user or is not available.");
+
+            repo.AddCardsToDeck(providedCards!, userId);
+
+            return new Response<string>(200, "The deck has been successfully configured");
         }
         catch (Exception ex)
         {
@@ -84,6 +97,24 @@ public class CardController : IController
         }
     }
 
+    protected bool IsValidRequestAddCardsToDeck(IEnumerable<Card> providedCards, Guid userId)
+    {
+        try
+        {
+            var userStackCards = repo.GetAllByUserId(userId);
+            IEnumerable<Card>? deckCards = repo.GetCardsInDeckByUserId(userId);
+
+            var userOwnsProvidedCards = providedCards.All<Card>(pc => userStackCards.Any<Card>(uc => uc.Id == pc.Id));
+            var deckIsEmpty = deckCards == null || deckCards.Count() == 0;
+
+            return userOwnsProvidedCards && deckIsEmpty;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Validating request to add cards to deck failed.\n{ex}");
+        }
+
+    }
 
 
     [Route("/cards/{cardId:alphanum}", HTTPMethod.GET, Role.ALL)]

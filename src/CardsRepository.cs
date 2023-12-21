@@ -102,32 +102,6 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     }
     public IEnumerable<Card> GetAllByUserId(Guid userid)
     {
-        // using (NpgsqlConnection? connection = this.Connect())
-        // using (var command = new NpgsqlCommand(@$"
-        // SELECT s.cardid, s.userid, c.id, c.name, c.descr, c.type, c.element, c.damage
-        // FROM {_Table} c
-        // JOIN stack s
-        // ON c.id=s.cardid
-        // WHERE s.userid=@userid", connection))
-        // {
-        //     command.Parameters.AddWithValue("@userid", userid);
-
-        //     IDataReader re = command.ExecuteReader();
-
-        //     List<Card> cards = new List<Card>();
-
-        //     while (re.Read())
-        //     {
-        //         Card card = new Card();
-        //         _Fill(card, re);
-        //         cards.Add(card);
-        //     }
-
-        //     command.Dispose(); connection!.Dispose();
-
-        //     return cards;
-        // }
-
         var builder = new QueryBuilder(this.Connect());
         ObjectBuilder<Card> fill = Fill;
 
@@ -142,7 +116,6 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         var cards = builder.ReadMultiple<Card>(fill);
 
         return cards;
-
     }
 
     // public void AddCardsToPackage(IEnumerable<Card> cards, Guid packageId)
@@ -183,7 +156,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         // return packageId;
     }
 
-    public IEnumerable<Card>? GetDeckByUserId(Guid userId)
+    public IEnumerable<Card>? GetCardsInDeckByUserId(Guid userId)
     {
         ObjectBuilder<Card> objectBuilder = Fill;
         var builder = new QueryBuilder(Connect());
@@ -195,10 +168,28 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
             .Where("d.userid=@userid")
             .AddParam("userid", userId)
             .Build();
-        
+
         IEnumerable<Card>? cards = builder.ReadMultiple<Card>(objectBuilder);
 
         return cards ?? null;
+    }
+
+    public void AddCardsToDeck(IEnumerable<Card> cards, Guid userId)
+    {
+        var builder = new QueryBuilder(Connect());
+        builder.InsertInto("deck", "cardid", "userid");
+        int i = 0;
+
+        foreach (Card card in cards)
+        {
+            builder
+                .InsertValues($"@cardid{i}", $"@userid{i}")
+                .AddParam($"@cardid{i}", card.Id)
+                .AddParam($"@userid{i}", userId);
+        }
+
+        builder.Build();
+        builder.ExecuteNonQuery();
     }
 
     protected Guid AddToPackageTable()
@@ -248,28 +239,6 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         return builder.Read<Card>(fill);
 
     }
-    ///? Obsolete
-    //   public Card? GetByName(string name)
-    //   {
-    //     using (NpgsqlConnection? connection = this._Connect())
-    //     using (var command = new NpgsqlCommand($"SELECT * FROM {_Table} WHERE name=@name", connection))
-    //     {
-    //       command.Parameters.AddWithValue("@name", name);
-
-    //       IDataReader re = command.ExecuteReader();
-    //       Card? card = null;
-
-    //       if (re.Read())
-    //       {
-    //         card = new Card();
-    //         _Fill(card, re);
-    //       }
-
-    //       command.Dispose(); connection!.Dispose();
-
-    //       return card;
-    //     }
-    //   }
 
     public override void Delete(Card card)
     {

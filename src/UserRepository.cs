@@ -13,6 +13,11 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
     _Fields = "id, name, password, coins, bio, image, role";
   }
 
+
+  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
+
+
   public override void Save(User user)
   {
 
@@ -30,6 +35,11 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
       command.Dispose(); connection!.Dispose();
     }
   }
+
+
+  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
+
 
   public void Update(User user)
   {
@@ -49,27 +59,33 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
     builder.ExecuteNonQuery();
   }
 
+
+
+  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
+
+
+
   public User? GetByName(string username)
   {
-    using (NpgsqlConnection? connection = this.Connect())
-    using (var command = new NpgsqlCommand($"SELECT * FROM {_Table} WHERE name=@name", connection))
-    {
-      command.Parameters.AddWithValue("@name", username);
+    ObjectBuilder<User> objectBuilder = _Fill;
+    var builder = new QueryBuilder(Connect());
+    builder
+      .Select("*")
+      .From("users")
+      .Where("name=@name")
+      .AddParam("@name", username)
+      .Build();
 
-      IDataReader re = command.ExecuteReader();
-      User? user = null;
+    User? user = builder.Read<User>(objectBuilder);
 
-      if (re.Read())
-      {
-        user = new User();
-        _Fill(user, re);
-      }
-
-      command.Dispose(); connection!.Dispose();
-
-      return user;
-    }
+    return user ?? null;
   }
+
+
+
+  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
 
 
 
@@ -79,10 +95,18 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
   }
 
 
+  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
+
+
   protected override void Fill(User obj, IDataReader re)
   {
     throw new NotImplementedException();
   }
+
+
+  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
 
 
   protected override void _Fill(User user, IDataReader re)

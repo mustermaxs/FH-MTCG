@@ -158,13 +158,37 @@ public class UserController : IController
     //////////////////////////////////////////////////////////////////////
 
 
-    [Route("/users/{userid:alphanum}", HTTPMethod.GET, Role.ALL)]
+    // [Route("/users/{userid:alphanum}", HTTPMethod.GET, Role.ALL)]
+    [Obsolete("Don't need this.")]
     public IResponse GetUserById(Guid userid)
     {
         User? user = repo.Get(userid);
         Thread.Sleep(2000);
 
         return new SuccessResponse<User>(200, user, "");
+    }
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+    [Route("/users/{username:alpha}", HTTPMethod.GET, Role.USER  | Role.ADMIN)]
+    public IResponse GetUserByName(string username)
+    {
+        try
+        {
+            User? user = repo.GetByName(username);
+
+            if (user == null)
+                return new Response<string>(404, "User not found.");
+
+            return new Response<User>(200, user, "Data successfully retrieved");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to get user by name.\n{ex}");
+
+            return new Response<string>(500, "Something went wrong :(");
+        }
     }
 }

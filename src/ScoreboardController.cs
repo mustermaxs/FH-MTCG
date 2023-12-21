@@ -22,7 +22,7 @@ namespace MTCG
         public ScoreboardController(IRequest context):base(context) {}
 
 
-        [Route("score", HTTPMethod.GET)]
+        [Route("score", HTTPMethod.GET, Role.ALL)]
         public string GetScore()
         {
             return JsonSerializer.Serialize<Point>(new Point("Max", 100));

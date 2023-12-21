@@ -5,13 +5,14 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 
 
 
 namespace MTCG
 {
     /// <summary>This class implements a HTTP server.</summary>
-    public sealed class HttpServer
+    public class HttpServer
     {
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // private members                                                                                                  //
@@ -90,19 +91,8 @@ namespace MTCG
                         data += Encoding.ASCII.GetString(buf, 0, n);
                     }
 
-                    /// 07.12.2023 14:47
-                    /// IMPROVE RoutingContext nimmt zu viele Argumente entgegen.
-                    /// Setter sind ok. zusammmen mit HttpSvrEventArgs wirkts aber etwas
-                    /// redundant
                     var svrEventArgs = new HttpSvrEventArgs(client, data);
-                    var requestBuilder = new RequestBuilder();
-
-                    IRequest request = requestBuilder
-                    .WithHeaders(svrEventArgs.Headers)
-                    .WithHttpMethod(svrEventArgs.Method)
-                    .WithPayload(svrEventArgs.Payload)
-                    .WithRoute(svrEventArgs.Path)
-                    .Build();
+                    var request = BuildRequest(svrEventArgs);
 
                     IResponse response = router.HandleRequest(ref request);
 
@@ -121,6 +111,33 @@ namespace MTCG
                 _Listener.Stop();
 
             }
+        }
+
+        protected IRequest BuildRequest(HttpSvrEventArgs svrEventArgs)
+        {
+            CookieContainer cookieContainer = new CookieContainer();
+            Session session;
+
+            var request = new RequestBuilder();
+            string? authToken = svrEventArgs.Headers.SingleOrDefault<HttpHeader>(header => header.Name == "Authorization")?.Value;
+
+
+            request
+            .WithHeaders(svrEventArgs.Headers)
+            .WithHttpMethod(svrEventArgs.Method)
+            .WithPayload(svrEventArgs.Payload)
+            .WithRoute(svrEventArgs.Path);
+
+            if (authToken == null)
+                return request.Build();
+                
+            if (SessionManager.TryGetSessionWithAuthToken(authToken, out session))
+            {
+                var sessionId = session.SessionId;
+                request.WithSessionId(sessionId);
+            }
+            
+            return request.Build();
         }
 
         protected void SetUpRouter()

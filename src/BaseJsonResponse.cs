@@ -1,6 +1,6 @@
 using System;
-using System.Text.Json;
-
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 namespace MTCG;
 
 public abstract class BaseJsonResponse<T> : IResponse where T : class?
@@ -37,6 +37,6 @@ public abstract class BaseJsonResponse<T> : IResponse where T : class?
             return string.Empty;
         }
 
-        return JsonSerializer.Serialize<T>(Payload);
+        return JsonConvert.SerializeObject(Payload);
     }
 }

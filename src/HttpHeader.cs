@@ -17,25 +17,37 @@ namespace MTCG
         }
 
 
-        public HttpHeader(string header) 
+        public HttpHeader(string header)
         {
             Name = Value = string.Empty;
 
             try
             {
                 int n = header.IndexOf(':');
-                Name  = header.Substring(0, n).Trim();
+                Name = header.Substring(0, n).Trim();
+                // if is authoriation token, save only value of token as value without the auth schema
+                if (header.Contains("Authorization"))
+                {
+                    Value = ExtractAuthToken(header);
+                    return;
+                }
                 Value = header.Substring(n + 1).Trim();
             }
-            catch(Exception) {}
+            catch (Exception) { }
         }
+
+        protected string ExtractAuthToken(string authToken)
+        {
+            return authToken.Split(' ')[2];
+        }
+
 
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // public properties                                                                                                //
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
+
         /// <summary>Gets the header name.</summary>
         virtual public string Name
         {
@@ -44,9 +56,9 @@ namespace MTCG
 
 
         /// <summary>Gets the header value.</summary>
-        virtual public string Value 
-        { 
-            get; protected set; 
+        virtual public string Value
+        {
+            get; protected set;
         } = string.Empty;
     }
 }

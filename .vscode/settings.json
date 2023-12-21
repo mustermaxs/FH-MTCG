@@ -1,0 +1,4 @@
+{
+    "editor.suggest.snippetsPreventQuickSuggestions": true,
+    "editor.snippetSuggestions": "inline"
+}

@@ -25,7 +25,7 @@ public class RouteRegistry : IEndpointMapper
     /// Stores a dictionary of all the registered endpoints in the application.
     /// Associates them with their HTTP-method for faster lookup and structure.
     /// </summary>
-    
+
     private Dictionary<HTTPMethod, List<IEndpoint>> endpointMappings;
     private IUrlParser parser;
 
@@ -34,7 +34,7 @@ public class RouteRegistry : IEndpointMapper
     /// <summary>
     /// Stores a static instance of a RouteRegistry.
     /// </summary>
-    
+
     private static IEndpointMapper? _this = null;
 
 
@@ -64,7 +64,7 @@ public class RouteRegistry : IEndpointMapper
     /// <param name="urlParser">
     /// Parser to extract (named) variables from the requested URL
     /// </param>
-    
+
     private RouteRegistry(IUrlParser urlParser)
     {
         this.parser = urlParser;
@@ -98,7 +98,7 @@ public class RouteRegistry : IEndpointMapper
     /// <returns>
     /// Boolean
     /// </returns>  
-    
+
     public bool IsRouteRegistered(string routeTemplate, HTTPMethod httpMethod)
     {
         List<IEndpoint> potentialEndpoints;
@@ -128,14 +128,24 @@ public class RouteRegistry : IEndpointMapper
     /// <param name="controllerMethod">
     /// Controller method that's supposed to handle the request.
     /// </param>
-    
-    public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, MethodInfo controllerMethod)
+
+    public void RegisterEndpoint(string routePattern, HTTPMethod method, Type controllerType, MethodInfo controllerMethod, Role accesslevel)
     {
         var parsedRoutePattern = this.parser.ReplaceTokensWithRegexPatterns(routePattern);
 
         if (!IsRouteRegistered(parsedRoutePattern, method))
         {
-            this.endpointMappings[method].Add(new Endpoint(method, parsedRoutePattern, routePattern, controllerType, controllerMethod));
+            var endpointBuilder = new EndpointBuilder();
+
+            endpointBuilder
+                .WithHttpMethod(method)
+                .WithControllerType(controllerType)
+                .WithAccessLevel(accesslevel)
+                .WithRoutePattern(routePattern)
+                .WithControllerMethod(controllerMethod);
+
+
+            this.endpointMappings[method].Add(endpointBuilder.Build());
         }
         else
         {
@@ -153,12 +163,12 @@ public class RouteRegistry : IEndpointMapper
     /// <param name="endpoint">
     /// Object implementing the IEndpoint interface
     /// </param>
-    
+
     public void RegisterEndpoint(IEndpoint endpoint)
     {
         var parsedRoutePattern = this.parser.ReplaceTokensWithRegexPatterns(endpoint.RouteTemplate);
 
-        if (!IsRouteRegistered(parsedRoutePattern, endpoint.HttpMethod))
+        if (!IsRouteRegistered(endpoint.RouteTemplate, endpoint.HttpMethod))
         {
             this.endpointMappings[endpoint.HttpMethod].Add(
                 new Endpoint(
@@ -166,7 +176,8 @@ public class RouteRegistry : IEndpointMapper
                     parsedRoutePattern,
                     endpoint.RouteTemplate,
                     endpoint.ControllerType,
-                    endpoint.ControllerMethod));
+                    endpoint.ControllerMethod,
+                    endpoint.AccessLevel));
         }
         else
         {
@@ -195,7 +206,7 @@ public class RouteRegistry : IEndpointMapper
     /// this method returns an object that implements the IEndpoint interface.
     /// If it doesn't find a matching endpoint, it throws a RouteDoesntExistException.
     /// </returns>
-    
+
     public IEndpoint? MapRequestToEndpoint(string requestedUrl, HTTPMethod method)
     {
         List<IEndpoint> potentialEndpoints = endpointMappings[method];

@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "1L+dDIf9CkoQiEIYrRCD9HPgSCLBRSXaM6rcZXcg5Nd4nQWilSrLinMC5U4ScXcwtR8/QxksLmjC6Uc9Niw2lw==",
+  "dgSpecHash": "NqnfL+zn9O1xmCPe6Cm9uvIEPPRiB5PNgzsbMbCgYZ8+TECw2xurtJF1Q9/krUSOevC1Bxq80rBMKSqYp9DBFA==",
   "success": true,
   "projectFilePath": "/home/mustermax/vscode_projects/MTCG/src/MTCG.csproj",
   "expectedPackageFiles": [
     "/home/mustermax/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.0/microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.0/microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",
+    "/home/mustermax/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
     "/home/mustermax/.nuget/packages/npgsql/8.0.0/npgsql.8.0.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.diagnostics.diagnosticsource/8.0.0/system.diagnostics.diagnosticsource.8.0.0.nupkg.sha512",
     "/home/mustermax/.nuget/packages/system.runtime.compilerservices.unsafe/6.0.0/system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",

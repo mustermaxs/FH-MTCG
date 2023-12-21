@@ -28,6 +28,7 @@ namespace MTCG
         protected string _Fields = "";
 
 
+        protected abstract void Fill(T obj, IDataReader re);
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // protected methods                                                                                                //
@@ -46,7 +47,7 @@ namespace MTCG
 
         /// <summary>Creates and returns a valid database connection.</summary>
         /// <returns>Database connection.</returns>
-        protected NpgsqlConnection? _Connect()
+        protected NpgsqlConnection? Connect()
         {
             try
             {
@@ -80,7 +81,7 @@ namespace MTCG
         /// <returns>Returns the retrieved object or NULL if there is no object with the given ID..</returns>
         public virtual T? Get(Guid id)
         {
-            using (var connection = this._Connect())
+            using (var connection = this.Connect())
             {
                 var command = new NpgsqlCommand($"SELECT {_Fields} FROM {_Table} WHERE id = @id", connection);
                 T? rval = new();
@@ -109,15 +110,13 @@ namespace MTCG
         /// REFACTOR
         public virtual IEnumerable<T> GetAll()
         {
-            using (var connection = this._Connect())
+            using (var connection = this.Connect())
             using (var command = new NpgsqlCommand($"SELECT * FROM {_Table}", connection))
             {
                 Dictionary<string, string> dbParams = new Dictionary<string, string>();
                 List<T> rval = new();
 
                 IDataReader re = command.ExecuteReader();
-
-                int index = 0;
 
                 while (re.Read())
                 {
@@ -138,7 +137,7 @@ namespace MTCG
         /// <param name="obj">Object.</param>
         public virtual void Delete(T obj)
         {
-            using (var connection = this._Connect())
+            using (var connection = this.Connect())
             {
                 IDbCommand cmd = connection.CreateCommand();
                 cmd.CommandText = $"SELECT {_Fields} FROM {_Table}";

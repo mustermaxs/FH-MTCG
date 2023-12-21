@@ -5,20 +5,22 @@ using System.Threading.Tasks;
 
 namespace MTCG;
 
-
-
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 /// <summary>
 /// Performs all the request/response handling.
 /// Delegates the work to designated entities.
 /// </summary>
-
 public class Router : IRouter
 {
     private IEndpointMapper routeRegistry;
     private IRouteObtainer routeObtainer;
     // private IAuthenticator authenticator;
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
 
     /// <summary>
@@ -33,11 +35,6 @@ public class Router : IRouter
     /// <param name="routeObtainer">
     /// Gets 
     /// </param>
-
-
-    /// 06.12.2023 20:40
-    /// IMPROVE routeObtainer sollte nicht direkt im router verwendet werden
-    /// router sollte in RegisterRoutes
     public Router(IEndpointMapper routeRegistry, IRouteObtainer routeObtainer)
     {
         this.routeRegistry = routeRegistry;
@@ -45,6 +42,8 @@ public class Router : IRouter
     }
 
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
 
     /// <summary>
@@ -54,7 +53,7 @@ public class Router : IRouter
     /// </summary>
     public void RegisterRoutes()
     {
-        var routes = routeObtainer.ObtainRoutes();
+        List<Endpoint> routes = routeObtainer.ObtainRoutes();
 
         foreach (var route in routes)
         {
@@ -62,15 +61,64 @@ public class Router : IRouter
                 var RouteTemplate,
                 var HttpMethod,
                 var ControllerType,
-                var ControllerMethod
+                var ControllerMethod,
+                var AccessLevel
             ) = route;
 
-            routeRegistry.RegisterEndpoint(RouteTemplate, HttpMethod, ControllerType, ControllerMethod);
+            var endpointBuilder = new EndpointBuilder();
+            endpointBuilder
+            .WithRouteTemplate(RouteTemplate)
+            .WithHttpMethod(HttpMethod)
+            .WithControllerType(ControllerType)
+            .WithControllerMethod(ControllerMethod)
+            .WithAccessLevel(AccessLevel);
+
+            Endpoint endpoint = endpointBuilder.Build();
+            routeRegistry.RegisterEndpoint(endpoint);
+            Console.WriteLine($"[Register Route] {HttpMethod.ToString().PadRight(5)} {RouteTemplate}");
         }
     }
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+    protected bool CompareAccessLevels(Role clientAccessLevel, Role requiredAccessLevel)
+    {
+        return clientAccessLevel >= requiredAccessLevel;
+    }
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
 
+    public bool ClientHasPermissionToRequest(IRequest request)
+    {
+        Role requestAccessLevel = request.Endpoint!.AccessLevel;
+
+        Session session = null;
+
+
+        if (requestAccessLevel == Role.ALL)
+        {
+            return true;
+        }
+
+
+        if (!request.TryGetHeader("Authorization", out string authToken)
+            || !SessionManager.TryGetSessionWithAuthToken(authToken, out session))
+        {
+            if (session == null && requestAccessLevel == Role.ANONYMOUS) return true;
+
+            return false;
+        }
+
+        Role userAccessLevel = session.User!.GetUserAccessLevel();
+
+        return userAccessLevel == (requestAccessLevel & userAccessLevel);
+    }
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
     /// <summary>
     /// Responsible for getting the necessary ressources to process the request.
@@ -86,6 +134,8 @@ public class Router : IRouter
         try
         {
             routeRegistry.MapRequestToEndpoint(ref request);
+
+            if (!ClientHasPermissionToRequest(request)) throw new AuthenticationFailedException($"Client doesn't have access to ressource.");
 
             var controllerType = request.Endpoint!.ControllerType;
             var controller = (IController)Activator.CreateInstance(controllerType, request);
@@ -104,14 +154,6 @@ public class Router : IRouter
             return response;
         }
 
-        catch (DbTransactionFailureException ex)
-        {
-            Console.WriteLine($"Transaction failed.\n{ex.Message}");
-
-            return new ResponseWithoutPayload(500, $"Transaction failed.\n{ex.Message}");
-
-        }
-
         catch (RouteDoesntExistException ex)
         {
             Console.WriteLine($"{ex}\nRequested endpoint: {ex.Url}");
@@ -121,13 +163,15 @@ public class Router : IRouter
 
         catch (AuthenticationFailedException ex)
         {
-            Console.WriteLine($"Authentication failed.");
+            Console.WriteLine($"Access token is missing or invalid");
 
-            return new ResponseWithoutPayload(404, $"Something went wrong.\n{ex.Message}");
+            return new ResponseWithoutPayload(404, $"Access token is missing or invalid.\n{ex.Message}");
         }
 
         catch (Exception ex)
         {
+            Console.WriteLine($"ERROR\n{ex}");
+
             return new ResponseWithoutPayload(500, $"Something went wrong.\n{ex.Message}");
         }
     }

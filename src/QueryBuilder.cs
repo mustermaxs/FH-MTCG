@@ -45,6 +45,7 @@ public class QueryBuilder
     protected int paramIndex = 0;
     protected bool returnInsertedId;
     protected bool insertedValues = false;
+    private int expectNbrOfValuesInserted = 0;
     protected bool isInsertStatement = false;
     private NpgsqlConnection? _connection = null;
     protected bool calledBuild = false;
@@ -86,6 +87,7 @@ public class QueryBuilder
 
     public QueryBuilder InsertInto(string tableName, IEnumerable<string>? fields)
     {
+        expectNbrOfValuesInserted = fields?.Count() ?? 0;
         isInsertStatement = true;
         commandSequence.Add(QBCommand.INSERT);
         columnSequence[commandIndex] = fields != null && fields.Count() > 0
@@ -97,6 +99,7 @@ public class QueryBuilder
     }
     public QueryBuilder InsertInto(string tableName, params string[]? fields)
     {
+        expectNbrOfValuesInserted = fields?.Count() ?? 0;
         isInsertStatement = true;
         commandSequence.Add(QBCommand.INSERT);
 
@@ -183,7 +186,8 @@ public class QueryBuilder
 
     public QueryBuilder InsertValues(params string[]? columns)
     {
-
+        int columnCount = columns?.Length ?? 0;
+        if (columnCount < expectNbrOfValuesInserted) throw new ArgumentException($"Expected {expectNbrOfValuesInserted} values to be inserted.");
         if (columns != null && columns.Length > 0)
             commandSequence.Add(QBCommand.VALUES_DEF);
         else
@@ -215,6 +219,8 @@ public class QueryBuilder
     }
     public QueryBuilder InsertValues(IEnumerable<string>? columns)
     {
+        int columnCount = columns?.Count() ?? 0;
+        if (columnCount < expectNbrOfValuesInserted) throw new ArgumentException($"Expected {expectNbrOfValuesInserted} values to be inserted.");
         if (columns != null && columns.Count() > 0)
             commandSequence.Add(QBCommand.VALUES_DEF);
         else

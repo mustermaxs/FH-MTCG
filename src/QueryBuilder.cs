@@ -54,6 +54,7 @@ public class QueryBuilder
     protected Dictionary<int, (int Index, string Key, dynamic Value)> paramSequence = new();
     protected Dictionary<int, string> columnSequence = new();
     protected int commandIndex = 0;
+    protected bool isFirstUpdateSetStmt = true;
     protected int qsIndex = 0;
     protected List<string> qString = new();
     protected Dictionary<QBCommand, string> commandStringMappings = new()
@@ -74,7 +75,7 @@ public class QueryBuilder
         { QBCommand.ORDERBY, " ORDER BY" },
         { QBCommand.VALUES_DEF, " " },
         { QBCommand.VALUES_DECL, " VALUES " },
-        {QBCommand.BLANK, "  "}
+        {QBCommand.BLANK, "  "},
     };
     private bool isFirstInsertValuesCall = true;
 
@@ -227,6 +228,31 @@ public class QueryBuilder
             commandSequence.Add(QBCommand.BLANK);
 
         columnSequence[commandIndex] = columns != null && columns.Count() > 0 ? $" ({Columns(columns)}) " : "";
+        commandIndex++;
+
+        return this;
+    }
+
+
+    public QueryBuilder Update(string tableName)
+    {
+        commandSequence.Add(QBCommand.UPDATE);
+        columnSequence[commandIndex] = $" {tableName} ";
+        
+        commandIndex++;
+
+        return this;
+    }
+
+    public QueryBuilder UpdateSet(string column, string value)
+    {
+        string pre = isFirstUpdateSetStmt ? " SET " : "";
+        string commaOrNothing = isFirstUpdateSetStmt ? "" : " , ";
+
+        commandSequence.Add(QBCommand.BLANK);
+        columnSequence[commandIndex] = $" {pre} {commaOrNothing} {column}={value} ";
+
+        isFirstUpdateSetStmt = false;
         commandIndex++;
 
         return this;

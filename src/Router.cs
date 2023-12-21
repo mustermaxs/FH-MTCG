@@ -5,22 +5,23 @@ using System.Threading.Tasks;
 
 namespace MTCG;
 
-
-
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 /// <summary>
 /// Performs all the request/response handling.
 /// Delegates the work to designated entities.
 /// </summary>
-
 public class Router : IRouter
 {
     private IEndpointMapper routeRegistry;
     private IRouteObtainer routeObtainer;
     // private IAuthenticator authenticator;
 
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
+
 
     /// <summary>
     /// Constructor for the router.
@@ -162,7 +163,7 @@ public class Router : IRouter
 
         catch (AuthenticationFailedException ex)
         {
-            Console.WriteLine($"Authentication failed.");
+            Console.WriteLine($"Access token is missing or invalid");
 
             return new ResponseWithoutPayload(404, $"Access token is missing or invalid.\n{ex.Message}");
         }

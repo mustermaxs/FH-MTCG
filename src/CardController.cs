@@ -30,7 +30,13 @@ public class CardController : IController
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
             IEnumerable<Card> cards = repo.GetAllCardsInStackByUserId(userId);
 
+            if (cards.Count() == 0) return new Response<string>(204, "The request was fine, but the user doesn't have any cards");
+            
             return new Response<IEnumerable<Card>>(200, cards, $"The user has cards, the response contains these");
+
+            // string stackId = repo.GetStackIdForUserId(userId)?.ToString() ?? string.Empty;
+
+            // return new Response<string>(200, stackId.ToString(), $"The user has cards, the response contains these");
         }
         catch (Exception ex)
         {
@@ -196,8 +202,7 @@ public class CardController : IController
     //////////////////////////////////////////////////////////////////////
 
 
-
-    public void AddCardToStack(Card card, Guid userId)
+    protected void AddCardToStack(Card card, Guid userId)
     {
         try
         {
@@ -210,11 +215,49 @@ public class CardController : IController
     }
 
 
+    [Route("/cards", HTTPMethod.POST, Role.USER)]
+    public IResponse AddCardsToStack()
+    {
+        try
+        {
+            Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
+            var cards = request.PayloadAsObject<List<Card>>();
+            
+            foreach (Card card in cards)
+            {
+                repo.AddCardToStack(card, userId);
+            }
+
+            return new Response<string>(200, "Cards successfully added to stack.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to add cards to stack.\n{ex}");
+
+            return new Response<string>(500, "Something went wrong :(");
+        }
+    }
 
 
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
+    [Route("/cards/all", HTTPMethod.GET, Role.ALL)]
+    public IResponse GetAllCards()
+    {
+        try
+        {
+            IEnumerable<Card> cards = repo.GetAll();
+
+            return new Response<IEnumerable<Card>>(200, cards, "Fetched all cards.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to fetch all cards.\n{ex}");
+
+            return new Response<string>(500, "Something went wrong :(");
+        }
+    }
 
 
     //TODO

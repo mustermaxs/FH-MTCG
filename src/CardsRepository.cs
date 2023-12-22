@@ -32,18 +32,71 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         }
     }
 
-    public void SaveCardToStack(Card card, Guid userId)
+    public void AddCardToStack(Card card, Guid userId)
     {
-        using (NpgsqlConnection? connection = this.Connect())
-        using (var command = new NpgsqlCommand($"INSERT INTO stack (cardid, userid) VALUES (@cardid, @userid);", connection))
-        {
-            command.Parameters.AddWithValue("@cardid", card.Id);
-            command.Parameters.AddWithValue("@userid", userId);
+        var builder = new QueryBuilder(Connect());
 
-            command.ExecuteNonQuery();
+        builder
+            .InsertInto("stackcards", "userid", "cardid")
+            .InsertValues("@userid", "@cardid")
+            .AddParam("@userid", userId)
+            .AddParam("@cardid", card.Id)
+            .Build();
+        
+        builder.ExecuteNonQuery();            
+    }
 
-            command.Dispose(); connection!.Dispose();
-        }
+    public void RemoveCardFromStack(Card card, Guid userId)
+    {
+        var builder = new QueryBuilder(Connect());
+        builder
+            .Delete()
+            .From("stack")
+            .Where("userid=@userid")
+            .AddParam("@userid", userId)
+            .And("cardid=@cardid")
+            .AddParam("@cardid", card.Id)
+            .Limit("1")
+            .Build();
+
+        builder.ExecuteNonQuery();
+    }
+
+
+    public void RemoveCardFromDeck(Card card, Guid userId)
+    {
+        var builder = new QueryBuilder(Connect());
+        builder
+            .Delete()
+            .From("decks")
+            .Where("userid=@userid")
+            .AddParam("@userid", userId)
+            .And("cardid=@cardid")
+            .AddParam("@cardid", card.Id)
+            .Limit("1")
+            .Build();
+
+        builder.ExecuteNonQuery();
+    }
+
+
+    [Obsolete("")]
+    public Guid? GetStackIdForUserId(Guid userId)
+    {
+        var builder = new QueryBuilder(Connect());
+        builder
+            .Select("id")
+            .From("stack")
+            .Where("userid=@userid")
+            .AddParam("@userid", userId)
+            .Build();
+
+        var records =  builder.ReadMultiple().ToArray();
+        
+        if (records.Count() > 0)
+            return (Guid)records[0]["id"];
+        
+        return null;
     }
 
     public override IEnumerable<Card> GetAll()
@@ -68,50 +121,29 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         // }
         ObjectBuilder<Card> fill = Fill;
 
-        var query = new QueryBuilder(Connect());
-        query
-        .Select(_Fields.Split(", "))
-        .From(_Table).Build();
+        var builder = new QueryBuilder(Connect());
+        builder
+            .Select("*")
+            .From("cards")
+            .Build();
 
-        return query.ReadMultiple<Card>(fill);
+        return builder.ReadMultiple<Card>(fill);
     }
 
-    //TODO
-    public void AddCardToStack(Card card, Guid userid)
-    {
-        // using (NpgsqlConnection? connection = this.Connect())
-        // using (var command = new NpgsqlCommand($"INSERT INTO stack (userid, cardid) VALUES(@userid, @cardid)", connection))
-        // {
-        //     command.Parameters.AddWithValue("@cardid", card.Id);
-        //     command.Parameters.AddWithValue("@userid", userid);
 
-        //     command.ExecuteNonQuery();
-        //     command.Dispose(); connection!.Dispose();
-
-        //     // return cards;
-
-        // }
-
-        // var query = new QueryBuilder(Connect());
-        // query
-        // .InsertInto("stack", new string[] { "userid", "cardid" })
-        // .AddParam("userid", userid)
-        // .AddParam("cardid", card.Id);
-
-        // query.Run();
-    }
     public IEnumerable<Card> GetAllCardsInStackByUserId(Guid userid)
     {
         var builder = new QueryBuilder(this.Connect());
         ObjectBuilder<Card> fill = Fill;
 
         builder
-            .Select("s.cardid", "s.userid", "c.id", "c.name", "c.descr", "c.type", "c.element", "c.damage")
+            .Select("c.*")
             .From("cards c")
-            .Join("stack s")
-            .On("c.id=s.cardid")
-            .Where("s.userid=@userid")
-            .AddParam("userid", userid).Build();
+            .Join("stackcards sc")
+            .On("sc.cardid=c.id")
+            .Where("sc.userid=@userid")
+            .AddParam("@userid",userid)
+            .Build();
 
         var cards = builder.ReadMultiple<Card>(fill);
 
@@ -173,6 +205,9 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
         return cards ?? null;
     }
+
+
+
 
     public void AddCardsToDeck(IEnumerable<Card> cards, Guid userId)
     {

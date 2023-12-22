@@ -27,7 +27,9 @@ public enum QBCommand
     ADD_INSERT_VALUE,
     INSERT_DEFAULT,
     BLANK,
-    VALUES_DEF
+    VALUES_DEF,
+    DELETE,
+    LIMIT
 }
 
 public delegate void ObjectBuilder<T>(T obj, IDataReader reader);
@@ -76,6 +78,8 @@ public class QueryBuilder
         { QBCommand.VALUES_DEF, " " },
         { QBCommand.VALUES_DECL, " VALUES " },
         {QBCommand.BLANK, "  "},
+        {QBCommand.DELETE, " DELETE "},
+        {QBCommand.LIMIT, " LIMIT "}
     };
     private bool isFirstInsertValuesCall = true;
 
@@ -84,6 +88,16 @@ public class QueryBuilder
         if (connection == null) throw new ArgumentNullException(nameof(connection));
 
         this._connection = connection;
+    }
+
+    public QueryBuilder Limit(string condition)
+    {
+        commandSequence.Add(QBCommand.LIMIT);
+        columnSequence[commandIndex] = $" {condition} ";
+
+        commandIndex++;
+
+        return this;
     }
 
     public QueryBuilder InsertInto(string tableName, IEnumerable<string>? fields)
@@ -238,7 +252,7 @@ public class QueryBuilder
     {
         commandSequence.Add(QBCommand.UPDATE);
         columnSequence[commandIndex] = $" {tableName} ";
-        
+
         commandIndex++;
 
         return this;
@@ -466,6 +480,15 @@ public class QueryBuilder
         return this;
     }
 
+
+    public QueryBuilder Delete()
+    {
+        commandSequence.Add(QBCommand.DELETE);
+        commandIndex++;
+
+        return this;
+    }
+
     public IEnumerable<T> Run<T>() where T : new()
     {
         if (queryString == string.Empty) throw new Exception("Invalid query provided.");
@@ -503,6 +526,36 @@ public class QueryBuilder
 
         return ids;
     }
+
+    public IEnumerable<Dictionary<string, object>> ReadMultiple()
+    {
+        if (!calledBuild) throw new Exception("Need to call QueryBuilder.Build first.");
+
+        using var command = new NpgsqlCommand(queryString, _connection);
+
+        AddParams(command);
+
+        using var reader = command.ExecuteReader();
+        List<Dictionary<string, object>> resultList = new List<Dictionary<string, object>>();
+
+        while (reader.Read())
+        {
+            var recordValues = new Dictionary<string, object>();
+
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                string columnName = reader.GetName(i);
+                object value = reader.GetValue(i);
+                recordValues[columnName] = value;
+            }
+
+            resultList.Add(recordValues);
+        }
+
+        return resultList;
+    }
+
+
 
     public T? Read<T>(ObjectBuilder<T> callback) where T : class, new()
     {

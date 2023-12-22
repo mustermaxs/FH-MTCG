@@ -45,7 +45,7 @@ namespace MTCG
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:alphanum)\})", @"(?<$2>[a-zA-Z0-9-]+)");
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:int)\})", @"(?<$2>[0-9]+)");
 
-            urlPattern = "^" + urlPattern + "$";
+            // urlPattern = "^" + urlPattern + "$";
 
             return urlPattern;
         }
@@ -95,7 +95,9 @@ namespace MTCG
         /// </returns>
         public bool PatternMatches(string url, string urlPattern)
         {
-            return Regex.Match(url, urlPattern).Success;
+            var prpdPatternForExactMatch = urlPattern.TrimStart('^').TrimEnd('$');
+
+            return url == prpdPatternForExactMatch || Regex.Match(url, urlPattern).Success;
         }
     }
 }

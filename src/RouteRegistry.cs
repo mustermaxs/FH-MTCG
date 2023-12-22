@@ -254,28 +254,45 @@ public class RouteRegistry : IEndpointMapper
     /// </returns>
     public void MapRequestToEndpoint(ref IRequest request)
     {
-        List<IEndpoint> potentialEndpoints = endpointMappings[request.HttpMethod];
+        IEnumerable<IEndpoint> endpointsWithHttpMethod = endpointMappings[request.HttpMethod];
+        IEnumerable<IEndpoint> potentialEndpoints;
         string trimmedUrl = parser.TrimUrl(request.RawUrl!);
         Dictionary<string, string> urlParams = new();
+        int nbrPotentialEndpoints = 0;
 
-        foreach (var endpoint in potentialEndpoints)
+        potentialEndpoints = endpointsWithHttpMethod.Where(
+            e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
+
+        nbrPotentialEndpoints = potentialEndpoints.Count();
+
+        if (nbrPotentialEndpoints == 0) throw new RouteDoesntExistException(request.RawUrl!);
+        // if (nbrPotentialEndpoints > 2) throw new Exception($"Found too many potential endpoints. [{nbrPotentialEndpoints}]");
+
+        // var endpoint =
+        //     endpointsWithHttpMethod.SingleOrDefault<IEndpoint>(e => e.EndpointPattern == trimmedUrl)
+        //     ?? endpointsWithHttpMethod.SingleOrDefault<IEndpoint>(e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
+
+        var endpoint = endpointsWithHttpMethod
+    .SingleOrDefault(e => e.EndpointPattern == trimmedUrl);
+
+        // If no exact match was found, try to find a regex match.
+        if (endpoint == null)
         {
-
-            if (parser.PatternMatches(trimmedUrl, endpoint.EndpointPattern))
-            {
-                urlParams = this.parser.MatchUrlAndGetParams(trimmedUrl, endpoint.EndpointPattern);
-                endpoint.UrlParams = urlParams;
-                request.Endpoint = (Endpoint)endpoint;
-                request.RouteFound = true;
-
-                return;
-            }
+            endpoint = endpointsWithHttpMethod
+                .SingleOrDefault(e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
         }
 
-        if (!request.RouteFound)
+        // If no match was found, throw an exception.
+        if (endpoint == null)
         {
             throw new RouteDoesntExistException(request.RawUrl!);
         }
-    }
 
+        urlParams = this.parser.MatchUrlAndGetParams(trimmedUrl, endpoint!.EndpointPattern);
+        endpoint.UrlParams = urlParams;
+        request.Endpoint = (Endpoint)endpoint;
+        request.RouteFound = true;
+
+        return;
+    }
 }

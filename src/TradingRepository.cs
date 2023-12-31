@@ -49,7 +49,7 @@ public class TradingRepository : BaseRepository<Trade>, IRepository<Trade>
 
         if (card == null) throw new Exception("Card doesn't exist.");
 
-        trade.CardToTrade = card;
+        trade.CardToTrade = card.Id;
         trade.Id = re.GetGuid(re.GetOrdinal("id"));
         trade.Type = re.GetString(re.GetOrdinal("type"));
         trade.MinimumDamage = re.GetFloat(re.GetOrdinal("minimumdamage"));
@@ -63,7 +63,7 @@ public class TradingRepository : BaseRepository<Trade>, IRepository<Trade>
 
         if (card == null) throw new Exception("Card doesn't exist.");
 
-        trade.CardToTrade = card;
+        trade.CardToTrade = card.Id;
         trade.Id = re.GetGuid(re.GetOrdinal("id"));
         trade.Type = re.GetString(re.GetOrdinal("type"));
         trade.MinimumDamage = re.GetFloat(re.GetOrdinal("minimumdamage"));
@@ -91,7 +91,30 @@ public class TradingRepository : BaseRepository<Trade>, IRepository<Trade>
 
     public override void Save(Trade obj)
     {
-        throw new NotImplementedException();
+
+//         -----------------+-----------------------+-----------+----------+--------------------
+//  id              | uuid                  |           | not null | uuid_generate_v4()
+//  offeringuserid  | uuid                  |           |          | 
+//  acceptinguserid | uuid                  |           |          | 
+//  offeredcardid   | uuid                  |           |          | 
+//  acceptedcardid  | uuid                  |           |          | 
+//  minimumdamage   | double precision      |           |          | 
+//  requiredtype    | character varying(50) |           |          | 
+//  settled         | boolean               |           |          | 
+//  deckid          | uuid                  | 
+        var builder = new QueryBuilder(Connect());
+        builder
+            .InsertInto("trades", "offeringuserid", "offeredcardid", "minimumdamage", "requiredtype")
+            .InsertValues("@offeringuserid", "@offeredcardid", "@minimumdamage", "@requiredtype")
+
+            // .InsertInto("trades", "cardid", "type", "minimumdamage")
+            // .InsertValues("@cardid", "@type", "@minimumdamage")
+            // .AddParam("@cardid", obj.CardToTrade)
+            // .AddParam("@type", obj.Type)
+            // .AddParam("@minimumdamage", obj.MinimumDamage)
+            // .Build();
+
+        builder.ExecuteNonQuery();        
     }
 
     public override void Delete(Trade obj)

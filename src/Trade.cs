@@ -10,8 +10,8 @@ namespace MTCG;
 
 public class Trade : IModel
 {
-    public Guid Id { get; set; }
-    public Card? CardToTrade { get; set; } = null;
+    public Guid? Id { get; set; }
+    public Guid? CardToTrade { get; set; }
 
     /// <summary>
     /// The required card type.

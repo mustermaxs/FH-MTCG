@@ -72,7 +72,7 @@ public class TradingController : IController
         Card acceptedCard = trade.GetAcceptedCard()!;
 
         bool typeIsSame = trade.Type == acceptedCard.Type;
-        bool damageGreaterOrEqual = acceptedCard.Damage >= trade.CardToTrade!.Damage;
+        bool damageGreaterOrEqual = acceptedCard.Damage >= trade.MinimumDamage;
 
         return typeIsSame && damageGreaterOrEqual;
     }
@@ -95,15 +95,28 @@ public class TradingController : IController
     [Route("/tradings", HTTPMethod.POST, Role.USER | Role.ADMIN)]
     public IResponse AddTradingDeal()
     {
-        throw new NotImplementedException("Not implemented.");
-
         try
         {
+            Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
+            Trade trade = request.PayloadAsObject<Trade>();
 
+            if (trade == null) throw new Exception("");
+            
+            var cardRepo = new CardRepository();
+            List<Card> deckCards = cardRepo.GetAllCardsInStackByUserId(userId).ToList();
+            
+            if (!deckCards.Exists(c => c.Id == trade.CardToTrade))
+                return new Response<string>(403, "The deal contains a card that is not owned by the user or locked in the deck.");
+            
+            trade.SetOfferingUserId(userId);
+            
+            repo.Save(trade);
+
+            return new Response<string>(201, "Trading deal successfully created");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Failed to add new trading deal.\n{ex}");
+            Console.WriteLine($"Failed to add new trading deal.\n{ex}");
 
             return new Response<string>(500, "Something went wrong :(");
         }

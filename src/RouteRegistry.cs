@@ -258,41 +258,26 @@ public class RouteRegistry : IEndpointMapper
         IEnumerable<IEndpoint> potentialEndpoints;
         string trimmedUrl = parser.TrimUrl(request.RawUrl!);
         Dictionary<string, string> urlParams = new();
-        int nbrPotentialEndpoints = 0;
 
         potentialEndpoints = endpointsWithHttpMethod.Where(
             e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
 
-        nbrPotentialEndpoints = potentialEndpoints.Count();
-
-        if (nbrPotentialEndpoints == 0) throw new RouteDoesntExistException(request.RawUrl!);
-        // if (nbrPotentialEndpoints > 2) throw new Exception($"Found too many potential endpoints. [{nbrPotentialEndpoints}]");
-
-        // var endpoint =
-        //     endpointsWithHttpMethod.SingleOrDefault<IEndpoint>(e => e.EndpointPattern == trimmedUrl)
-        //     ?? endpointsWithHttpMethod.SingleOrDefault<IEndpoint>(e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
-
-        var endpoint = endpointsWithHttpMethod
-    .SingleOrDefault(e => e.EndpointPattern == trimmedUrl);
-
-        // If no exact match was found, try to find a regex match.
-        if (endpoint == null)
-        {
-            endpoint = endpointsWithHttpMethod
-                .SingleOrDefault(e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
-        }
-
-        // If no match was found, throw an exception.
-        if (endpoint == null)
-        {
+        if (potentialEndpoints.Count() == 0)
             throw new RouteDoesntExistException(request.RawUrl!);
-        }
+
+        // check if exact match
+        // else check if regex match is found
+        // else, return null
+        var endpoint =
+            potentialEndpoints.SingleOrDefault<IEndpoint>(e => e.EndpointPattern == trimmedUrl)
+            ?? potentialEndpoints.SingleOrDefault<IEndpoint>(e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
+
+        if (endpoint == null)
+            throw new RouteDoesntExistException(request.RawUrl!);
 
         urlParams = this.parser.MatchUrlAndGetParams(trimmedUrl, endpoint!.EndpointPattern);
         endpoint.UrlParams = urlParams;
         request.Endpoint = (Endpoint)endpoint;
         request.RouteFound = true;
-
-        return;
     }
 }

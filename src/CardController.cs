@@ -31,12 +31,8 @@ public class CardController : IController
             IEnumerable<Card> cards = repo.GetAllCardsInStackByUserId(userId);
 
             if (cards.Count() == 0) return new Response<string>(204, "The request was fine, but the user doesn't have any cards");
-            
+
             return new Response<IEnumerable<Card>>(200, cards, $"The user has cards, the response contains these");
-
-            // string stackId = repo.GetStackIdForUserId(userId)?.ToString() ?? string.Empty;
-
-            // return new Response<string>(200, stackId.ToString(), $"The user has cards, the response contains these");
         }
         catch (Exception ex)
         {

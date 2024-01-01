@@ -55,11 +55,11 @@ namespace MTCG
             return urlPattern;
         }
 
-        protected Match MatchAndIgnoreQueryString(string url, string pattern)
+        protected Match? MatchAndIgnoreQueryString(string url, string pattern)
         {
-            int queryStartPos = -1;
+            int queryStartPos = url.IndexOf("?");
 
-            if ((queryStartPos = url.IndexOf("?")) > -1) return Regex.Match(url, pattern);
+            if (queryStartPos == -1) return Regex.Match(url, pattern);
 
             var urlWithoutQueryString = url.Substring(0, queryStartPos);
 

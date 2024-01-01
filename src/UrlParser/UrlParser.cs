@@ -12,7 +12,8 @@ namespace MTCG
             return url.Trim('/');
         }
 
-
+        //////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////
 
         /// <summary>
         /// Removes trailing slaches from URL.
@@ -22,7 +23,8 @@ namespace MTCG
             return RemoveTrailingSlashes(url);
         }
 
-
+        //////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////
 
 
         /// <summary>
@@ -40,17 +42,18 @@ namespace MTCG
         public string ReplaceTokensWithRegexPatterns(string url)
         {
             string urlPattern = TrimUrl(url);
+            // urlPattern = Regex.Escape(urlPattern);
 
+            urlPattern = urlPattern.Replace("?", "\\?");
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:alpha)\})", @"(?<$2>[a-zA-Z-]+)");
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:alphanum)\})", @"(?<$2>[a-zA-Z0-9-]+)");
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:int)\})", @"(?<$2>[0-9]+)");
-
-            // urlPattern = "^" + urlPattern + "$";
-
+            // urlPattern = Regex.Replace(urlPattern, @"\?[]")
             return urlPattern;
         }
 
-
+        //////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////
 
         /// <summary>Performs regex match to check if requested url matches provided pattern urlPattern</summary>
         /// <param name="urlPattern">Regex pattern (string)</param>
@@ -61,9 +64,7 @@ namespace MTCG
             Match match = Regex.Match(url, urlPattern);
 
             if (!match.Success)
-            {
                 return new Dictionary<string, string>();
-            }
 
             GroupCollection groups = match.Groups;
             Dictionary<string, string> namedGroups = new Dictionary<string, string>();
@@ -78,7 +79,8 @@ namespace MTCG
             return namedGroups;
         }
 
-
+        //////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////
 
         /// <summary>
         /// Checks if the provided URL matches

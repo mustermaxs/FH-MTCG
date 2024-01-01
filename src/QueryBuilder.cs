@@ -481,12 +481,12 @@ public class QueryBuilder
     }
 
 
-    public QueryBuilder Delete()
+    public QueryBuilder DeleteFrom(string tableName)
     {
         commandSequence.Add(QBCommand.DELETE);
         commandIndex++;
 
-        return this;
+        return From(tableName);
     }
 
     public IEnumerable<T> Run<T>() where T : new()

@@ -9,7 +9,7 @@ namespace MTCG;
 
 
 // TODO
-public class TradingRepository : BaseRepository<Trade>, IRepository<Trade>
+public class TradingRepository : BaseRepository<StoreTrade>, IRepository<StoreTrade>
 {
     public TradingRepository()
 : base()
@@ -21,11 +21,11 @@ public class TradingRepository : BaseRepository<Trade>, IRepository<Trade>
 
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-    
-    public Trade? GetTradeById(Guid id)
+
+    public UserTrade? GetTradeById(Guid id)
     {
         var builder = new QueryBuilder(Connect());
-        ObjectBuilder<Trade> objectBuilder = Fill;
+        ObjectBuilder<UserTrade> objectBuilder = Fill;
         builder
             .Select("t.*", "c.*")
             .From("trades t")
@@ -34,14 +34,38 @@ public class TradingRepository : BaseRepository<Trade>, IRepository<Trade>
             .Where("t.id=@id")
             .AddParam("@id", id)
             .Build();
-        
-        Trade? trade = builder.Read<Trade>(objectBuilder);
+
+        UserTrade? trade = builder.Read<UserTrade>(objectBuilder);
 
         return trade ?? null;
     }
 
+    protected void FillShopTrade(StoreTrade trade, IDataReader re)
+    {
+        var cardRepo = new CardRepository();
+        Guid offeredCardId = re.GetGuid(re.GetOrdinal("offeredcardid"));
+        var offeredCard = cardRepo.Get(offeredCardId);
 
-    protected override void Fill(Trade trade, IDataReader re)
+        if (offeredCard == null) throw new Exception("Card doesn't exist.");
+
+        trade.CardToTrade = offeredCard.Id;
+        trade.Id = re.GetGuid(re.GetOrdinal("id"));
+        trade.Type = re.GetString(re.GetOrdinal("requiredtype"));
+        trade.MinimumDamage = (float)re.GetDouble(re.GetOrdinal("minimumdamage"));
+        trade.SetOfferingUserId(re.GetGuid(re.GetOrdinal("offeringuserid")));
+    }
+
+
+    protected override void Fill(StoreTrade trade, IDataReader re)
+    {
+        if (trade is StoreTrade)
+            FillShopTrade(trade, re);
+        else if (trade is UserTrade)
+            FillUserTrade(trade as UserTrade, re);
+    }
+
+
+    protected void FillUserTrade(UserTrade trade, IDataReader re)
     {
         var cardRepo = new CardRepository();
         Guid cardId = re.GetGuid(re.GetOrdinal("cardid"));
@@ -51,11 +75,19 @@ public class TradingRepository : BaseRepository<Trade>, IRepository<Trade>
 
         trade.CardToTrade = card.Id;
         trade.Id = re.GetGuid(re.GetOrdinal("id"));
-        trade.Type = re.GetString(re.GetOrdinal("type"));
-        trade.MinimumDamage = re.GetFloat(re.GetOrdinal("minimumdamage"));
+        trade.Type = re.GetString(re.GetOrdinal("required"));
+        trade.MinimumDamage = (float)re.GetDouble(re.GetOrdinal("minimumdamage"));
+        trade.SetOfferingUserId(re.GetGuid(re.GetOrdinal("offeringuserid")));
     }
 
-    protected override void _Fill(Trade trade, IDataReader re)
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
+    protected override void _Fill(StoreTrade trade, IDataReader re)
     {
         var cardRepo = new CardRepository();
         Guid cardId = re.GetGuid(re.GetOrdinal("cardid"));
@@ -65,60 +97,141 @@ public class TradingRepository : BaseRepository<Trade>, IRepository<Trade>
 
         trade.CardToTrade = card.Id;
         trade.Id = re.GetGuid(re.GetOrdinal("id"));
-        trade.Type = re.GetString(re.GetOrdinal("type"));
-        trade.MinimumDamage = re.GetFloat(re.GetOrdinal("minimumdamage"));
+        trade.Type = re.GetString(re.GetOrdinal("requiredtype"));
+        trade.MinimumDamage = (float)re.GetDouble(re.GetOrdinal("minimumdamage"));
     }
 
-    public IEnumerable<Trade> GetAllOpenTrades()
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    public IEnumerable<T> GetAll<T>() where T : StoreTrade, new()
     {
-        ObjectBuilder<Trade> objectBuilder = Fill;
+        ObjectBuilder<T> objectBuilder = Fill;
+
+        var builder = new QueryBuilder(Connect());
+        Type tradeType = typeof(T);
+        string tradeTypeStringVal =
+            tradeType == typeof(UserTrade)
+            ? "users"
+            : "store";
+
+        builder
+            .Select("*")
+            .From("trades")
+            .Where("tradetype=@tradetype")
+            .AddParam("@tradetype", tradeTypeStringVal)
+            .Build();
+
+        IEnumerable<T> trades = builder.ReadMultiple<T>(objectBuilder);
+
+        return trades;
+    }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    public IEnumerable<UserTrade> GetAllStoreTrades()
+    {
+        ObjectBuilder<UserTrade> objectBuilder = Fill;
 
         var builder = new QueryBuilder(Connect());
         builder
             .Select("*")
             .From("trades")
+            .Where("tradetype=@tradetype")
+            .AddParam("@tradetype", "store")
             .Build();
-        
-        IEnumerable<Trade> trades = builder.ReadMultiple<Trade>(objectBuilder);
+
+        IEnumerable<UserTrade> trades = builder.ReadMultiple<UserTrade>(objectBuilder);
 
         return trades;
     }
 
-    public override Trade? Get(Guid id)
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    public IEnumerable<UserTrade> GetAllPendingUserTrades()
+    {
+        ObjectBuilder<UserTrade> objectBuilder = Fill;
+
+        var builder = new QueryBuilder(Connect());
+        builder
+            .Select("*")
+            .From("trades")
+            .Where("tradetype=@tradetype")
+            .AddParam("@tradetype", "users")
+            .Build();
+
+        IEnumerable<UserTrade> trades = builder.ReadMultiple<UserTrade>(objectBuilder);
+
+        return trades;
+    }
+
+    public override StoreTrade? Get(Guid id)
     {
         return base.Get(id);
     }
 
-    public override void Save(Trade obj)
+    public override void Save(StoreTrade obj)
     {
-
-//         -----------------+-----------------------+-----------+----------+--------------------
-//  id              | uuid                  |           | not null | uuid_generate_v4()
-//  offeringuserid  | uuid                  |           |          | 
-//  acceptinguserid | uuid                  |           |          | 
-//  offeredcardid   | uuid                  |           |          | 
-//  acceptedcardid  | uuid                  |           |          | 
-//  minimumdamage   | double precision      |           |          | 
-//  requiredtype    | character varying(50) |           |          | 
-//  settled         | boolean               |           |          | 
-//  deckid          | uuid                  | 
-        var builder = new QueryBuilder(Connect());
-        builder
-            .InsertInto("trades", "offeringuserid", "offeredcardid", "minimumdamage", "requiredtype")
-            .InsertValues("@offeringuserid", "@offeredcardid", "@minimumdamage", "@requiredtype")
-
-            // .InsertInto("trades", "cardid", "type", "minimumdamage")
-            // .InsertValues("@cardid", "@type", "@minimumdamage")
-            // .AddParam("@cardid", obj.CardToTrade)
-            // .AddParam("@type", obj.Type)
-            // .AddParam("@minimumdamage", obj.MinimumDamage)
-            // .Build();
-
-        builder.ExecuteNonQuery();        
+        if (obj is UserTrade userTrade)
+        {
+            if (userTrade != null)
+            {
+                SaveTradeAmongUsers(userTrade);
+            }
+        }
+        else
+        {
+            SaveTradeWithStore(obj);
+        }
     }
 
-    public override void Delete(Trade obj)
+    protected void SaveTradeWithStore(StoreTrade obj)
     {
-        base.Delete(obj);
+        var builder = new QueryBuilder(Connect());
+        builder
+            .InsertInto("trades", "cardid", "minimumdamage", "type", "tradetype")
+            .InsertValues("@cardid", "@minimumdamage", "@type", "@tradetype")
+            .AddParam("@cardid", obj.CardToTrade!)
+            .AddParam("@minimumdamage", obj.MinimumDamage)
+            .AddParam("@type", obj.Type!)
+            .AddParam("@tradetype", "store")
+            .Build();
+
+        builder.ExecuteNonQuery();
+    }
+    protected void SaveTradeAmongUsers(UserTrade obj)
+    {
+        var builder = new QueryBuilder(Connect());
+        builder
+            .InsertInto("trades", "offeringuserid", "offeredcardid", "minimumdamage", "requiredtype", "tradetype")
+            .InsertValues("@offeringuserid", "@offeredcardid", "@minimumdamage", "@requiredtype", "@tradetype")
+            .AddParam("@offeringuserid", obj.GetOfferingUserId())
+            .AddParam("@offeredcardid", obj.CardToTrade)
+            .AddParam("@minimumdamage", obj.MinimumDamage)
+            .AddParam("@requiredtype", obj.Type)
+            .AddParam("@tradetype", "users")
+            .Build();
+
+        builder.ExecuteNonQuery();
+    }
+
+    public override void Delete(StoreTrade obj)
+    {
+        var builder = new QueryBuilder(Connect());
+        builder
+            .DeleteFrom("trades")
+            .Where("id=@id")
+            .AddParam("@id", obj.Id!.Value)
+            .Build();
+        builder.ExecuteNonQuery();
     }
 }

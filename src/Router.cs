@@ -94,21 +94,17 @@ public class Router : IRouter
     public bool ClientHasPermissionToRequest(IRequest request)
     {
         Role requestAccessLevel = request.Endpoint!.AccessLevel;
-
         Session session = null;
 
-
         if (requestAccessLevel == Role.ALL)
-        {
             return true;
-        }
-
 
         if (!request.TryGetHeader("Authorization", out string authToken)
             || !SessionManager.TryGetSessionWithAuthToken(authToken, out session))
         {
-            if (session == null && requestAccessLevel == Role.ANONYMOUS) return true;
-
+            if (session == null && requestAccessLevel == Role.ANONYMOUS)
+                return true;
+            
             return false;
         }
 
@@ -135,15 +131,14 @@ public class Router : IRouter
         {
             routeRegistry.MapRequestToEndpoint(ref request);
 
-            if (!ClientHasPermissionToRequest(request)) throw new AuthenticationFailedException($"Client doesn't have access to ressource.");
+            if (!ClientHasPermissionToRequest(request))
+                throw new AuthenticationFailedException($"Client doesn't have access to ressource.");
 
             var controllerType = request.Endpoint!.ControllerType;
             var controller = (IController)Activator.CreateInstance(controllerType, request);
 
             if (controller == null)
-            {
                 throw new Exception("Failed to instantiate controller.");
-            }
 
 
             MethodInfo controllerAction = request.Endpoint.ControllerMethod;

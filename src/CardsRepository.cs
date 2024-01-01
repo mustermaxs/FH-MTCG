@@ -64,8 +64,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     {
         var builder = new QueryBuilder(Connect());
         builder
-            .Delete()
-            .From("stack")
+            .DeleteFrom("stack")
             .Where("userid=@userid")
             .AddParam("@userid", userId)
             .And("cardid=@cardid")
@@ -83,8 +82,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     {
         var builder = new QueryBuilder(Connect());
         builder
-            .Delete()
-            .From("decks")
+            .DeleteFrom("decks")
             .Where("userid=@userid")
             .AddParam("@userid", userId)
             .And("cardid=@cardid")

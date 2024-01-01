@@ -35,8 +35,8 @@ namespace MTCG
         /// <summary>Performs regex match to check if requested url matches provided pattern urlPattern</summary>
         /// <param name="urlPattern">Regex pattern (string)</param>
         /// <param name="url">Requested URL string. should be preprocessed with CleanUrl</param>
-        /// <returns>Dictionary with param names as key and value as its value.</returns>
-        Dictionary<string, string> MatchUrlAndGetParams(string url, string urlPattern);
+        /// <returns>Returns IUrlparams</returns>
+        IUrlParams MatchUrlAndGetParams(string url, string urlPattern);
 
 
         

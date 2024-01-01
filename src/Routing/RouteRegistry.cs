@@ -209,30 +209,28 @@ public class RouteRegistry : IEndpointMapper
 
     public IEndpoint? MapRequestToEndpoint(string requestedUrl, HTTPMethod method)
     {
-        List<IEndpoint> potentialEndpoints = endpointMappings[method];
+        IEnumerable<IEndpoint> endpointsWithHttpMethod = endpointMappings[method];
+        IEnumerable<IEndpoint> potentialEndpoints;
         string trimmedUrl = parser.TrimUrl(requestedUrl);
         Dictionary<string, string> urlParams = new();
-        bool routeFound = false;
 
-        foreach (var endpoint in potentialEndpoints)
-        {
+        potentialEndpoints = endpointsWithHttpMethod.Where(
+            e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
 
-            if (parser.PatternMatches(trimmedUrl, endpoint.EndpointPattern))
-            {
-                urlParams = this.parser.MatchUrlAndGetParams(trimmedUrl, endpoint.EndpointPattern);
-                endpoint.UrlParams = urlParams;
-                routeFound = true;
-
-                return endpoint;
-            }
-        }
-
-        if (!routeFound)
-        {
+        if (potentialEndpoints.Count() == 0)
             throw new RouteDoesntExistException(requestedUrl);
-        }
 
-        return null;
+        // check if exact match
+        // else check if regex match is found
+        // else, return null
+        var endpoint =
+            potentialEndpoints.SingleOrDefault<IEndpoint>(e => e.EndpointPattern == trimmedUrl)
+            ?? potentialEndpoints.SingleOrDefault<IEndpoint>(e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
+
+        if (endpoint == null)
+            throw new RouteDoesntExistException(requestedUrl);
+        
+        return endpoint;
     }
 
 
@@ -254,13 +252,12 @@ public class RouteRegistry : IEndpointMapper
     /// </returns>
     public void MapRequestToEndpoint(ref IRequest request)
     {
-        IEnumerable<IEndpoint> endpointsWithHttpMethod = endpointMappings[request.HttpMethod];
-        IEnumerable<IEndpoint> potentialEndpoints;
+        var endpointsWithHttpMethod = endpointMappings[request.HttpMethod];
         string trimmedUrl = parser.TrimUrl(request.RawUrl!);
-        Dictionary<string, string> urlParams = new();
+        IUrlParams urlParams;
 
-        potentialEndpoints = endpointsWithHttpMethod.Where(
-            e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
+        var potentialEndpoints = endpointsWithHttpMethod.Where(
+            pe => parser.PatternMatches(trimmedUrl, pe.EndpointPattern)).ToList();
 
         if (potentialEndpoints.Count() == 0)
             throw new RouteDoesntExistException(request.RawUrl!);
@@ -268,9 +265,10 @@ public class RouteRegistry : IEndpointMapper
         // check if exact match
         // else check if regex match is found
         // else, return null
-        var endpoint =
-            potentialEndpoints.SingleOrDefault<IEndpoint>(e => e.EndpointPattern == trimmedUrl)
-            ?? potentialEndpoints.SingleOrDefault<IEndpoint>(e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
+        
+        IEndpoint? endpoint =
+            potentialEndpoints.FirstOrDefault<IEndpoint>(e1 => e1.EndpointPattern == trimmedUrl)
+            ?? potentialEndpoints.FirstOrDefault<IEndpoint>(e2 => parser.PatternMatches(trimmedUrl, e2.EndpointPattern));
 
         if (endpoint == null)
             throw new RouteDoesntExistException(request.RawUrl!);

@@ -142,7 +142,7 @@ public class Router : IRouter
 
 
             MethodInfo controllerAction = request.Endpoint.ControllerMethod;
-            IResponse response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, request.Endpoint.UrlParams);
+            IResponse response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, request.Endpoint.UrlParams.NamedParams);
 
             Console.WriteLine($"Response: {response.Description}\nStatus: {response.StatusCode}");
 

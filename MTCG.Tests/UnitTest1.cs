@@ -18,12 +18,12 @@ public class MTCG_UrlParser
     {
     }
 
-    [TestCase("/mtcg/user/{userid:int}/", "^mtcg/user/(?<userid>[0-9]+)$")]
-    [TestCase("/mtcg/user/{userid:int}/{username:alpha}/", "^mtcg/user/(?<userid>[0-9]+)/(?<username>[a-zA-Z-]+)$")]
-    [TestCase("/mtcg/user/{username:alpha}/", "^mtcg/user/(?<username>[a-zA-Z-]+)$")]
-    [TestCase("/mtcg/security/{token:alphanum}/", "^mtcg/security/(?<token>[a-zA-Z0-9-]+)$")]
-    [TestCase("/mtcg/route/without/params/", "^mtcg/route/without/params$")]
-    [TestCase("/api/{controller:alpha}/test/{view:alpha}/user/{userid:int}", "^api/(?<controller>[a-zA-Z-]+)/test/(?<view>[a-zA-Z-]+)/user/(?<userid>[0-9]+)$")]
+    [TestCase("/mtcg/user/{userid:int}/", "mtcg/user/(?<userid>[0-9]+)")]
+    [TestCase("/mtcg/user/{userid:int}/{username:alpha}/", "mtcg/user/(?<userid>[0-9]+)/(?<username>[a-zA-Z-]+)")]
+    [TestCase("/mtcg/user/{username:alpha}/", "mtcg/user/(?<username>[a-zA-Z-]+)")]
+    [TestCase("/mtcg/security/{token:alphanum}/", "mtcg/security/(?<token>[a-zA-Z0-9-]+)")]
+    [TestCase("/mtcg/route/without/params/", "mtcg/route/without/params")]
+    [TestCase("/api/{controller:alpha}/test/{view:alpha}/user/{userid:int}", "api/(?<controller>[a-zA-Z-]+)/test/(?<view>[a-zA-Z-]+)/user/(?<userid>[0-9]+)")]
     public void Test_ReplacesTokensWithRegexPatterns(string routeTemplate, string expectedRoutePattern)
     {
         string trimmedRouteTemplate = parser.TrimUrl(routeTemplate);
@@ -38,6 +38,16 @@ public class MTCG_UrlParser
         string generatedRegex = this.parser?.ReplaceTokensWithRegexPatterns(trimmedRouteTemplate) ?? "";
         Assert.That(generatedRegex, Is.EqualTo(expectedRoutePattern),
                     $"Generated regex '{generatedRegex}' does not match expected pattern '{expectedRoutePattern}'.");
+    }
+
+    [TestCase("/test?filter=name&order=asc")]
+    public void Test_ParserExtractsQueryParams(string requestedUrl)
+    {
+        string pattern = parser.ReplaceTokensWithRegexPatterns(requestedUrl);
+        UrlParams urlParams = (UrlParams)parser.MatchUrlAndGetParams(requestedUrl, pattern);
+
+        Assert.IsTrue(urlParams.QueryString["filter"] == "name");
+        Assert.IsTrue(urlParams.QueryString["order"] == "asc");
     }
 
 }
@@ -92,19 +102,26 @@ public class MTCG_RouteRegistry
     {
         if (parser != null && routeRegistry != null)
         {
-            string pattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
-            string regexRoutePattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
-            MethodInfo controllerMethod = typeof(TestController).GetMethod("TestMethod")!;
-            IEndpoint endpoint = new Endpoint(method, routeTemplate, regexRoutePattern, typeof(TestController), controllerMethod);
+            // string pattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
+            // string regexRoutePattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
+            // MethodInfo controllerMethod = typeof(TestController).GetMethod("TestMethod")!;
+            // IEndpoint endpoint = new Endpoint(method, routeTemplate, regexRoutePattern, typeof(TestController), controllerMethod, Role.ANONYMOUS);
+            var endpoint = new Mock<IEndpoint>();
+            endpoint.Setup(e => e.HttpMethod).Returns(method);
+            endpoint.Setup(e => e.RouteTemplate).Returns(routeTemplate);
+            endpoint.Setup(e => e.EndpointPattern).Returns(parser.ReplaceTokensWithRegexPatterns(routeTemplate));
+            endpoint.Setup(e => e.ControllerType).Returns(typeof(TestController));
+            endpoint.Setup(e => e.ControllerMethod).Returns(typeof(TestController).GetMethod("TestMethod")!);
+            endpoint.Setup(e => e.AccessLevel).Returns(Role.ANONYMOUS);
 
-            routeRegistry.RegisterEndpoint(endpoint);
+            routeRegistry.RegisterEndpoint(endpoint.Object);
 
             var resEndpoint = routeRegistry.MapRequestToEndpoint(requestedUrl, method);
 
             Assert.IsTrue(resEndpoint != null, $"{routeRegistry.GetType().Name} wasn't able to map the requested route.\n" +
             $"Requested Url: {requestedUrl}\n" +
             $"Template:     {routeTemplate}\n" +
-            $"Pattern:      {pattern}");
+            $"Pattern:      {endpoint.Object.EndpointPattern}");
         }
 
     }
@@ -238,7 +255,7 @@ public class ControllerTests
         mockEndpoint.Setup(m => m.ControllerMethod).Returns(typeof(UserController).GetMethod("GetUserById")!);
         mockEndpoint.Setup(m => m.EndpointPattern).Returns("^users/([a-zA-Z0-9-]+)$");
 
-        mockEndpoint.Setup(m => m.UrlParams).Returns(new Dictionary<string, string> { { "userid", "897cb65a-4381-4c14-afda-65ff2cd291a4" } });
+        mockEndpoint.Setup(m => m.UrlParams.NamedParams).Returns(new Dictionary<string, string> { { "userid", "897cb65a-4381-4c14-afda-65ff2cd291a4" } });
 
         var mockRequest = new Mock<IRequest>();
         mockRequest.Setup(m => m.HttpMethod).Returns(HTTPMethod.GET);

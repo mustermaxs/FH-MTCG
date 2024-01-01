@@ -11,7 +11,7 @@ namespace MTCG;
         private Type controllerType;
         private MethodInfo controllerMethod;
         private Role accessLevel;
-        private Dictionary<string, string> urlParams;
+        private IUrlParams urlParams;
 
         public EndpointBuilder WithHttpMethod(HTTPMethod method)
         {
@@ -53,7 +53,7 @@ namespace MTCG;
             return this;
         }
 
-        public EndpointBuilder WithUrlParams(Dictionary<string, string> parameters)
+        public EndpointBuilder WithUrlParams(IUrlParams parameters)
         {
             urlParams = parameters;
             return this;

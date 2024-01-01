@@ -12,12 +12,10 @@ public class CardController : IController
     /// here until authentication is implemented and in use
     /// should then work by checking the Authentication token
     /// and getting the users uuid from DB
-    [Route("/cards", HTTPMethod.GET)]
+    // [Route("/cards", HTTPMethod.GET)]
     public IResponse GetAllCardsForUserByUserId(Guid userid)
     {
-        try
-        {
-            
-        }
+        throw new NotImplementedException("");
+
     }
 }

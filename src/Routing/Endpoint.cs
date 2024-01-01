@@ -82,7 +82,7 @@ public class Endpoint : IEndpoint
     {
         return HashCode.Combine(HttpMethod, RouteTemplate, ControllerType, ControllerMethod);
     }
-    public Dictionary<string, string> UrlParams { get; set; }
+    public IUrlParams UrlParams { get; set; }
 
     protected string? endpointPattern;
 

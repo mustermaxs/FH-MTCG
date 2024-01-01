@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace MTCG
@@ -49,8 +50,22 @@ namespace MTCG
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:alphanum)\})", @"(?<$2>[a-zA-Z0-9-]+)");
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:int)\})", @"(?<$2>[0-9]+)");
             // urlPattern = Regex.Replace(urlPattern, @"\?[]")
+
+
             return urlPattern;
         }
+
+        protected Match MatchAndIgnoreQueryString(string url, string pattern)
+        {
+            int queryStartPos = -1;
+
+            if ((queryStartPos = url.IndexOf("?")) > -1) return Regex.Match(url, pattern);
+
+            var urlWithoutQueryString = url.Substring(0, queryStartPos);
+
+            return Regex.Match(urlWithoutQueryString, pattern);
+        }
+
 
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
@@ -59,20 +74,53 @@ namespace MTCG
         /// <param name="urlPattern">Regex pattern (string)</param>
         /// <param name="url">Requested URL string. should be preprocessed with CleanUrl</param>
         /// <returns>Dictionary with param names as key and value as its value.</returns>
-        public Dictionary<string, string> MatchUrlAndGetParams(string url, string urlPattern)
+        public IUrlParams MatchUrlAndGetParams(string url, string urlPattern)
         {
-            Match match = Regex.Match(url, urlPattern);
+            var namedParams = ExtractNamedParams(url, urlPattern);
+            var queryParams = ExtractQueryParams(url, urlPattern);
 
-            if (!match.Success)
+            return new UrlParams(namedParams, queryParams);
+        }
+
+
+        //////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////
+
+
+        public Dictionary<string, string> ExtractQueryParams(string url, string urlPattern)
+        {
+            int queryStartPos = url.IndexOf("?");
+
+            if (queryStartPos == -1)
                 return new Dictionary<string, string>();
 
-            GroupCollection groups = match.Groups;
+            var queryString = url.Substring(queryStartPos + 1);
+
+            var keyValPairs = queryString.Split('&')
+                .Select(pair => pair.Split('='))
+                .ToDictionary(pair => pair[0], pair => pair[1]);
+
+            return keyValPairs;
+        }
+
+
+        //////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////
+
+        public Dictionary<string, string> ExtractNamedParams(string url, string urlPattern)
+        {
+            Match namedParamMatches = MatchAndIgnoreQueryString(url, urlPattern);
             Dictionary<string, string> namedGroups = new Dictionary<string, string>();
+
+            if (!namedParamMatches.Success)
+                return namedGroups;
+
+            GroupCollection groups = namedParamMatches.Groups;
 
             for (int i = 1; i < groups.Count; i++)
             {
-                string groupName = match.Groups[i].Name;
-                string groupValue = match.Groups[i].Value;
+                string groupName = namedParamMatches.Groups[i].Name;
+                string groupValue = namedParamMatches.Groups[i].Value;
                 namedGroups[groupName] = groupValue;
             }
 
@@ -97,9 +145,8 @@ namespace MTCG
         /// </returns>
         public bool PatternMatches(string url, string urlPattern)
         {
-            var prpdPatternForExactMatch = urlPattern.TrimStart('^').TrimEnd('$');
 
-            return url == prpdPatternForExactMatch || Regex.Match(url, urlPattern).Success;
+            return Regex.Match(url, urlPattern).Success;
         }
     }
 }

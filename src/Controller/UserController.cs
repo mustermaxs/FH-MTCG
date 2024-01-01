@@ -172,7 +172,7 @@ public class UserController : IController
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-    [Route("/users/{username:alpha}", HTTPMethod.GET, Role.USER  | Role.ADMIN)]
+    [Route("/users/{username:alpha}", HTTPMethod.GET, Role.ALL)]
     public IResponse GetUserByName(string username)
     {
         try

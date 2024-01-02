@@ -50,6 +50,68 @@ public class MTCG_UrlParser
         Assert.IsTrue(urlParams.QueryString["order"] == "asc");
     }
 
+    [Test]
+    public void ExtractQueryParams_ReturnsCorrectDictionary()
+    {
+        var url = "https://example.com/path?param1=value1&param2=value2&param3=value3";
+        var urlPattern = "https://example.com/path";
+
+        var expectedParams = new Dictionary<string, string>
+    {
+        { "param1", "value1" },
+        { "param2", "value2" },
+        { "param3", "value3" }
+    };
+
+        var urlParser = new UrlParser();
+
+        var actualParams = urlParser.ExtractQueryParams(url, urlPattern);
+
+        Assert.AreEqual(expectedParams, actualParams);
+    }
+
+    [Test]
+    public void Test_ReplaceTokensWithRegexPatterns()
+    {
+        var urlParser = new UrlParser();
+        string url = "https://example.com/{username:alpha}/profile/{id:int}";
+
+        string result = urlParser.ReplaceTokensWithRegexPatterns(url);
+
+        Assert.AreEqual("https://example.com/(?<username>[a-zA-Z-]+)/profile/(?<id>[0-9]+)", result);
+    }
+    [Test]
+    public void ExtractNamedParams_ReturnsCorrectDictionary()
+    {
+        var url = "https://example.com/users/123";
+        var urlPattern = @"^https:\/\/example\.com\/users\/(?<userId>\d+)$";
+        var expectedParams = new Dictionary<string, string>
+    {
+        { "userId", "123" }
+    };
+
+        var urlParser = new UrlParser();
+
+        var result = urlParser.ExtractNamedParams(url, urlPattern);
+
+        Assert.AreEqual(expectedParams, result);
+    }
+
+    [Test]
+    public void UrlParamsIndexer_ReturnsCorrectValue()
+    {
+        var urlParams = new UrlParams();
+        urlParams["key1"] = "value1";
+        urlParams["key2"] = "value2";
+
+        string value1 = urlParams["key1"];
+        string value2 = urlParams["key2"];
+        string value3 = urlParams["key3"];
+
+        Assert.AreEqual("value1", value1);
+        Assert.AreEqual("value2", value2);
+        Assert.AreEqual(string.Empty, value3);
+    }
 }
 
 [TestFixture]
@@ -210,7 +272,7 @@ public class SessionTests
     // public void PasswordValidator_ValidatesCorrectPassword()
     // {
     //     IValidator passwordValidator = new PasswordValidator();
-        
+
     // }
 }
 
@@ -225,7 +287,7 @@ public class Test_UserController
         var mockUser = new Mock<User>();
         string username = "maxi";
         string password = "maxiking";
-        
+
         var controller = new UserController(mockRequest.Object);
         IResponse response = controller.Login();
 
@@ -246,7 +308,7 @@ public class ControllerTests
     public void Setup()
     {
         this.responsePayload = $"{{\"Name\":\"Michael\",\"Bio\":\"Halloooo.\",\"Password\":\"mikey\",\"Image\":\"###\",\"Coins\":32,\"ID\":\"897cb65a-4381-4c14-afda-65ff2cd291a4\"}}";
-        
+
         var mockRouteObtainer = new Mock<IRouteObtainer>();
         this.mockRouteObtainer = mockRouteObtainer.Object;
 

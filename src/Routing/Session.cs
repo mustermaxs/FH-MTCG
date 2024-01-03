@@ -1,6 +1,6 @@
 namespace MTCG;
 
-public class Session : IModel
+public class Session
 {
 
     public Session() { }

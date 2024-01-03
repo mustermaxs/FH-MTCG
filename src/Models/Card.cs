@@ -35,7 +35,18 @@ public class Card : IModel
     public string? Element { get; set; } = string.Empty;
     public string? Type { get; set; } = string.Empty;
 
-
+    public object ToSerializableObj()
+    {
+        return new
+        {
+            Id = Id.ToString(),
+            Description,
+            Damage,
+            Name,
+            Element,
+            Type
+        };
+    }
     public Card()
     {
         Id = Guid.NewGuid();

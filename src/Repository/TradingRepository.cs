@@ -22,10 +22,11 @@ public class TradingRepository : BaseRepository<StoreTrade>, IRepository<StoreTr
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-    public UserTrade? GetTradeById(Guid id)
+    public T? GetTradeById<T>(Guid id) where T : StoreTrade, new()
     {
         var builder = new QueryBuilder(Connect());
-        ObjectBuilder<UserTrade> objectBuilder = Fill;
+        ObjectBuilder<T> objectBuilder = Fill;
+        
         builder
             .Select("t.*", "c.*")
             .From("trades t")
@@ -35,9 +36,7 @@ public class TradingRepository : BaseRepository<StoreTrade>, IRepository<StoreTr
             .AddParam("@id", id)
             .Build();
 
-        UserTrade? trade = builder.Read<UserTrade>(objectBuilder);
-
-        return trade ?? null;
+        return builder.Read<T>(objectBuilder);
     }
 
     protected void FillShopTrade(StoreTrade trade, IDataReader re)

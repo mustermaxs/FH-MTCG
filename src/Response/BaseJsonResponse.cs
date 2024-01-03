@@ -37,6 +37,11 @@ public abstract class BaseJsonResponse<T> : IResponse where T : class?
             return string.Empty;
         }
 
+        if (Payload is IModel)
+        {
+            return JsonConvert.SerializeObject((Payload as IModel)?.ToSerializableObj());
+        }
+
         return JsonConvert.SerializeObject(Payload);
     }
 }

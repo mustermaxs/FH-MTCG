@@ -22,7 +22,7 @@ public class Request : IRequest
         this.sessionId = string.Empty;
     }
     private string? sessionId;
-    public string? SessionId { get => sessionId; }
+    public string? SessionId { get => sessionId ?? string.Empty; }
 
     public Request(HTTPMethod method, string? rawUrl, HttpHeader[]? headers, string? payload, string? sessionId)
     {

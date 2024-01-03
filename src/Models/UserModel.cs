@@ -17,4 +17,16 @@ public class User : IModel
     public User()
     {
     }
+
+    public object ToSerializableObj()
+    {
+        return new
+        {
+            Name,
+            Bio,
+            Image,
+            Coins,
+            ID = ID.ToString()
+        };
+    }
 }

@@ -12,4 +12,12 @@ public class Deck : IModel
         var cardToRemove = Cards.SingleOrDefault<Card>(c => c == card);
         Cards.Remove(card);
     }
+
+    public object ToSerializableObj()
+    {
+        return new
+        {
+            Cards = Cards.Select(c => c.ToSerializableObj())
+        };
+    }
 }

@@ -13,6 +13,18 @@ public class UserTrade : StoreTrade, IModel
     protected Card? acceptedCard;
     public Card? GetAcceptedCard() => acceptedCard;
     public void SetAcceptedCard(Card card) { acceptedCard = card; }
+    new public object ToSerializableObj()
+    {
+        return new
+        {
+            Id = Id.ToString(),
+            CardToTrade = CardToTrade.ToString(),
+            Type,
+            MinimumDamage,
+            OfferingUserId = offeringUserId.ToString(),
+            AcceptedCard = acceptedCard?.ToSerializableObj()
+        };
+    }
 
 }
 
@@ -35,4 +47,17 @@ public class StoreTrade : IModel
     protected User? offeringUser;
     public void SetOfferingUser(User user) { offeringUser = user; }
     public User? GetOfferingUser() => offeringUser;
+
+    public object ToSerializableObj()
+    {
+        return new
+        {
+            Id = Id.ToString(),
+            CardToTrade = CardToTrade.ToString(),
+            Type,
+            MinimumDamage,
+            OfferingUserId = offeringUserId.ToString()
+        };
+    }
+
 }

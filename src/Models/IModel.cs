@@ -10,4 +10,5 @@ public interface IModel
     //     return JsonSerializer.Deserialize<T>(jsonString);
     // }
     // public static string ToJsonString(IModel model) => JsonSerializer.Serialize(model);
+    public object ToSerializableObj();
 }

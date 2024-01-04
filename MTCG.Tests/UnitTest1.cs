@@ -18,12 +18,12 @@ public class MTCG_UrlParser
     {
     }
 
-    [TestCase("/mtcg/user/{userid:int}/", "mtcg/user/(?<userid>[0-9]+)")]
-    [TestCase("/mtcg/user/{userid:int}/{username:alpha}/", "mtcg/user/(?<userid>[0-9]+)/(?<username>[a-zA-Z-]+)")]
-    [TestCase("/mtcg/user/{username:alpha}/", "mtcg/user/(?<username>[a-zA-Z-]+)")]
-    [TestCase("/mtcg/security/{token:alphanum}/", "mtcg/security/(?<token>[a-zA-Z0-9-]+)")]
-    [TestCase("/mtcg/route/without/params/", "mtcg/route/without/params")]
-    [TestCase("/api/{controller:alpha}/test/{view:alpha}/user/{userid:int}", "api/(?<controller>[a-zA-Z-]+)/test/(?<view>[a-zA-Z-]+)/user/(?<userid>[0-9]+)")]
+    [TestCase("/mtcg/user/{userid:int}/", "^mtcg/user/(?<userid>[0-9]+)")]
+    [TestCase("/mtcg/user/{userid:int}/{username:alpha}/", "^mtcg/user/(?<userid>[0-9]+)/(?<username>[a-zA-Z-]+)")]
+    [TestCase("/mtcg/user/{username:alpha}/", "^mtcg/user/(?<username>[a-zA-Z-]+)")]
+    [TestCase("/mtcg/security/{token:alphanum}/", "^mtcg/security/(?<token>[a-zA-Z0-9-]+)")]
+    [TestCase("/mtcg/route/without/params/", "^mtcg/route/without/params")]
+    [TestCase("/api/{controller:alpha}/test/{view:alpha}/user/{userid:int}", "^api/(?<controller>[a-zA-Z-]+)/test/(?<view>[a-zA-Z-]+)/user/(?<userid>[0-9]+)")]
     public void Test_ReplacesTokensWithRegexPatterns(string routeTemplate, string expectedRoutePattern)
     {
         string trimmedRouteTemplate = parser.TrimUrl(routeTemplate);
@@ -50,11 +50,27 @@ public class MTCG_UrlParser
         Assert.IsTrue(urlParams.QueryString["order"] == "asc");
     }
 
+    [TestCase("/usersa", "/users")]
+    [TestCase("/test/users", "/users")]
+    [TestCase("/usersabcdef", "/users")]
+    [TestCase("/users/123", "/users")]
+    [TestCase("/usersabc?abc", "/users")]
+    [TestCase("/test/usersabc?abc", "/users")]
+    public void Test_DoesntMatchUrl(string wrongUrl, string correctUrl)
+    {
+        string pattern = parser.ReplaceTokensWithRegexPatterns(correctUrl);
+
+        Assert.IsFalse(parser.PatternMatches(wrongUrl, pattern),
+            $"Requested: {wrongUrl}\nPattern: {pattern}");
+    }
+
+
+
     [Test]
     public void ExtractQueryParams_ReturnsCorrectDictionary()
     {
-        var url = "https://example.com/path?param1=value1&param2=value2&param3=value3";
-        var urlPattern = "https://example.com/path";
+        var url = "https://mtcg.com/path?param1=value1&param2=value2&param3=value3";
+        var urlPattern = "https://mtcg.com/path";
 
         var expectedParams = new Dictionary<string, string>
     {
@@ -78,7 +94,7 @@ public class MTCG_UrlParser
 
         string result = urlParser.ReplaceTokensWithRegexPatterns(url);
 
-        Assert.AreEqual("https://example.com/(?<username>[a-zA-Z-]+)/profile/(?<id>[0-9]+)", result);
+        Assert.AreEqual("^https://example.com/(?<username>[a-zA-Z-]+)/profile/(?<id>[0-9]+)", result);
     }
     [Test]
     public void ExtractNamedParams_ReturnsCorrectDictionary()
@@ -114,6 +130,10 @@ public class MTCG_UrlParser
     }
 }
 
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 [TestFixture]
 
 public class Test_Request
@@ -142,6 +162,69 @@ public class Test_Request
 }
 
 
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+[TestFixture]
+public class Tests_Response
+{
+    public class TestModel : IModel
+    {
+        public int NotSerializedField { get; set; } = 100;
+        public string SerializedField { get; set; } = "Serialized";
+        public string? NullField { get; set; } = null;
+        public object ToSerializableObj()
+        {
+            return new
+            {
+                SerializedField,
+                NullField
+            };
+        }
+        public TestModel() { }
+    }
+    [Test]
+    public void PayloadAsJson_ReturnsEmptyString_WhenPayloadIsNull()
+    {
+        var response = new Response<string>(200, "");
+
+        string json = response.PayloadAsJson();
+
+        Assert.AreEqual(string.Empty, json);
+    }
+
+    [Test]
+    public void PayloadAsJson_ReturnsSerializedPayload_WhenPayloadIsIModel()
+    {
+        var testModel = new TestModel();
+        var response = new Response<TestModel>(200, testModel, "");
+
+        string json = response.PayloadAsJson();
+
+        Assert.AreEqual("{\"SerializedField\":\"Serialized\",\"NullField\":null}", json);
+    }
+
+    [Test]
+    public void StatusCode_ReturnsCorrectStatusCode()
+    {
+        var response = new Response<string>(200, "");
+
+        Assert.AreEqual(200, response.StatusCode);
+    }
+
+
+    [Ignore("")]
+    [Test]
+    public void PayloadAsJson_ReturnsSerializedPayload_WhenPayloadIsNotIModel()
+    {
+
+    }
+}
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
 [TestFixture]
 public class MTCG_RouteRegistry
 {
@@ -164,6 +247,9 @@ public class MTCG_RouteRegistry
     {
         if (parser != null && routeRegistry != null)
         {
+            // routeTemplate = parser.TrimUrl(routeTemplate);
+            // requestedUrl = parser.TrimUrl(requestedUrl);
+
             // string pattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
             // string regexRoutePattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
             // MethodInfo controllerMethod = typeof(TestController).GetMethod("TestMethod")!;
@@ -191,6 +277,9 @@ public class MTCG_RouteRegistry
 
 }
 
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 public class TestController : IController
 {
     public TestController(IRequest request) : base(request) { }
@@ -199,6 +288,9 @@ public class TestController : IController
 
     }
 }
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 [TestFixture]
 public class SessionTests
@@ -276,6 +368,9 @@ public class SessionTests
     // }
 }
 
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 [Ignore("Reason for skipping this test class")]
 [TestFixture]
 public class Test_UserController
@@ -294,6 +389,9 @@ public class Test_UserController
         Assert.That(response.StatusCode == 200, $"Failed to login user. {response.Description}");
     }
 }
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 [TestFixture]
 [Ignore("Need to make a few changes. Source code changed")]
@@ -357,7 +455,8 @@ public class ReflectionRouteObtainerTest : IController
     }
 }
 
-
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 [TestFixture]
 public class Test_ReflectionUtils
@@ -402,7 +501,8 @@ public class Test_ReflectionUtils
     }
 }
 
-
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 
 //    [TestFixture]

@@ -49,9 +49,8 @@ namespace MTCG
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:alpha)\})", @"(?<$2>[a-zA-Z-]+)");
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:alphanum)\})", @"(?<$2>[a-zA-Z0-9-]+)");
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:int)\})", @"(?<$2>[0-9]+)");
-            // urlPattern = Regex.Replace(urlPattern, @"\?[]")
-
-
+            urlPattern = "^" + urlPattern;
+            
             return urlPattern;
         }
 
@@ -59,11 +58,11 @@ namespace MTCG
         {
             int queryStartPos = url.IndexOf("?");
 
-            if (queryStartPos == -1) return Regex.Match(url, pattern);
+            if (queryStartPos == -1) return Regex.Match(url, pattern + "$");
 
             var urlWithoutQueryString = url.Substring(0, queryStartPos);
 
-            return Regex.Match(urlWithoutQueryString, pattern);
+            return Regex.Match(urlWithoutQueryString, pattern + "$");
         }
 
 
@@ -76,8 +75,8 @@ namespace MTCG
         /// <returns>Dictionary with param names as key and value as its value.</returns>
         public IUrlParams MatchUrlAndGetParams(string url, string urlPattern)
         {
-            var namedParams = ExtractNamedParams(url, urlPattern);
             var queryParams = ExtractQueryParams(url, urlPattern);
+            var namedParams = ExtractNamedParams(url, urlPattern);
 
             return new UrlParams(namedParams, queryParams);
         }
@@ -145,8 +144,10 @@ namespace MTCG
         /// </returns>
         public bool PatternMatches(string url, string urlPattern)
         {
+            url = TrimUrl(url);
 
-            return Regex.Match(url, urlPattern).Success;
+            return MatchAndIgnoreQueryString(url, urlPattern).Success;
+            // return Regex.Match(url, urlPattern).Success;
         }
     }
 }

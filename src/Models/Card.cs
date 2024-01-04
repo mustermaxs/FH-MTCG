@@ -22,7 +22,20 @@ public enum CardName
     Dragon,
     Ork,
     Kraken,
+    FireKraken,
     DEFAULT
+}
+
+
+public class StackCard : Card
+{
+    public Guid? StackId { get; set; } = null;
+
+}
+
+public class DeckCard : Card
+{
+    public Guid? DeckId { get; set; } = null;
 }
 
 public class Card : IModel
@@ -34,7 +47,7 @@ public class Card : IModel
     public CardName Name { get; set; } = CardName.DEFAULT;
     public string? Element { get; set; } = string.Empty;
     public string? Type { get; set; } = string.Empty;
-
+    public bool Locked { get; set; } = false;
     public object ToSerializableObj()
     {
         return new

@@ -8,27 +8,26 @@ namespace MTCG;
 //////////////////////////////////////////////////////////////////////
 
 
-public class UserTrade : StoreTrade, IModel
+public class CoinTrade : IModel
 {
-    protected Card? acceptedCard;
-    public Card? GetAcceptedCard() => acceptedCard;
-    public void SetAcceptedCard(Card card) { acceptedCard = card; }
-    new public object ToSerializableObj()
+    public Guid? Id { get; set; }
+    public Guid? CardToTrade { get; set; }
+    public int? CoinsReceived { get; set; }
+    public Guid? OfferingUserId { get; set; }
+    public bool Settled { get; set; } = false;
+
+    public object ToSerializableObj()
     {
         return new
         {
             Id = Id.ToString(),
             CardToTrade = CardToTrade.ToString(),
-            Type,
-            MinimumDamage,
-            OfferingUserId = offeringUserId.ToString(),
-            AcceptedCard = acceptedCard?.ToSerializableObj()
+            CoinsReceived,
         };
     }
-
 }
 
-public class StoreTrade : IModel
+public class CardTrade : IModel
 {
     public Guid? Id { get; set; }
     public Guid? CardToTrade { get; set; }
@@ -41,12 +40,12 @@ public class StoreTrade : IModel
     /// </summary>
     public float MinimumDamage { get; set; } = 0.0f;
 
-    public Guid GetOfferingUserId() => offeringUserId;
-    public void SetOfferingUserId(Guid id) { offeringUserId = id; }
-    protected Guid offeringUserId;
-    protected User? offeringUser;
-    public void SetOfferingUser(User user) { offeringUser = user; }
-    public User? GetOfferingUser() => offeringUser;
+    public Guid OfferingUserId { get; set; }
+    public User? OfferingUser { get; set; }
+    public Guid AcceptingUserId { get; set; }
+    public User? AcceptingUser { get; set; }
+    public Guid? AcceptedDeckCardId { get; set; }
+    public bool Settled { get; set; } = false;
 
     public object ToSerializableObj()
     {
@@ -56,7 +55,6 @@ public class StoreTrade : IModel
             CardToTrade = CardToTrade.ToString(),
             Type,
             MinimumDamage,
-            OfferingUserId = offeringUserId.ToString()
         };
     }
 

@@ -22,7 +22,7 @@ public class CardController : IController
     /// Fetches cards in stack for a specific user:
     /// </summary>
     /// <returns></returns>
-    [Route("/cards", HTTPMethod.GET, Role.USER)]
+    [Route("/stack", HTTPMethod.GET, Role.USER)]
     public IResponse GetStackForUser()
     {
         try
@@ -51,26 +51,7 @@ public class CardController : IController
 
 
 
-    [Route("/packages", HTTPMethod.POST, Role.ADMIN)]
-    public IResponse AddPackage()
-    {
-        try
-        {
-            List<Card>? cards = request.PayloadAsObject<List<Card>>();
 
-            if (cards == null || cards.Count < 5) return new Response<string>(400, "Package must consist of 5 cards");
-
-            repo.AddPackage(cards);
-
-            return new Response<string>(200, "Package and cards successfully created");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-
-            return new Response<string>(403, "At least one card in the packages already exists");
-        }
-    }
 
 
 
@@ -85,7 +66,7 @@ public class CardController : IController
         try
         {
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
-            var userCards = repo.GetCardsInDeckByUserId(userId);
+            var userCards = repo.GetDeckByUserId(userId);
 
             if (userCards == null) return new Response<string>(204, "The request was fine, but the deck doesn't have any cards");
 
@@ -126,6 +107,9 @@ public class CardController : IController
                 return new Response<string>(403, "At least one of the provided cards does not belong to the user or is not available.");
 
             repo.AddCardsToDeck(providedCards!, userId);
+            
+            providedCards.ForEach(card => repo.RemoveCardFromStack(card, userId));
+
 
             return new Response<string>(200, "The deck has been successfully configured");
         }
@@ -149,10 +133,11 @@ public class CardController : IController
         try
         {
             var userStackCards = repo.GetAllCardsInStackByUserId(userId);
-            IEnumerable<Card>? deckCards = repo.GetCardsInDeckByUserId(userId);
+            IEnumerable<Card>? deckCards = repo.GetDeckByUserId(userId);
 
             var userOwnsProvidedCards = providedCards.All<Card>(pc => userStackCards.Any<Card>(uc => uc.Id == pc.Id));
             var deckIsEmpty = deckCards == null || deckCards.Count() == 0;
+            // bool cardsLockedInDeck = providedCards.All<Card>(c => !c.Locked);
 
             return userOwnsProvidedCards && deckIsEmpty;
         }

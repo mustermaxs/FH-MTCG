@@ -146,6 +146,14 @@ public class QueryBuilder
         paramSequence = new();
         queryString = string.Empty;
         paramMappings.Clear();
+        paramIndex = 0;
+        qsIndex = 0;
+        isFirstInsertValuesCall = true;
+        isFirstUpdateSetStmt = true;
+        insertedValues = false;
+        expectNbrOfValuesInserted = 0;
+        isInsertStatement = false;
+        returnInsertedId = false;
     }
 
 
@@ -556,6 +564,25 @@ public class QueryBuilder
     }
 
 
+    /// <summary>
+    /// Reads a single value from the specified column and attempts
+    /// to cast to the provided type.
+    /// </summary>
+    /// <typeparam name="T">Expected return type.</typeparam>
+    /// <param name="columnName">Name of DB column.</param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    public T? ReadSingle<T>(string columnName) where T : struct
+    {
+        if (!calledBuild) throw new Exception("Need to call QueryBuilder.Build first.");
+
+        var result = ReadMultiple().FirstOrDefault();
+
+        if (result == null || !result.ContainsKey(columnName))
+            return default(T);
+        
+        return (T)result[columnName];
+    }
 
     public T? Read<T>(ObjectBuilder<T> callback) where T : class, new()
     {

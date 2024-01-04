@@ -7,10 +7,10 @@ namespace MTCG;
 //////////////////////////////////////////////////////////////////////
 
 [Controller]
-public class TradingController : IController
+public class CardTradingController : IController
 {
-    protected static TradingRepository repo = new TradingRepository();
-    public TradingController(IRequest request) : base(request) { }
+    protected static CardTradeRepository repo = new CardTradeRepository();
+    public CardTradingController(IRequest request) : base(request) { }
 
 
     //////////////////////////////////////////////////////////////////////
@@ -18,25 +18,15 @@ public class TradingController : IController
 
     // CHANGE -> Role.USER | ROLE.ADMIN
     [Route("/tradings", HTTPMethod.GET, Role.ALL)]
-    public IResponse GetAllStoreTradingDeals()
+    public IResponse GetAllPendingCardTrades()
     {
         try
         {
-            List<StoreTrade> trades;
-            string? queryFilter;
-            request.Endpoint.UrlParams.QueryString.TryGetValue("filter", out queryFilter);
+            List<CardTrade> trades = repo.GetAll().Where(t => !t.Settled).ToList();
 
-            if (queryFilter != null)
-            {
-                if (queryFilter == "store") trades = repo.GetAll<StoreTrade>().ToList<StoreTrade>();
-                else if (queryFilter == "users") trades = repo.GetAll<UserTrade>().ToList<StoreTrade>();
-                else throw new Exception("Invalid filter.");
-            }
-            else trades = repo.GetAll<StoreTrade>().ToList<StoreTrade>();
+            if (trades.Count == 0) return new Response<string>(204, "The request was fine, but there are no trading deals available");
 
-            if (trades.Count() == 0) return new Response<string>(204, "The request was fine, but there are no trading deals available");
-
-            return new Response<List<StoreTrade>>(200, trades, "There are trading deals available, the response contains these");
+            return new Response<List<CardTrade>>(200, trades, "There are trading deals available, the response contains these");
         }
         catch (Exception ex)
         {
@@ -51,75 +41,88 @@ public class TradingController : IController
     //////////////////////////////////////////////////////////////////////
 
 
-    public IResponse GetAllUserTradingDeals()
+    [Route("/tradings/{tradeid:alphanum}", HTTPMethod.POST, Role.USER)]
+    public IResponse AcceptTradingDeal(Guid tradeid)
     {
         try
         {
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId!)!.ID;
-            IEnumerable<UserTrade> trades = repo.GetAll<UserTrade>();
+            var cardRepo = new CardRepository();
+            var reqContent = request.PayloadAsObject<object>();
+            Guid acceptedCardId = Guid.Parse(reqContent.ToString());
+            Card acceptedCard = cardRepo.GetDeckCardForUser(acceptedCardId, userId);
+            CardTrade? trade = repo.Get(tradeid);
 
-            if (trades.Count() == 0) return new Response<string>(204, "The request was fine, but there are no trading deals available");
+            if (trade == null || trade.Settled)
+                return new Response<string>(404, "The provided deal ID was not found.");
 
-            return new Response<IEnumerable<UserTrade>>(200, trades, "There are trading deals available, the response contains these");
+            Card offeredCard = cardRepo.GetDeckCardForUser(trade.CardToTrade.Value, trade.OfferingUserId);
+
+            if (!OfferedCardIsOwnedByUser(acceptedCardId, userId) ||
+                userId == trade.OfferingUserId ||
+                !AcceptedDealMeetsRequirements(trade, acceptedCard))
+                return new Response<string>(403, "The offered card is not owned by the user, or the requirements are not met (Type, MinimumDamage), or the offered card is locked in the deck.");
+
+            trade.AcceptingUserId = userId;
+            trade.Settled = true;
+            trade.AcceptedDeckCardId = acceptedCardId;
+            acceptedCard.Locked = false;
+            offeredCard!.Locked = false;
+            ExchangeDeckCards(acceptedCard, offeredCard!, userId, trade.OfferingUserId);
+            repo.Update(trade);
+
+            return new Response<string>(200, "Trading deal successfully executed.");
+
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to fetch all pending trading deals.\n{ex}");
+            Console.WriteLine($"Failed to remove trading deal.\n{ex}");
 
             return new Response<string>(500, "Something went wrong :(");
         }
     }
 
 
-    //////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////
-
-    // [Route("/tradings/{tradingdealid:int}", HTTPMethod.GET, Role.USER | Role.ADMIN)]
-    // public IResponse AcceptTrade(Guid tradingdealid)
-    // {
-    //     try
-    //     {
-    //         Trade? trade = repo.GetTradeById(tradingdealid);
-
-    //         if (trade == null) return new Response<string>(404, "The provided deal ID was not found.");
-
-
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine($"Failed to accept trade.\n{ex}");
-
-    //         return new Response<string>(500, "Something went wrong :(");
-    //     }
-    // }
-
 
 
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
 
-    protected bool AcceptedDealMeetsRequirements(UserTrade trade)
+    protected void ExchangeDeckCards(Card acceptedCard, Card offeredCard, Guid userId, Guid offeringUserId)
     {
-        if (!ValidateAcceptedTrade(trade)) throw new Exception("Accepted trade incomplete.");
+        var cardRepo = new CardRepository();
+        cardRepo.AddCardsToDeck(new List<Card> { acceptedCard }, offeringUserId);
+        cardRepo.RemoveCardFromDeck(acceptedCard, userId);
+        cardRepo.AddCardsToDeck(new List<Card> { offeredCard }, userId);
+        cardRepo.RemoveCardFromDeck(offeredCard, offeringUserId);
+    }
 
-        Card acceptedCard = trade.GetAcceptedCard()!;
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    protected bool AcceptedDealMeetsRequirements(CardTrade trade, Card acceptedCard)
+    {
+        var userId = SessionManager.GetUserBySessionId(request.SessionId!)!.ID;
+        bool tradeWithSelf = trade.OfferingUserId == userId;
         bool typeIsSame = trade.Type == acceptedCard.Type;
         bool damageGreaterOrEqual = acceptedCard.Damage >= trade.MinimumDamage;
 
-        return typeIsSame && damageGreaterOrEqual;
+        return typeIsSame && damageGreaterOrEqual && !tradeWithSelf && !trade.Settled;
     }
 
 
-    protected bool ValidateAcceptedTrade(UserTrade trade)
-    {
-        return (
-            trade.GetAcceptedCard() != null &&
-            trade.GetOfferingUser() != null &&
-            trade.GetAcceptedCard() != null
-            );
-    }
+    // protected bool ValidateAcceptedTrade(CardTrade trade)
+    // {
+    //     return (
+    //         trade.GetAcceptedCard() != null &&
+    //         trade.GetOfferingUser() != null &&
+    //         trade.GetAcceptedCard() != null
+    //         );
+    // }
 
 
     //////////////////////////////////////////////////////////////////////
@@ -129,12 +132,12 @@ public class TradingController : IController
     /// Adds a new trading deal among users to the DB.
     /// </summary>
     /// <returns></returns>
-    [Route("/tradings/users", HTTPMethod.POST, Role.USER | Role.ADMIN)]
+    // [Route("/tradings/users", HTTPMethod.POST, Role.USER | Role.ADMIN)]
     public IResponse AddTradingDealWithUser()
     {
         try
         {
-            UserTrade? trade = request.PayloadAsObject<UserTrade>();
+            var trade = request.PayloadAsObject<CardTrade>();
 
             if (trade == null) throw new Exception("");
 
@@ -143,7 +146,7 @@ public class TradingController : IController
             if (!OfferedCardIsOwnedByUser(trade.CardToTrade, userId))
                 return new Response<string>(403, "The deal contains a card that is not owned by the user or locked in the deck.");
 
-            trade.SetOfferingUserId(userId);
+            trade.OfferingUserId = userId;
 
             repo.Save(trade);
 
@@ -161,23 +164,26 @@ public class TradingController : IController
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-
-    public IResponse AddTradingDealWithStore()
+    [Route("/tradings", HTTPMethod.POST, Role.USER)]
+    public IResponse AddCardTradingDeal()
     {
         try
         {
-            Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
-            UserTrade trade = request.PayloadAsObject<UserTrade>();
+            Guid userId = SessionManager.GetUserBySessionId(request.SessionId!)!.ID;
+            var trade = request.PayloadAsObject<CardTrade>();
 
-            if (trade == null) throw new Exception("");
+            if (trade == null) throw new Exception($"Failed to create trade object from provided JSON string.\n{request.Payload}");
 
             var cardRepo = new CardRepository();
-            List<Card> deckCards = cardRepo.GetAllCardsInStackByUserId(userId).ToList();
+            DeckCard deckCard = cardRepo.GetDeckCardForUser(trade.CardToTrade.Value, UserId);
 
-            if (!deckCards.Exists(c => c.Id == trade.CardToTrade))
+            if (deckCard == null || !deckCard.DeckId.HasValue || deckCard.Locked)
                 return new Response<string>(403, "The deal contains a card that is not owned by the user or locked in the deck.");
 
-            trade.SetOfferingUserId(userId);
+            trade.OfferingUserId = UserId;
+            deckCard.Locked = true;
+
+            cardRepo.UpdateDeckCard(deckCard);
 
             repo.Save(trade);
 
@@ -185,9 +191,15 @@ public class TradingController : IController
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to add new trading deal.\n{ex}");
+            string postTradeJsonStructure = @"{
+            ""CardToTrade"": ""3fa85f64-5717-4562-b3fc-2c963f66afa6"",
+            ""Type"": ""monster"",
+            ""MinimumDamage"": 15
+        }";
 
-            return new Response<string>(500, "Something went wrong :(");
+            Console.WriteLine($"{ex}\nFailed to add new trading deal.");
+
+            return new Response<string>(500, $"Something went wrong :(\nPerhaps misconfigured JSON request object.\nReq. structure: {postTradeJsonStructure}");
         }
     }
 
@@ -203,18 +215,15 @@ public class TradingController : IController
         {
             var trade = repo.Get(tradingdealid);
 
-            if (trade == null) return new Response<string>(404, "The provided deal ID was not found.");
-
-            Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
-
-            if (!OfferedCardIsOwnedByUser(trade.CardToTrade!.Value, userId))
-                return new Response<string>(403, "The deal contains a card that is not owned by the user.");
-
-            if (trade.GetOfferingUserId() == userId)
+            if (trade == null || trade.Settled || trade.OfferingUserId != UserId)
                 return new Response<string>(404, "The provided deal ID was not found.");
 
-            return new Response<string>(200, "Trading deal successfully deleted");
+            if (!OfferedCardIsOwnedByUser(trade.CardToTrade!.Value, UserId))
+                return new Response<string>(403, "The deal contains a card that is not owned by the user.");
 
+            repo.Delete(trade);
+
+            return new Response<string>(200, "Trading deal successfully deleted");
         }
         catch (Exception ex)
         {
@@ -229,9 +238,9 @@ public class TradingController : IController
     //////////////////////////////////////////////////////////////////////
 
 
-    protected bool TradeIsOwnedByUser(StoreTrade trade, Guid userId)
+    protected bool TradeIsOwnedByUser(CardTrade trade, Guid userId)
     {
-        return trade.GetOfferingUserId() == userId;
+        return trade.OfferingUserId == userId;
     }
 
 
@@ -244,7 +253,7 @@ public class TradingController : IController
         if (!cardId.HasValue || !userId.HasValue) return false;
 
         var cardRepo = new CardRepository();
-        var deckCards = cardRepo.GetCardsInDeckByUserId(userId.Value);
+        var deckCards = cardRepo.GetDeckByUserId(userId.Value);
 
         if (deckCards == null || deckCards.Count() == 0)
             return false;
@@ -311,10 +320,10 @@ public class TradingController : IController
     //         var acceptedCard = cards.SingleOrDefault<Card>(c =>
     //             c.Damage >= trade.MinimumDamage &&
     //             c.Type == trade.Type);
-            
+
     //         if (acceptedCard == null)
     //             return new Response<string>(403, "The offered card is not owned by the user, or the requirements are not met (Type, MinimumDamage), or the offered card is locked in the deck.");
-            
+
     //         cardRepo.AddCardToStack
 
     //         repo.Save(trade);

@@ -1,9 +1,4 @@
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/CoverletSourceRootsMapping
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.csproj.AssemblyReference.cache
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.GeneratedMSBuildEditorConfig.editorconfig
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.AssemblyInfoInputs.cache
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.AssemblyInfo.cs
-/home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.csproj.CoreCompileInputs.cache
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/MTCG.deps.json
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/MTCG.runtimeconfig.json
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/MTCG
@@ -106,6 +101,11 @@
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/runtimes/browser/lib/net6.0/System.Text.Encodings.Web.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/MTCG.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/bin/Debug/net6.0/MTCG.pdb
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.csproj.AssemblyReference.cache
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.GeneratedMSBuildEditorConfig.editorconfig
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.AssemblyInfoInputs.cache
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.AssemblyInfo.cs
+/home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.csproj.CoreCompileInputs.cache
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.csproj.CopyComplete
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/MTCG.Tests.dll
 /home/mustermax/vscode_projects/MTCG/MTCG.Tests/obj/Debug/net6.0/ref/MTCG.Tests.dll

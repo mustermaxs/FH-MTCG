@@ -3,6 +3,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 namespace MTCG;
 
+/// <summary>
+/// Base class for all JSON responses.
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public abstract class BaseJsonResponse<T> : IResponse where T : class?
 {
     public T? Payload { get; protected set; }
@@ -30,6 +34,18 @@ public abstract class BaseJsonResponse<T> : IResponse where T : class?
         return this;
     }
 
+    protected virtual string HandleEnumerablePayload()
+    {
+        var list = new List<object>();
+
+        foreach (var item in Payload as IEnumerable<IModel>)
+        {
+            list.Add(item.ToSerializableObj());
+        }
+
+        return JsonConvert.SerializeObject(list);
+    }
+
     virtual public string PayloadAsJson()
     {
         if (Payload == null)
@@ -38,9 +54,10 @@ public abstract class BaseJsonResponse<T> : IResponse where T : class?
         }
 
         if (Payload is IModel)
-        {
             return JsonConvert.SerializeObject((Payload as IModel)?.ToSerializableObj());
-        }
+
+        if (Payload is IEnumerable<IModel>)
+            return HandleEnumerablePayload();
 
         return JsonConvert.SerializeObject(Payload);
     }

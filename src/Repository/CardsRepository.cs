@@ -20,6 +20,10 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     //////////////////////////////////////////////////////////////////////
 
 
+    /// <summary>
+    /// Adds card to cards table in DB.
+    /// </summary>
+    /// <param name="card"></param>
     public override void Save(Card card)
     {
         using (NpgsqlConnection? connection = this.Connect())
@@ -35,6 +39,27 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
             command.Dispose(); connection!.Dispose();
         }
+    }
+
+
+    // BUG: Npgsql.PostgresException (0x80004005): 42601: syntax error at or near "DEFAULT"
+    public Guid SaveAndGetInsertedId(Card card)
+    {
+        var builder = new QueryBuilder(Connect());
+        builder
+            .InsertInto(_Table)
+            .InsertValues("@name", "@descr", "@damage", "@type", "@element")
+            .AddParam("@name", card.Name.ToString())
+            .AddParam("@descr", card.Description)
+            .AddParam("@damage", card.Damage)
+            .AddParam("@type", card.Type.ToString())
+            .AddParam("@element", card.Element)
+            .GetInsertedIds(true)
+            .Build();
+
+        IEnumerable<Guid> insertedIds = builder.Run<Guid>();
+
+        return insertedIds.FirstOrDefault();
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -60,16 +85,38 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     //////////////////////////////////////////////////////////////////////
 
 
-    public void RemoveCardFromStack(Card card, Guid userId)
+    public Guid? GetStackIdOfCard(Guid cardId, Guid userId)
     {
         var builder = new QueryBuilder(Connect());
         builder
-            .DeleteFrom("stack")
+            .Select("id")
+            .From("stackcards")
             .Where("userid=@userid")
             .AddParam("@userid", userId)
             .And("cardid=@cardid")
-            .AddParam("@cardid", card.Id)
+            .AddParam("@cardid", cardId)
             .Limit("1")
+            .Build();
+
+        return builder.ReadSingle<Guid>("id");
+    }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    public void RemoveCardFromStack(Card card, Guid userId)
+    {
+        Guid? stackCardId = GetStackIdOfCard(card.Id, userId);
+
+        if (!stackCardId.HasValue) throw new Exception("Failed to get stackid of card.");
+
+        var builder = new QueryBuilder(Connect());
+        builder
+            .DeleteFrom("stackcards")
+            .Where("id=@id")
+            .AddParam("@id", stackCardId)
             .Build();
 
         builder.ExecuteNonQuery();
@@ -82,7 +129,8 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     {
         var builder = new QueryBuilder(Connect());
         builder
-            .DeleteFrom("decks")
+            .Select("id")
+            .From("deck")
             .Where("userid=@userid")
             .AddParam("@userid", userId)
             .And("cardid=@cardid")
@@ -90,7 +138,19 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
             .Limit("1")
             .Build();
 
-        builder.ExecuteNonQuery();
+        Guid deckId = (Guid)builder.ReadMultiple().ToList()[0]["id"];
+
+        builder.Reset();
+        var pbuilder = new QueryBuilder(Connect());
+        pbuilder
+            .DeleteFrom("deck")
+            .Where("id=@id")
+            .AddParam("@id", deckId)
+            .And("userid=@userid")
+            .AddParam("@userid", userId)
+            .Build();
+
+        pbuilder.ExecuteNonQuery();
     }
 
 
@@ -121,7 +181,11 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-
+    /// <summary>
+    /// Gets all cards from cards table.
+    /// Not specific to any user.
+    /// </summary>
+    /// <returns>IEnumerable<Cards></returns>
     public override IEnumerable<Card> GetAll()
     {
         ObjectBuilder<Card> fill = Fill;
@@ -139,12 +203,12 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     //////////////////////////////////////////////////////////////////////
 
 
-    public IEnumerable<Card> GetAllCardsInStackByUserId(Guid userid)
+    public IEnumerable<StackCard> GetAllCardsInStackByUserId(Guid userid)
     {
         var builder = new QueryBuilder(this.Connect());
-        ObjectBuilder<Card> fill = Fill;
+        ObjectBuilder<StackCard> fill = Fill;
         builder
-            .Select("c.*")
+            .Select("c.*", "sc.id as stackid")
             .From("cards c")
             .Join("stackcards sc")
             .On("sc.cardid=c.id")
@@ -152,7 +216,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
             .AddParam("@userid", userid)
             .Build();
 
-        var cards = builder.ReadMultiple<Card>(fill);
+        var cards = builder.ReadMultiple<StackCard>(fill);
 
         return cards;
     }
@@ -161,27 +225,40 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-    // [Obsolete("")]
-    public void AddPackage(IEnumerable<Card> cards)
+
+    /// <summary>
+    /// Adds buyable package of cards to packages/packagecards tables.
+    /// </summary>
+    /// <param name="cards"></param>
+    /// TEST
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    public IEnumerable<DeckCard>? GetDeckByUserId(Guid userId)
     {
-        Guid packageId = Guid.Parse("d199ee35-d0bc-4701-9985-47ec7c8ee180");
-
-        var builder = new QueryBuilder(this.Connect());
+        ObjectBuilder<DeckCard> objectBuilder = Fill;
+        var builder = new QueryBuilder(Connect());
         builder
-            .InsertInto("packagecards", "packageid", "cardid");
+            .Select("c.*", "d.cardid", "d.userid", "d.id as deckid", "d.locked as locked")
+            .From("cards c")
+            .Join("deck d")
+            .On("d.cardid=c.id")
+            .Where("userid=@userid")
+            .AddParam("userid", userId)
+            .Build();
 
-        int i = 1;
+        List<DeckCard>? cards = builder.ReadMultiple<DeckCard>(objectBuilder).ToList();
 
-        foreach (Card card in cards)
-        {
-            builder.InsertValues($"@packageid{i}", $"@cardid{i}")
-            .AddParam($"@packageid{i}", packageId)
-            .AddParam($"@cardid{i}", card.Id);
-            i++;
-        }
-
-        builder.Build();
-        builder.ExecuteNonQuery();
+        return cards ?? null;
     }
 
 
@@ -189,22 +266,24 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     //////////////////////////////////////////////////////////////////////
 
 
-    public IEnumerable<Card>? GetCardsInDeckByUserId(Guid userId)
+    public DeckCard? GetDeckCardForUser(Guid cardId, Guid userId)
     {
-        ObjectBuilder<Card> objectBuilder = Fill;
+        ObjectBuilder<DeckCard> objectBuilder = Fill;
         var builder = new QueryBuilder(Connect());
         builder
-            .Select("c.*", "d.*")
+            .Select("c.*", "d.*", "d.id as deckid")
             .From("cards c")
             .Join("deck d")
             .On("d.cardid=c.id")
             .Where("d.userid=@userid")
-            .AddParam("userid", userId)
+            .AddParam("@userid", userId)
+            .And("d.cardid=@cardid")
+            .AddParam("@cardid", cardId)
             .Build();
 
-        IEnumerable<Card>? cards = builder.ReadMultiple<Card>(objectBuilder);
+        DeckCard? card = builder.Read<DeckCard>(objectBuilder);
 
-        return cards ?? null;
+        return card ?? null;
     }
 
 
@@ -224,6 +303,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
                 .InsertValues($"@cardid{i}", $"@userid{i}")
                 .AddParam($"@cardid{i}", card.Id)
                 .AddParam($"@userid{i}", userId);
+            i++;
         }
 
         builder.Build();
@@ -235,19 +315,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     //////////////////////////////////////////////////////////////////////
 
 
-    protected Guid AddToPackageTable()
-    {
-        var builder = new QueryBuilder(this.Connect());
-        builder
-            .InsertInto("packages")
-            .InsertValues()
-            .GetInsertedIds()
-            .Build();
 
-        IEnumerable<Guid> insertedIds = builder.Run<Guid>();
-
-        return insertedIds.FirstOrDefault();
-    }
 
 
     //////////////////////////////////////////////////////////////////////
@@ -256,12 +324,32 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
     protected override void Fill(Card card, IDataReader re)
     {
+        if (card is StackCard)
+            FillStackCard(card as StackCard, re);
+        if (card is DeckCard)
+            FillDeckCard(card as DeckCard, re);
+
         card.Id = re.GetGuid(re.GetOrdinal("id"));
         card.Name = (CardName)Enum.Parse(typeof(CardName), re.GetString(re.GetOrdinal("name")));
         card.Description = re.GetString(re.GetOrdinal("descr"));
         card.Damage = (float)re.GetDouble(re.GetOrdinal("damage"));
         card.Element = re.GetString(re.GetOrdinal("element"));
+        card.Type = re.GetString(re.GetOrdinal("type"));
     }
+
+
+    protected void FillStackCard(StackCard card, IDataReader re)
+    {
+        card.StackId = re.GetGuid(re.GetOrdinal("stackid"));
+    }
+
+    protected void FillDeckCard(DeckCard card, IDataReader re)
+    {
+        card.DeckId = re.GetGuid(re.GetOrdinal("deckid"));
+        card.Locked = re.GetBoolean(re.GetOrdinal("locked"));
+    }
+
+
 
 
     //////////////////////////////////////////////////////////////////////
@@ -311,8 +399,46 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     //////////////////////////////////////////////////////////////////////
 
 
+    public void UpdateDeckCard(DeckCard card)
+    {
+        var builder = new QueryBuilder(Connect());
+        builder
+            .Update("deck")
+            .UpdateSet("cardid", "@cardid")
+            .AddParam("@cardid", card.Id)
+            .UpdateSet("locked", "@locked")
+            .AddParam("@locked", card.Locked)
+            .Where("id=@id")
+            .AddParam("@id", card.DeckId!)
+            .Build();
+
+        builder.ExecuteNonQuery();
+    }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
     public void Update(Card card)
     {
-        throw new NotImplementedException();
+        var builder = new QueryBuilder(Connect());
+        builder
+            .Update("cards")
+            .UpdateSet("name", "@name")
+            .AddParam("@name", card.Name)
+            .UpdateSet("descr", "@descr")
+            .AddParam("@descr", card.Description!)
+            .UpdateSet("damage", "@damage")
+            .AddParam("@damage", card.Damage)
+            .UpdateSet("element", "@element")
+            .AddParam("@element", card.Element!)
+            .UpdateSet("type", "@type")
+            .AddParam("@type", card.Type!)
+            .Where("id=@id")
+            .AddParam("@id", card.Id)
+            .Build();
+
+        builder.ExecuteNonQuery();
     }
 }

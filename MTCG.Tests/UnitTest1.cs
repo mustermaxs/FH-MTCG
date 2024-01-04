@@ -5,6 +5,7 @@ using System.Reflection;
 using NUnit.Framework.Internal;
 using Moq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace UnitTests.MTCG;
 
@@ -183,6 +184,27 @@ public class Tests_Response
         }
         public TestModel() { }
     }
+
+        public class TestModelRec : IModel
+    {
+        public int NotSerializedField { get; set; } = 100;
+        public string SerializedField { get; set; } = "Serialized";
+        public string? NullField { get; set; } = null;
+        public IEnumerable<TestModel> SomeListItems { get; set; } = new List<TestModel> { new TestModel(), new TestModel() };
+        public object ToSerializableObj()
+        {
+            return new
+            {
+                SerializedField,
+                NullField,
+                SomeListItems = SomeListItems.ToList().Select(c => c.ToSerializableObj()).ToList()
+            };
+        }
+
+        public TestModelRec() { }
+    }
+
+
     [Test]
     public void PayloadAsJson_ReturnsEmptyString_WhenPayloadIsNull()
     {
@@ -203,6 +225,18 @@ public class Tests_Response
 
         Assert.AreEqual("{\"SerializedField\":\"Serialized\",\"NullField\":null}", json);
     }
+
+    [Test]
+    public void Response_ReturnsSerializedPayload_WhenPayloadIsIModel_Recursivley()
+    {
+        var testModel = new TestModelRec();
+        var response = new Response<TestModelRec>(200, testModel, "");
+
+        string json = response.PayloadAsJson();
+
+        Assert.AreEqual("{\"SerializedField\":\"Serialized\",\"NullField\":null,\"SomeListItems\":[{\"SerializedField\":\"Serialized\",\"NullField\":null},{\"SerializedField\":\"Serialized\",\"NullField\":null}]}", json);
+    }
+
 
     [Test]
     public void StatusCode_ReturnsCorrectStatusCode()

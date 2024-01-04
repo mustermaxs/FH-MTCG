@@ -104,11 +104,11 @@ public class Router : IRouter
         {
             if (session == null && requestAccessLevel == Role.ANONYMOUS)
                 return true;
-            
+
             return false;
         }
 
-        Role userAccessLevel = session.User!.GetUserAccessLevel();
+        Role userAccessLevel = session.User!.UserAccessLevel;
 
         return userAccessLevel == (requestAccessLevel & userAccessLevel);
     }
@@ -153,21 +153,21 @@ public class Router : IRouter
         {
             Console.WriteLine($"{ex}\nRequested endpoint: {ex.Url}");
 
-            return new ResponseWithoutPayload(404, $"The requested endpoint {ex.Url} doesn't seem to exist.");
+            return new Response<string>(404, $"The requested endpoint {ex.Url} doesn't seem to exist.");
         }
 
         catch (AuthenticationFailedException ex)
         {
-            Console.WriteLine($"Access token is missing or invalid");
+            Console.WriteLine($"Access token is missing or invalid.\n{ex}");
 
-            return new ResponseWithoutPayload(404, $"Access token is missing or invalid.\n{ex.Message}");
+            return new Response<string>(404, $"Access token is missing or invalid.");
         }
 
         catch (Exception ex)
         {
             Console.WriteLine($"ERROR\n{ex}");
 
-            return new ResponseWithoutPayload(500, $"Something went wrong.\n{ex.Message}");
+            return new Response<string>(500, $"Something went wrong.\n{ex.Message}");
         }
     }
 }

@@ -47,7 +47,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     {
         var builder = new QueryBuilder(Connect());
         builder
-            .InsertInto(_Table)
+            .InsertInto("cards", "name", "descr", "damage", "type", "element")
             .InsertValues("@name", "@descr", "@damage", "@type", "@element")
             .AddParam("@name", card.Name.ToString())
             .AddParam("@descr", card.Description)
@@ -57,9 +57,11 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
             .GetInsertedIds(true)
             .Build();
 
-        IEnumerable<Guid> insertedIds = builder.Run<Guid>();
+        // builder.ExecuteNonQuery();
+        Guid? insertedId = builder.ReadSingle<Guid>("id");
 
-        return insertedIds.FirstOrDefault();
+        return insertedId ?? Guid.Empty;
+        // return new Guid();
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -440,5 +442,18 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
             .Build();
 
         builder.ExecuteNonQuery();
+    }
+
+    public List<Card> GetCardsByIds(List<Guid> packageCardIds)
+    {
+        List<Card> cards = new List<Card>();
+
+        foreach (Guid cardId in packageCardIds)
+        {
+            var card = Get(cardId) ?? throw new Exception($"Failed to get all cards.\nCardId {cardId}");
+            cards.Add(card);
+        }
+
+        return cards;
     }
 }

@@ -33,6 +33,15 @@ public enum QBCommand
 }
 
 public delegate void ObjectBuilder<T>(T obj, IDataReader reader);
+public class ValueTypeWrapper<T>
+{
+    public T? Value { get; set;}
+
+    public ValueTypeWrapper()
+    {
+        this.Value = default(T);
+    }
+}
 
 /// <summary>
 /// This is garbage. I know that. But time is really limited.
@@ -82,6 +91,7 @@ public class QueryBuilder
         {QBCommand.LIMIT, " LIMIT "}
     };
     private bool isFirstInsertValuesCall = true;
+    private bool insertDefaultValues = false;
 
     public QueryBuilder(NpgsqlConnection? connection)
     {
@@ -139,6 +149,7 @@ public class QueryBuilder
     public void Reset()
     {
         calledBuild = false;
+        insertDefaultValues = false;
         qString = new();
         commandIndex = 0;
         commandSequence = new();
@@ -209,6 +220,13 @@ public class QueryBuilder
 
     public QueryBuilder InsertValues(params string[]? columns)
     {
+        if (columns == null || columns.Length == 0)
+        {
+            insertDefaultValues = true;
+
+            return this;
+        }
+
         int columnCount = columns?.Length ?? 0;
         if (columnCount < expectNbrOfValuesInserted) throw new ArgumentException($"Expected {expectNbrOfValuesInserted} values to be inserted.");
         if (columns != null && columns.Length > 0)
@@ -446,6 +464,9 @@ public class QueryBuilder
         {
             AddParams(command);
 
+            if (returnInsertedId)
+                queryString += " RETURN id";
+
             return command.ExecuteNonQuery();
         }
     }
@@ -474,7 +495,7 @@ public class QueryBuilder
 
     public QueryBuilder InsertAddValues(IEnumerable<string[]> rows)
     {
-        insertedValues = true;
+        if (insertDefaultValues) throw new Exception("Can't insert values while applying DEFAUL VALUES command");
 
         if (rows == null || !rows.Any())
         {
@@ -484,6 +505,13 @@ public class QueryBuilder
         string columns = Columns(rows.First());
 
         queryString += $" VALUES {string.Join(", ", rows.Select(row => $"({Columns(row)})"))}";
+
+        return this;
+    }
+
+    public QueryBuilder InsertOnlyDefaultValues()
+    {
+        this.insertDefaultValues = true;
 
         return this;
     }
@@ -503,7 +531,7 @@ public class QueryBuilder
 
         if (returnInsertedId)
         {
-            if (!insertedValues) queryString += $" DEFAULT VALUES; ";
+            if (insertDefaultValues) queryString += $" DEFAULT VALUES; ";
             using var command = new NpgsqlCommand(queryString, _connection);
             return ReturnInsertedIds<T>(command);
         }
@@ -576,11 +604,15 @@ public class QueryBuilder
     {
         if (!calledBuild) throw new Exception("Need to call QueryBuilder.Build first.");
 
+        if (insertDefaultValues) queryString += $" DEFAULT VALUES ";
+        if (isInsertStatement) queryString += $" RETURNING {columnName} ";
+
+        Console.WriteLine(queryString);
         var result = ReadMultiple().FirstOrDefault();
 
         if (result == null || !result.ContainsKey(columnName))
             return default(T);
-        
+
         return (T)result[columnName];
     }
 

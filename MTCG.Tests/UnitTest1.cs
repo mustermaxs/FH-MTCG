@@ -6,6 +6,7 @@ using NUnit.Framework.Internal;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 
 namespace UnitTests.MTCG;
 
@@ -185,7 +186,7 @@ public class Tests_Response
         public TestModel() { }
     }
 
-        public class TestModelRec : IModel
+    public class TestModelRec : IModel
     {
         public int NotSerializedField { get; set; } = 100;
         public string SerializedField { get; set; } = "Serialized";
@@ -535,8 +536,102 @@ public class Test_ReflectionUtils
     }
 }
 
+
+[TestFixture]
+public class Test_FileHandler
+{
+    [SetUp]
+    public void Setup()
+    {
+        Directory.SetCurrentDirectory("/home/mustermax/vscode_projects/MTCG/MTCG.Tests/");
+    }
+    [Test]
+    public void FileHandler_FindsKeyValuePair()
+    {
+        Directory.SetCurrentDirectory("/home/mustermax/vscode_projects/MTCG/MTCG.Tests/");
+
+        string res = FileHandler.SearchKeyValueInFile("config.txt", "PRICE_VIP_PACKAGE");
+
+        Assert.IsTrue(res == "15", $"Value is {res}");
+    }
+
+    [Test]
+    public void FileHandler_GetsJsonObjectFromFile()
+    {
+        var res = FileHandler.ReadJsonFromFile("config.json");
+
+        Assert.IsTrue(res!["SERVER_IP"] == "127.0.0.1"
+        && res!["SERVER_PORT"] == 12000);
+    }
+}
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
+
+
+
+[TestFixture]
+public class Test_ConfigService
+{
+    [SetUp]
+    public void Setup()
+    {
+        Directory.SetCurrentDirectory("/home/mustermax/vscode_projects/MTCG/MTCG.Tests/");
+    }
+
+    [Test]
+    public void Register_WithValidPath_ShouldRegisterConfig()
+    {
+        string path = "config.json";
+
+        ConfigService.Register<MockConfig>(path);
+
+        Assert.IsTrue(ConfigService.Get<MockConfig>() != null, "Failed to register config");
+    }
+
+    [Test]
+    public void Register_WithInvalidPath_ShouldThrowException()
+    {
+        string path = "invalid_config.json";
+
+        Assert.Throws<FileNotFoundException>(() => ConfigService.Register<MockConfig>(path), "Failed to throw exception for invalid path");
+    }
+
+    [Test]
+    public void Register_WithConfigObject_ShouldRegisterConfig()
+    {
+        var config = new MockConfig();
+
+        ConfigService.Register(config);
+
+        Assert.IsTrue(ConfigService.Get<MockConfig>() != null, "Failed to register config");
+    }
+
+    [Test]
+    public void Get_WithRegisteredConfig_ShouldReturnConfig()
+    {
+        ConfigService.Register<MockConfig>("config.json");
+
+        var config = ConfigService.Get<MockConfig>();
+
+        Assert.IsNotNull(config, "Failed to get registered config");
+    }
+
+    [Test]
+    public void Get_WithUnregisteredConfig_ShouldReturnNull()
+    {
+        ConfigService.Unregister("MockConfig");
+        var config = ConfigService.Get<MockConfig>();
+
+        Assert.IsNull(config, "Failed to return null for unregistered config");
+    }
+}
+
+public class MockConfig : IConfig
+{
+    override public string Name { get; } = "MockConfig";
+    public string SERVER_IP { get; set; } = "";
+    public int SERVER_PORT { get; set; } = 0;
+}
 
 
 //    [TestFixture]

@@ -1,0 +1,12 @@
+{
+    "server":
+    {
+        "SERVER_IP": "127.0.0.1",
+        "SERVER_PORT": 12000
+    },
+    "transactions":
+    {
+        "PRICE_NORMAL_PACKAGE": 5,
+        "PRICE_VIP_PACKAGE": 15
+    }
+}

@@ -12,15 +12,20 @@ public class JsonConfigLoader : IConfigLoader
     {
         dynamic completeConfig = FileHandler.ReadJsonFromFile(filePath) ?? throw new Exception("Failed to read config file");
 
-        if (TryGetRelevantSection<T>(completeConfig, out string config))
+        if (TryGetRelevantSection<T>(completeConfig, section, out string config))
             return JsonSerializer.Deserialize<T>(config) ?? default!;
         else
             throw new Exception($"Failed to get relevant section for config {typeof(T).Name}");
     }
 
-    private bool TryGetRelevantSection<T>(dynamic completeConfig, out string config) where T : IConfig, new()
+    public static T? Load<T>(string filePath, string? section) where T : IConfig, new()
     {
-        var sectionString = new T().Section;
+        return new JsonConfigLoader().LoadConfig<T>(filePath, section);
+    }
+
+    private bool TryGetRelevantSection<T>(dynamic completeConfig, string? section, out string config) where T : IConfig, new()
+    {
+        var sectionString = section ?? new T().Section;
         var sectionKey = sectionString;
 
         if (IsSubSection(sectionString))

@@ -134,7 +134,7 @@ namespace MTCG
         {
             if (ConfigService.configs.ContainsKey(config.Name))
             {
-                Console.WriteLine("ConfigService already contains config.");
+                Console.WriteLine($"ConfigService already contains config {config.Name}.");
 
                 return this;
             }

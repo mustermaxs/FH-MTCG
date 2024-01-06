@@ -1,0 +1,30 @@
+{
+    "responses": {
+        "languages": [
+            "english",
+            "german"
+        ],
+        "english": {
+            "Response": {
+                "INT_SVR_ERR": "Internal server error. Something went wrong :(",
+                "PCK_ADD_SUCC": "Package and cards successfully created",
+                "PCK_ADD_EXISTS": "At least one card in the packages already exists",
+                "PCK_GETALL_NO_PCKS": "The request was fine, but there are no packages",
+                "PCK_GETALL_SUCC": "The response contains all packages",
+                "PCK_REQ_OK_NOTEXISTS": "The request was fine, but the package doesn't exist",
+                "PCK_BYID_SUCC": "The response contains the package"
+            }
+        },
+        "german": {
+            "Response": {
+                "INT_SVR_ERR": "Interner Serverfehler. Etwas ist schiefgegangen :(",
+                "PCK_ADD_SUCC": "Paket und Karten wurden erfolgreich erstellt",
+                "PCK_ADD_EXISTS": "Mindestens eine Karte im Paket existiert bereits",
+                "PCK_GETALL_NO_PCKS": "Die Anfrage war in Ordnung, aber es gibt keine Pakete",
+                "PCK_GETALL_SUCC": "Die Antwort enthält alle Pakete",
+                "PCK_REQ_OK_NOTEXISTS": "Die Anfrage war in Ordnung, aber das Paket existiert nicht",
+                "PCK_BYID_SUCC": "Die Antwort enthält das Paket"
+            }
+        }
+    }
+}

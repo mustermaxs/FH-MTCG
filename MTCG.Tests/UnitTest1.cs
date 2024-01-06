@@ -167,6 +167,18 @@ public class Test_ConfigService
 
     [Test]
     [Ignore("")]
+    public void Gets_ValueFromNestedJsonObject()
+    {
+        string path = "config.json";
+        configService.Register<NestedConfig>(path);
+
+        var config = (NestedConfig)ConfigService.Get<NestedConfig>();
+
+        Assert.That(config.AnswerIs == 42, "Config has wrong value for AnswerIs.");
+    }
+
+    [Test]
+    [Ignore("")]
     public void Register_WithConfigObject_ShouldRegisterConfig()
     {
         var config = new MockConfig();
@@ -217,6 +229,14 @@ public class Test_ConfigService
         public string SERVER_IP { get; set; } = "";
         public int SERVER_PORT { get; set; } = 0;
         public override string Section => "mockserver";
+    }
+
+    public class NestedConfig : IConfig
+    {
+        override public string Name { get; } = "NestedConfig";
+        public override string FilePath => "config.json";
+        public int AnswerIs { get; set; }
+        public override string Section => "section/subsection/subsubsection";
     }
 }
 

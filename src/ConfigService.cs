@@ -32,7 +32,7 @@ namespace MTCG
         public ConfigService Register<T>(string? path) where T : IConfig, new()
         {
             var filePath = path ?? new T().FilePath;
-            Dictionary<string, dynamic> completeConfig = FileHandler.ReadJsonFromFile(filePath) ?? throw new Exception("Failed to read config file");
+            object? completeConfig = FileHandler.ReadJsonFromFile(filePath) ?? throw new Exception("Failed to read config file");
 
             if (ConfigService.TryGetRelevantSection<T>(completeConfig, out T config))
                 ConfigService.configs[config.Name] = config;
@@ -51,7 +51,7 @@ namespace MTCG
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
 
-        private static bool TryGetRelevantSection<T>(Dictionary<string, dynamic> completeConfig, out T config) where T : IConfig, new()
+        private static bool TryGetRelevantSection<T>(dynamic completeConfig, out T config) where T : IConfig, new()
         {
             var sectionKey = new T().Section;
 
@@ -68,11 +68,35 @@ namespace MTCG
             return config != default;
         }
 
+        private bool IsSubSection(string section)
+        {
+            return section.Contains("/");
+        }
+
+        public Dictionary<string, dynamic> GetSubSection(dynamic completeConfig, string searchedSection)
+        {
+            var sections = searchedSection.Split("/");
+            var currentSection = completeConfig[sections[0]];
+
+            for (int i = 1; i < sections.Length; i++)
+            {
+                if (!currentSection.ContainsKey(sections[i])) throw new Exception($"Failed to get subsection {searchedSection}");
+
+                currentSection = currentSection[sections[i]];
+            }
+
+            return currentSection;
+        }
+
 
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
 
-
+        /// <summary>
+        /// Registers a config object.
+        /// </summary>
+        /// <param name="config">IConfig object.</param>
+        /// <returns>ConfigService instance. For method chaining.</returns>
         public ConfigService Register(IConfig config)
         {
             if (ConfigService.configs.ContainsKey(config.Name))
@@ -92,13 +116,21 @@ namespace MTCG
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
 
-
+        /// <summary>
+        /// Unregisters a config object.
+        /// </summary>
+        /// <param name="name">name of config object.</param>
+        /// <returns>Boolean. True on success, false if config object isn't registered.</returns>
         public static bool Unregister(string name)
         {
             return ConfigService.configs.Remove(name);
         }
 
-
+        /// <summary>
+        /// Unregisters a config object.
+        /// </summary>
+        /// <param name="name">name of config object.</param>
+        /// <returns>Boolean. True on success, false if config object isn't registered.</returns>
         public static bool Unregister<T>() where T : IConfig
         {
             Type configType = typeof(T);
@@ -117,6 +149,12 @@ namespace MTCG
         //////////////////////////////////////////////////////////////////////
 
 
+        /// <summary>
+        /// Returns a config object.
+        /// </summary>
+        /// <typeparam name="T">Type of config object.</typeparam>
+        /// <returns>T Config object</returns>
+        /// <exception cref="Exception">Exception. If config object isn't registered.</exception>
         public static IConfig Get<T>() where T : IConfig
         {
             Type configType = typeof(T);

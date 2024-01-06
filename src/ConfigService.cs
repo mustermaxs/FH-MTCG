@@ -1,5 +1,7 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using Npgsql.Replication;
+using System.Collections.Generic;
+using System.Text.Json;
 
 
 namespace MTCG
@@ -32,7 +34,8 @@ namespace MTCG
         public ConfigService Register<T>(string? path) where T : IConfig, new()
         {
             var filePath = path ?? new T().FilePath;
-            object? completeConfig = FileHandler.ReadJsonFromFile(filePath) ?? throw new Exception("Failed to read config file");
+            
+            dynamic completeConfig = FileHandler.ReadJsonFromFile(filePath) ?? throw new Exception("Failed to read config file");
 
             if (ConfigService.TryGetRelevantSection<T>(completeConfig, out T config))
                 ConfigService.configs[config.Name] = config;
@@ -53,7 +56,15 @@ namespace MTCG
 
         private static bool TryGetRelevantSection<T>(dynamic completeConfig, out T config) where T : IConfig, new()
         {
-            var sectionKey = new T().Section;
+            var sectionString = new T().Section;
+            var sectionKey = sectionString;
+
+            if (IsSubSection(sectionString))
+            {
+                var sectionKeys = GetSubsectionKeys(sectionString);
+                sectionKey = sectionKeys[sectionKeys.Length-1];
+                completeConfig = GetSubSection(completeConfig, sectionKeys);
+            }
 
             if (!completeConfig.ContainsKey(sectionKey))
             {
@@ -62,30 +73,36 @@ namespace MTCG
             }
 
             var relevantSection = completeConfig[sectionKey];
+            var relevantSectionString = relevantSection.ToString();
 
-            config = JsonConvert.DeserializeObject<T>(relevantSection.ToString()) ?? default!;
+            config = JsonSerializer.Deserialize<T>(relevantSectionString) ?? default!;
 
             return config != default;
         }
 
-        private bool IsSubSection(string section)
+        private static bool IsSubSection(string section)
         {
             return section.Contains("/");
         }
 
-        public Dictionary<string, dynamic> GetSubSection(dynamic completeConfig, string searchedSection)
+        public static dynamic GetSubSection(dynamic completeConfig, string[] sections)
         {
-            var sections = searchedSection.Split("/");
             var currentSection = completeConfig[sections[0]];
 
-            for (int i = 1; i < sections.Length; i++)
+            for (int i = 1; i < sections.Length -1; i++)
             {
-                if (!currentSection.ContainsKey(sections[i])) throw new Exception($"Failed to get subsection {searchedSection}");
+                if (!currentSection.ContainsKey(sections[i])) throw new Exception($"Failed to get subsection {sections[i]}");
 
                 currentSection = currentSection[sections[i]];
             }
 
             return currentSection;
+        }
+
+
+        public static string[] GetSubsectionKeys(string section)
+        {
+            return section.Split("/");
         }
 
 

@@ -10,9 +10,15 @@ namespace MTCG
     {
         private static ConfigService? configService = null;
         private static Dictionary<string, IConfig> configs = new Dictionary<string, IConfig>();
+        private IConfigLoader configLoader = new JsonConfigLoader();
+        private IConfigLoader? customConfigLoader = null;
 
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
+
+        [Obsolete("")]
+        public void SetConfigLoader(IConfigLoader loader) => this.customConfigLoader = loader;
+
 
 
         private ConfigService()
@@ -34,20 +40,30 @@ namespace MTCG
         public ConfigService Register<T>(string? path) where T : IConfig, new()
         {
             var filePath = path ?? new T().FilePath;
-            
-            dynamic completeConfig = FileHandler.ReadJsonFromFile(filePath) ?? throw new Exception("Failed to read config file");
 
-            if (ConfigService.TryGetRelevantSection<T>(completeConfig, out T config))
-                ConfigService.configs[config.Name] = config;
-            else
-                throw new Exception($"Failed to get relevant section for config {typeof(T).Name}");
+            var config = (T)configLoader.LoadConfig<T>(filePath, new T().Section);
 
-            if (config == null) throw new Exception("Failed to deserialize config file");
+            if (config == default)
+                throw new Exception("Failed to deserialize config file");
 
             ConfigService.configs[config.Name] = config;
-            Console.WriteLine($"Registered config {config.Name}");
 
             return this;
+            // var filePath = path ?? new T().FilePath;
+            
+            // dynamic completeConfig = FileHandler.ReadJsonFromFile(filePath) ?? throw new Exception("Failed to read config file");
+
+            // if (ConfigService.TryGetRelevantSection<T>(completeConfig, out T config))
+            //     ConfigService.configs[config.Name] = config;
+            // else
+            //     throw new Exception($"Failed to get relevant section for config {typeof(T).Name}");
+
+            // if (config == null) throw new Exception("Failed to deserialize config file");
+
+            // ConfigService.configs[config.Name] = config;
+            // Console.WriteLine($"[Registered Config] {config.Name}");
+
+            // return this;
         }
 
 

@@ -1,4 +1,5 @@
 using System;
+using System.Security.Cryptography.X509Certificates;
 
 namespace MTCG;
 
@@ -10,6 +11,7 @@ namespace MTCG;
 public class CardController : IController
 {
     protected static CardRepository repo = new CardRepository();
+    protected CardConfig cardConfig = (CardConfig)ConfigService.Get<CardConfig>()!;
     public CardController(IRequest request) : base(request) { }
 
 
@@ -96,7 +98,7 @@ public class CardController : IController
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
             var providedCardIds = request.PayloadAsObject<List<Guid>>();
 
-            if (providedCardIds == null || providedCardIds.Count() < 4)
+            if (providedCardIds == null || providedCardIds.Count() < cardConfig.MaxCardsInDeck)
                 return new Response<string>(400, "The provided deck did not include the required amount of cards");
 
             // create cards from ids, bc for whatever reason, the requestbody
@@ -136,7 +138,7 @@ public class CardController : IController
             IEnumerable<Card>? deckCards = repo.GetDeckByUserId(userId);
 
             var userOwnsProvidedCards = providedCards.All<Card>(pc => userStackCards.Any<Card>(uc => uc.Id == pc.Id));
-            var deckIsEmpty = deckCards == null || deckCards.Count() == 0;
+            var deckIsEmpty = deckCards == null || deckCards.Count() == cardConfig.MaxCardsInDeck;
             // bool cardsLockedInDeck = providedCards.All<Card>(c => !c.Locked);
 
             return userOwnsProvidedCards && deckIsEmpty;
@@ -268,7 +270,6 @@ public class CardController : IController
 
 
     //TODO
-    [Route("/transactions/packages", HTTPMethod.POST, Role.USER | Role.ADMIN)]
     public IResponse BuyCard()
     {
         throw new NotImplementedException("");

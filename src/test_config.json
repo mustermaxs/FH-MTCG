@@ -8,15 +8,6 @@
             "subsubsection": {
                 "AnswerIs": 42
             }
-        },
-        "listconfig": {
-            "Answers": [
-                1,
-                2,
-                3,
-                4,
-                5
-            ]
         }
     }
 }

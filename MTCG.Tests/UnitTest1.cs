@@ -166,7 +166,15 @@ public class Test_ConfigService
     }
 
     [Test]
-    [Ignore("")]
+    public void GetsSubSections()
+    {
+        string section = "a/b/c";
+        string[] res = { "a", "b", "c"};
+
+        Assert.That(ConfigService.GetSubsectionKeys(section).Any(s => res.Contains(s)), "Failed to get subsections");
+    }
+
+    [Test]
     public void Gets_ValueFromNestedJsonObject()
     {
         string path = "config.json";
@@ -178,7 +186,6 @@ public class Test_ConfigService
     }
 
     [Test]
-    [Ignore("")]
     public void Register_WithConfigObject_ShouldRegisterConfig()
     {
         var config = new MockConfig();
@@ -186,6 +193,16 @@ public class Test_ConfigService
         configService.Register(config);
 
         Assert.IsTrue(ConfigService.Get<MockConfig>() != null, "Failed to register config");
+    }
+
+    [Test]
+    public void SavesEnumerableToConfigObject()
+    {
+        configService.Register<ListConfig>("config.json");
+        var config = (ListConfig)ConfigService.Get<ListConfig>();
+        var expected = new List<int>{1,2,3,4,5};
+
+        Assert.That(config.Answers.SequenceEqual(expected), "Failed to save enumerable to config object.");
     }
 
     [Test]
@@ -237,6 +254,13 @@ public class Test_ConfigService
         public override string FilePath => "config.json";
         public int AnswerIs { get; set; }
         public override string Section => "section/subsection/subsubsection";
+    }
+    public class ListConfig : IConfig
+    {
+        override public string Name { get; } = "ListConfig";
+        public override string FilePath => "config.json";
+        public IEnumerable<int> Answers { get; set; }
+        public override string Section => "section/listconfig";
     }
 }
 

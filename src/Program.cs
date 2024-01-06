@@ -24,15 +24,26 @@ namespace MTCG
             /// to register endpoints and the responsible controllers
             /// to handle requests.
             /// </summary>
-            
+            LoadConfigs();
             IUrlParser urlParser = new UrlParser();
             IEndpointMapper routeRegistry = RouteRegistry.GetInstance(urlParser);
             IAttributeHandler attributeHandler = new AttributeHandler();
             IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);
-            
+
             Router router = new(routeRegistry, routeObtainer);
             HttpServer svr = new(router);
             svr.Run();
+        }
+
+        protected static void LoadConfigs()
+        {
+            // Directory.SetCurrentDirectory("/home/mustermax/vscode_projects/MTCG/MTCG.Tests/");
+            var configService = ConfigService.GetInstance();
+
+            configService
+                .Register<ServerConfig>(null)
+                .Register<UserConfig>(null)
+                .Register<CardConfig>(null);
         }
     }
 }

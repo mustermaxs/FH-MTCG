@@ -10,5 +10,8 @@
     },
     "user": {
         "StartAmountCoins": 20
+    },
+    "listconfig": {
+        "Answers": [1,2,3,4,5]
     }
 }

@@ -182,8 +182,7 @@ public class RouteRegistry : IEndpointMapper
         else
         {
             throw new ArgumentException(
-                $"Unkown HTTP Method provided. Acceptable methods are:" +
-                "{HTTPMethod.GET}, {HTTPMethod.POST}, {HTTPMethod.PUT}, {HTTPMethod.DELETE}, {HTTPMethod.PATCH}.");
+                $"Endpoint '{endpoint.RouteTemplate}' with HttpMethod '{endpoint.HttpMethod}' is already registered.");
         }
     }
 

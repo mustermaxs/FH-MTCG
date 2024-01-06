@@ -53,30 +53,39 @@ public class Router : IRouter
     /// </summary>
     public void RegisterRoutes()
     {
-        List<Endpoint> routes = routeObtainer.ObtainRoutes();
-
-        foreach (var route in routes)
+        try
         {
-            (
-                var RouteTemplate,
-                var HttpMethod,
-                var ControllerType,
-                var ControllerMethod,
-                var AccessLevel
-            ) = route;
+            List<Endpoint> routes = routeObtainer.ObtainRoutes();
 
-            var endpointBuilder = new EndpointBuilder();
-            endpointBuilder
-            .WithRouteTemplate(RouteTemplate)
-            .WithHttpMethod(HttpMethod)
-            .WithControllerType(ControllerType)
-            .WithControllerMethod(ControllerMethod)
-            .WithAccessLevel(AccessLevel);
+            foreach (var route in routes)
+            {
+                (
+                    var RouteTemplate,
+                    var HttpMethod,
+                    var ControllerType,
+                    var ControllerMethod,
+                    var AccessLevel
+                ) = route;
 
-            Endpoint endpoint = endpointBuilder.Build();
-            routeRegistry.RegisterEndpoint(endpoint);
-            Console.WriteLine($"[Register Route] {HttpMethod.ToString().PadRight(5)} {RouteTemplate}");
+                var endpointBuilder = new EndpointBuilder();
+                endpointBuilder
+                .WithRouteTemplate(RouteTemplate)
+                .WithHttpMethod(HttpMethod)
+                .WithControllerType(ControllerType)
+                .WithControllerMethod(ControllerMethod)
+                .WithAccessLevel(AccessLevel);
+
+                Endpoint endpoint = endpointBuilder.Build();
+                routeRegistry.RegisterEndpoint(endpoint);
+                Console.WriteLine($"[Register Route] {HttpMethod.ToString().PadRight(5)} {RouteTemplate}");
+            }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Router failed to register routes.\n{ex}");
+            throw new Exception($"{ex}");
+        }
+
     }
 
     //////////////////////////////////////////////////////////////////////

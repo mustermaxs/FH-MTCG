@@ -48,6 +48,21 @@ public class SessionManager : BaseSessionManager
     }
 
 
+    public static bool IsLoggedIn(string token)
+    {
+        return Sessions.ContainsKey(CreateSessionIdFromAuthToken(token));
+    }
+
+
+    public static string CreateAnonymSessionReturnId(string id)
+    {
+        string sessionId = SessionManager.CreateAuthToken(id);
+        Session session = new Session(sessionId).WithUser(new User());
+        
+
+        return session.SessionId;
+    }
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
@@ -67,7 +82,7 @@ public class SessionManager : BaseSessionManager
     //////////////////////////////////////////////////////////////////////
 
 
-    public static bool TryGetSessionWithAuthToken(string authToken, out Session session)
+    public static bool TryGetSessionWithToken(string authToken, out Session session)
     {
         string sessionId = CryptoHandler.Encode(authToken);
 
@@ -100,7 +115,7 @@ public class SessionManager : BaseSessionManager
             Session? retrievedSession = null;
 
             Sessions.TryGetValue(sessionId, out retrievedSession);
-            
+
             return retrievedSession;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -28,12 +29,22 @@ namespace MTCG
         public HttpSvrEventArgs(TcpClient client, string plainMessage)
         {
             _Client = client;
+
+
             PlainMessage = plainMessage;
             Payload = string.Empty;
 
             string[] lines = plainMessage.Replace("\r\n", "\n").Replace("\r", "\n").Split('\n');
             bool inheaders = true;
             List<HttpHeader> headers = new();
+
+            var ep = client.Client.RemoteEndPoint as IPEndPoint;
+
+            if (ep != null)
+            {
+                var clientPort = ep.Port;
+                headers.Add(new HttpHeader($"Port:{clientPort}"));
+            }
 
             for (int i = 0; i < lines.Length; i++)
             {

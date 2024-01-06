@@ -191,4 +191,21 @@ public class UserController : IController
             return new Response<string>(500, "Something went wrong :(");
         }
     }
+
+
+    [Route("/users/settings/language", HTTPMethod.POST, Role.ADMIN | Role.USER | Role.ALL)]
+    public IResponse ChangeResponseLanguage()
+    {
+        var payload = request.PayloadAsObject<Dictionary<string, string>>();
+        
+        if (payload.TryGetValue("language", out string language))
+        {   
+            if (resConfig.Responses.ContainsKey(language))
+            {
+                return new Response<string>(200, "Language successfully changed.");
+            }
+
+        }
+        return new Response<string>(400, "Bad request.");
+    }
 }

@@ -109,7 +109,7 @@ public class Router : IRouter
             return true;
 
         if (!request.TryGetHeader("Authorization", out string authToken)
-            || !SessionManager.TryGetSessionWithAuthToken(authToken, out session))
+            || !SessionManager.TryGetSessionWithToken(authToken, out session))
         {
             if (session == null && requestAccessLevel == Role.ANONYMOUS)
                 return true;
@@ -138,6 +138,10 @@ public class Router : IRouter
     {
         try
         {
+            // var resConfig = JsonConfigLoader.Load<ResponseConfig>("config.json", "responses/german");
+            // if (SessionManager.TryGetSessionWithToken(request.SessionId!, out Session session))
+            //     session.Configs.Append(resConfig);
+
             routeRegistry.MapRequestToEndpoint(ref request);
 
             if (!ClientHasPermissionToRequest(request))

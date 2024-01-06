@@ -25,6 +25,8 @@ namespace MTCG
 
         private IRouter router;
 
+        private ServerConfig config = (ServerConfig)ConfigService.Get<ServerConfig>();
+
 
         public HttpServer(IRouter router)
         {
@@ -71,15 +73,16 @@ namespace MTCG
             if (Active) return;
 
             Active = true;
-            _Listener = new(IPAddress.Parse("127.0.0.1"), 12000);
+            _Listener = new(IPAddress.Parse(config.SERVER_IP), config.SERVER_PORT);
             _Listener.Start();
             var tasks = new List<Task>();
 
-            byte[] buf = new byte[256];
+            byte[] buf = new byte[config.BufferSize];
 
             while (Active)
             {
                 TcpClient client = _Listener.AcceptTcpClient();
+
 
                 tasks.Add(Task.Run(() =>
                 {
@@ -117,9 +120,9 @@ namespace MTCG
         {
             CookieContainer cookieContainer = new CookieContainer();
             Session session;
-
-            var request = new RequestBuilder();
+            var clientPort = svrEventArgs.Headers.SingleOrDefault<HttpHeader>(h => h.Name == "Port")?.Value;
             string? authToken = svrEventArgs.Headers.SingleOrDefault<HttpHeader>(header => header.Name == "Authorization")?.Value;
+            var request = new RequestBuilder();
 
 
             request
@@ -129,15 +132,29 @@ namespace MTCG
             .WithRoute(svrEventArgs.Path);
 
             if (authToken == null)
+            {
+                // var sessionId = CreateOrGetAnonymSessionId(clientPort!.ToString());
+                // request.WithSessionId(sessionId);
+
                 return request.Build();
-                
-            if (SessionManager.TryGetSessionWithAuthToken(authToken, out session))
+            }
+
+            if (SessionManager.TryGetSessionWithToken(authToken, out session))
             {
                 var sessionId = session.SessionId;
                 request.WithSessionId(sessionId);
             }
-            
+
             return request.Build();
+        }
+
+
+        protected string CreateOrGetAnonymSessionId(string port)
+        {
+            if (SessionManager.TryGetSessionWithToken(port, out Session session))
+                return session.SessionId;
+
+            return SessionManager.CreateAnonymSessionReturnId(port);
         }
 
         protected void SetUpRouter()

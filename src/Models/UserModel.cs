@@ -9,8 +9,10 @@ public class User : IModel
     public string Password { get; set; } = string.Empty;
     public string Image { get; set; } = string.Empty;
     public int Coins { get; set; }
-    public Role UserAccessLevel { get; set;} = Role.USER;
+    public Role UserAccessLevel { get; set;} = Role.ANONYMOUS;
     public Guid ID { get; set; }
+    public string Language { get; set; } = "english";
+
 
     public User()
     {

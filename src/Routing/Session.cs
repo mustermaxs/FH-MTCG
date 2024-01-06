@@ -13,6 +13,8 @@ public class Session
     public string AuthToken { get; private set; } = string.Empty;
     public User? User { get; private set; } = null;
     public bool IsLoggedIn { get => User != null && AuthToken != ""; }
+    public IEnumerable<IConfig> Configs { get; set; } = new List<IConfig>();
+    public string Language { get; set; } = "english";
 
     public Session WithAuthToken(string authToken)
     {

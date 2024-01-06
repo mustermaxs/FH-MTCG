@@ -9,6 +9,7 @@ namespace MTCG
         protected IRequest request;
         protected User LoggedInUser { get; private set; }
         protected Guid UserId {get; private set;}
+        protected ResponseConfig resConfig = (ResponseConfig)ConfigService.Get<ResponseConfig>();
 
         public IController(IRequest request)
         {
@@ -18,6 +19,7 @@ namespace MTCG
             {
                 this.LoggedInUser = SessionManager.GetUserBySessionId(request.SessionId);
                 this.UserId = LoggedInUser.ID;
+                // this.LoggedInUser.Language;
             }
         }
     }

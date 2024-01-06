@@ -474,7 +474,7 @@ public class SessionTests
         var mockUserObj = mockUser.Object;
 
         SessionManager.CreateSessionForUser(authToken, mockUserObj);
-        Assert.True(SessionManager.TryGetSessionWithAuthToken(authToken, out session), $"Failed to get session");
+        Assert.True(SessionManager.TryGetSessionWithToken(authToken, out session), $"Failed to get session");
         Assert.That(session.User!.Name == "Max");
         Assert.That(session.User.Bio == "Das ist die Bio");
         Assert.That(session.AuthToken == authToken, $"SessionId is incorrect.");
@@ -494,9 +494,9 @@ public class SessionTests
         Session s2;
         Session s3;
 
-        SessionManager.TryGetSessionWithAuthToken("123", out s1);
-        SessionManager.TryGetSessionWithAuthToken("234", out s2);
-        SessionManager.TryGetSessionWithAuthToken("345", out s3);
+        SessionManager.TryGetSessionWithToken("123", out s1);
+        SessionManager.TryGetSessionWithToken("234", out s2);
+        SessionManager.TryGetSessionWithToken("345", out s3);
 
         Assert.That(s1.AuthToken == "123", $"Failed to get session from SessionManager.");
         Assert.That(s2.AuthToken == "234", $"Failed to get session from SessionManager.");
@@ -512,7 +512,7 @@ public class SessionTests
         SessionManager.CreateSessionForUser("123", mockUserObj);
         SessionManager.EndSession("123");
 
-        Assert.IsFalse(SessionManager.TryGetSessionWithAuthToken("123", out _), $"Session was not ended.");
+        Assert.IsFalse(SessionManager.TryGetSessionWithToken("123", out _), $"Session was not ended.");
     }
 
     [TestCase]
@@ -524,7 +524,7 @@ public class SessionTests
         SessionManager.CreateSessionForUser("123", mockUserObj);
         SessionManager.EndSession("invalid authToken");
 
-        Assert.IsTrue(SessionManager.TryGetSessionWithAuthToken("123", out _), $"Session was not ended.");
+        Assert.IsTrue(SessionManager.TryGetSessionWithToken("123", out _), $"Session was not ended.");
     }
 
     // [TestCase("password123")]

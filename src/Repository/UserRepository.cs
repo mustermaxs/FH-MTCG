@@ -49,11 +49,13 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
         .UpdateSet("bio", "@bio")
         .UpdateSet("image", "@image")
         .UpdateSet("name", "@name")
+        .UpdateSet("language", "@lang")
       .Where("id=@id")
     .AddParam("@bio", user.Bio)
     .AddParam("@image", user.Image)
     .AddParam("@name", user.Name)
     .AddParam("@id", user.ID)
+    .AddParam("@lang", user.Language)
     .Build();
 
     builder.ExecuteNonQuery();
@@ -117,5 +119,6 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
     user.Bio = re.GetString(re.GetOrdinal("bio"));
     user.Coins = re.GetInt32(re.GetOrdinal("coins"));
     user.Image = re.GetString(re.GetOrdinal("image"));
+    user.Language = re.GetString(re.GetOrdinal("language"));
   }
 }

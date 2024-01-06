@@ -43,6 +43,7 @@ namespace MTCG
             configService
                 .Register<ServerConfig>(null)
                 .Register<UserConfig>(null)
+                .Register<ResponseConfig>(null)
                 .Register<CardConfig>(null);
         }
     }

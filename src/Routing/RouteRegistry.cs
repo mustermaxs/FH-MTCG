@@ -18,8 +18,13 @@ namespace MTCG;
 /// controller method to delegate the processing of the client request to.
 /// </summary>
 
-public class RouteRegistry : IEndpointMapper
+public class RouteRegistry : IEndpointMapper, IDisposable
 {
+
+    public void Dispose()
+    {
+        _this = null;
+    }
 
     /// <summary>
     /// Stores a dictionary of all the registered endpoints in the application.
@@ -219,12 +224,15 @@ public class RouteRegistry : IEndpointMapper
         if (potentialEndpoints.Count() == 0)
             throw new RouteDoesntExistException(requestedUrl);
 
+
         // check if exact match
         // else check if regex match is found
         // else, return null
         var endpoint =
-            potentialEndpoints.SingleOrDefault<IEndpoint>(e => e.EndpointPattern == trimmedUrl)
-            ?? potentialEndpoints.SingleOrDefault<IEndpoint>(e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
+            potentialEndpoints.FirstOrDefault<IEndpoint>(e => parser.TrimUrl(e.RouteTemplate) == trimmedUrl)
+            ??
+            potentialEndpoints.FirstOrDefault<IEndpoint>(e => parser.PatternMatches(trimmedUrl, e.EndpointPattern));
+
 
         if (endpoint == null)
             throw new RouteDoesntExistException(requestedUrl);
@@ -264,9 +272,8 @@ public class RouteRegistry : IEndpointMapper
         // check if exact match
         // else check if regex match is found
         // else, return null
-        
         IEndpoint? endpoint =
-            potentialEndpoints.FirstOrDefault<IEndpoint>(e1 => e1.EndpointPattern == trimmedUrl)
+            potentialEndpoints.FirstOrDefault<IEndpoint>(e1 => parser.TrimUrl(e1.RouteTemplate) == trimmedUrl)
             ?? potentialEndpoints.FirstOrDefault<IEndpoint>(e2 => parser.PatternMatches(trimmedUrl, e2.EndpointPattern));
 
         if (endpoint == null)

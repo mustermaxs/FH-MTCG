@@ -141,11 +141,14 @@ public class Router : IRouter
             // var resConfig = JsonConfigLoader.Load<ResponseConfig>("config.json", "responses/german");
             // if (SessionManager.TryGetSessionWithToken(request.SessionId!, out Session session))
             //     session.Configs.Append(resConfig);
+            Console.WriteLine($"[Request]\t{request.HttpMethod} {request.RawUrl}");
 
             routeRegistry.MapRequestToEndpoint(ref request);
 
+            if (request.RouteFound) Console.Write($"[Map to]\t{request.Endpoint.RouteTemplate}\n");
+
             if (!ClientHasPermissionToRequest(request))
-                throw new AuthenticationFailedException($"Client doesn't have access to ressource.");
+                throw new AuthenticationFailedException($"[DENIED]\tClient doesn't have access to ressource.\n");
 
             var controllerType = request.Endpoint!.ControllerType;
             var controller = (IController)Activator.CreateInstance(controllerType, request);

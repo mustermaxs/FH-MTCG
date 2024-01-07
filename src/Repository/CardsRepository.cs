@@ -26,19 +26,31 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     /// <param name="card"></param>
     public override void Save(Card card)
     {
-        using (NpgsqlConnection? connection = this.Connect())
-        using (var command = new NpgsqlCommand($"INSERT INTO {_Table} (name, descr, damage, type, element) VALUES (@name, @descr, @damage, @type, @element);", connection))
-        {
-            command.Parameters.AddWithValue("@name", card.Name);
-            command.Parameters.AddWithValue("@description", card.Description);
-            command.Parameters.AddWithValue("@type", card.Type.ToString());
-            command.Parameters.AddWithValue("@element", card.Element);
-            command.Parameters.AddWithValue("@damage", card.Damage);
+        // using (NpgsqlConnection? connection = this.Connect())
+        // using (var command = new NpgsqlCommand($"INSERT INTO {_Table} (name, descr, damage, type, element) VALUES (@name, @descr, @damage, @type, @element);", connection))
+        // {
+        //     command.Parameters.AddWithValue("@name", card.Name);
+        //     command.Parameters.AddWithValue("@description", card.Description);
+        //     command.Parameters.AddWithValue("@type", card.Type.ToString());
+        //     command.Parameters.AddWithValue("@element", card.Element);
+        //     command.Parameters.AddWithValue("@damage", card.Damage);
 
-            command.ExecuteNonQuery();
+        //     command.ExecuteNonQuery();
 
-            command.Dispose(); connection!.Dispose();
-        }
+        //     command.Dispose(); connection!.Dispose();
+        // }
+        var builder = new QueryBuilder(Connect());
+        builder
+            .InsertInto("cards", "name", "descr", "damage", "type", "element")
+            .InsertValues("@name", "@descr", "@damage", "@type", "@element")
+            .AddParam("@name", card.Name.ToString())
+            .AddParam("@descr", card.Description)
+            .AddParam("@damage", card.Damage)
+            .AddParam("@type", card.Type.ToString())
+            .AddParam("@element", card.Element)
+            .Build();
+
+        builder.ExecuteNonQuery();
     }
 
 

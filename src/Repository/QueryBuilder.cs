@@ -35,7 +35,7 @@ public enum QBCommand
 public delegate void ObjectBuilder<T>(T obj, IDataReader reader);
 public class ValueTypeWrapper<T>
 {
-    public T? Value { get; set;}
+    public T? Value { get; set; }
 
     public ValueTypeWrapper()
     {
@@ -50,7 +50,7 @@ public class ValueTypeWrapper<T>
 /// monster card tra.. monster trading car... tradi.. tradeoff.
 /// Nobody is ever going to read this.
 /// </summary>
-public class QueryBuilder
+public class QueryBuilder : IDisposable
 {
     private string queryString = string.Empty;
     protected int paramIndex = 0;
@@ -98,6 +98,26 @@ public class QueryBuilder
         if (connection == null) throw new ArgumentNullException(nameof(connection));
 
         this._connection = connection;
+    }
+
+    public void Dispose()
+    {
+
+        if (_connection != null)
+        {
+            _connection.Close();
+            _connection.Dispose();
+            Console.WriteLine("CLOSED CONNECTION");
+            if (_connection.State == System.Data.ConnectionState.Open)
+            {
+                Console.WriteLine("!!!!!!!!!!!!!!!!Connection is open.");
+            }
+        }
+    }
+
+    ~QueryBuilder()
+    {
+        Dispose();
     }
 
     public QueryBuilder Limit(string condition)
@@ -410,7 +430,7 @@ public class QueryBuilder
         }
 
         queryString = qString.Aggregate((a, b) => a + b);
-        Console.WriteLine(queryString);
+        // Console.WriteLine(queryString);
         calledBuild = true;
     }
 
@@ -444,7 +464,8 @@ public class QueryBuilder
             callback(obj, reader);
             list.Add(obj);
         }
-
+        command.Dispose();
+        reader.DisposeAsync();
         return list;
     }
 
@@ -559,6 +580,7 @@ public class QueryBuilder
                 ids.Add(id);
             }
         }
+        command.Dispose();
 
         return ids;
     }
@@ -588,6 +610,8 @@ public class QueryBuilder
             resultList.Add(recordValues);
         }
 
+        command.Dispose();
+        reader.DisposeAsync();
         return resultList;
     }
 
@@ -607,7 +631,7 @@ public class QueryBuilder
         if (insertDefaultValues) queryString += $" DEFAULT VALUES ";
         if (isInsertStatement) queryString += $" RETURNING {columnName} ";
 
-        Console.WriteLine(queryString);
+        // Console.WriteLine(queryString);
         var result = ReadMultiple().FirstOrDefault();
 
         if (result == null || !result.ContainsKey(columnName))

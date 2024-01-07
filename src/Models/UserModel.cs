@@ -10,7 +10,7 @@ public class User : IModel
     public string Image { get; set; } = string.Empty;
     public int Coins { get; set; }
     public Role UserAccessLevel { get; set;} = Role.ANONYMOUS;
-    public Guid ID { get; set; }
+    public Guid ID { get; set; } = Guid.NewGuid();
     public string Language { get; set; } = "english";
 
 

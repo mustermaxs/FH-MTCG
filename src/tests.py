@@ -176,7 +176,7 @@ def print_colored(text, color):
     print(f"{color}{text}{Colors.RESET}")
 
 def expect_status(res, expected_status, doAssert=False):
-    if (res.status_code is not expected_status):
+    if (res.status_code != expected_status):
         print_colored(f" FAILED {res.status_code} : {res.reason}", Colors.RED)
         if doAssert:
             assert res.status_code == expected_status
@@ -226,7 +226,7 @@ def test_delete_package(id):
 # Returns package id
 def test_create_package(cards : list, user : User):
     cards_list = [card.to_dict() for card in cards.values()]
-    token = test_login(user.token)
+    token = test_login(user)
     res = req.post(url("packages", "POST"), json=cards_list, headers=Headers(token))
     
     if expect_status(res, 200, True):
@@ -262,15 +262,13 @@ def test_register_user(user: User):
 def test_register_alreadyexisting_user(user: User):
     res = req.post(url("users", "POST"), json=user.to_dict())
     if expect_status(res, 500, True):
-        response = res.json()
-        user.token = response["authToken"]
         return user
     else:
         return None
 
 test_user = User("test", "test", "", ":)", 100, "", "")
 
-test_user = test_register_user(test_user)
+# test_user = test_register_user(test_user)
 test_register_alreadyexisting_user(test_user)
 test_retrieve_packages_no_packages()
 test_login(users["max"])

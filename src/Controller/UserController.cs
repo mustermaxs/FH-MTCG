@@ -154,6 +154,29 @@ public class UserController : IController
     }
 
 
+    [Route("/users/{id:alphanum}", HTTPMethod.DELETE, Role.ADMIN     )]
+    public IResponse DeleteUser(Guid id)
+    {
+        try
+        {
+            var user = repo.Get(id);
+
+            if (user == null)
+                return new Response<string>(404, resConfig["USR_NOT_FOUND"]);
+
+            repo.Delete(user);
+
+            return new Response<string>(200, resConfig["USR_DELETE_SUCC"]);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to delete user. {ex.Message}");
+
+            return new Response<string>(500, "Failed to delete user");
+        }
+    }
+
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 

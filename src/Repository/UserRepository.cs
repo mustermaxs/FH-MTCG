@@ -62,6 +62,22 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
   }
 
 
+  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
+
+
+  public override void Delete(User obj)
+  {
+    var builder = new QueryBuilder(Connect());
+    builder
+      .DeleteFrom("users")
+      .Where("id=@id")
+      .AddParam("@id", obj.ID)
+      .Build();
+
+    builder.ExecuteNonQuery();
+  }
+
 
   //////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////
@@ -71,13 +87,13 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
   public User? GetByName(string username)
   {
     ObjectBuilder<User> objectBuilder = _Fill;
-    var builder = new QueryBuilder(Connect());
+    using var builder = new QueryBuilder(Connect());
     builder
       .Select("u.*", "r.id", "r.role AS rolename")
       .From("users u")
       .Join("roles r")
       .On("r.id=u.role")
-      .Where("name=@name")
+      .Where("u.name=@name")
       .AddParam("@name", username)
       .Build();
 

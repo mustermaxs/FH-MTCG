@@ -73,8 +73,10 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
     ObjectBuilder<User> objectBuilder = _Fill;
     var builder = new QueryBuilder(Connect());
     builder
-      .Select("*")
-      .From("users")
+      .Select("u.*", "r.id", "r.role AS rolename")
+      .From("users u")
+      .Join("roles r")
+      .On("r.id=u.role")
       .Where("name=@name")
       .AddParam("@name", username)
       .Build();
@@ -93,7 +95,20 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
 
   public override User? Get(Guid id)
   {
-    return base.Get(id);
+    ObjectBuilder<User> objectBuilder = _Fill;
+    var builder = new QueryBuilder(Connect());
+    builder
+      .Select("u.*", "r.id", "r.role AS rolename")
+      .From("users u")
+      .Join("roles r")
+      .On("r.id=u.role")
+      .Where("id=@id")
+      .AddParam("@id", id)
+      .Build();
+
+    User? user = builder.Read<User>(objectBuilder);
+
+    return user ?? null;
   }
 
 
@@ -120,5 +135,6 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
     user.Coins = re.GetInt32(re.GetOrdinal("coins"));
     user.Image = re.GetString(re.GetOrdinal("image"));
     user.Language = re.GetString(re.GetOrdinal("language"));
+    user.UserAccessLevel = Enum.TryParse<Role>(re.GetString(re.GetOrdinal("rolename")), out Role role) ? role : Role.ANONYMOUS;
   }
 }

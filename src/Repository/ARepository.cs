@@ -54,7 +54,6 @@ namespace MTCG
                 NpgsqlConnection connection = new NpgsqlConnection("Host=localhost;Username=admin;Password=12345;Database=mtc");
 
                 connection.Open();
-                Console.WriteLine("openend connection");
 
                 return connection;
             }

@@ -47,7 +47,7 @@ namespace MTCG
                 throw new Exception("Failed to deserialize config file");
 
             ConfigService.configs[config.Name] = config;
-
+            Console.WriteLine($"[Registered Config] {config.Name}");
             return this;
             // var filePath = path ?? new T().FilePath;
             

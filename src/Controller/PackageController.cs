@@ -102,6 +102,27 @@ public class PackageController : IController
         // if (user.Coins >= 5)
         
     }
+
+    [Route("/packages/{id:alphanum}", HTTPMethod.DELETE, Role.ADMIN)]
+    public IResponse DeletePackage(Guid id)
+    {
+        try
+        {
+            var package = repo.Get(id);
+
+            if (package == null) return new Response<string>(400, resConfig["PCK_REQ_OK_NOTEXISTS"]);
+            
+            repo.Delete(package);
+
+            return new Response<string>(200, "Package was deleted.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
+        }
+    }
 }
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////

@@ -70,15 +70,15 @@ public class CardController : IController
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
             var userCards = repo.GetDeckByUserId(userId);
 
-            if (userCards == null) return new Response<string>(204, "The request was fine, but the deck doesn't have any cards");
+            if (userCards == null) return new Response<string>(204, resConfig["CRD_DECK_EMPTY"]);
 
-            return new Response<IEnumerable<Card>>(200, userCards, "The deck has cards, the response contains these");
+            return new Response<IEnumerable<Card>>(200, userCards, resConfig["CRD_DECK_SUCC"]);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
 
-            return new Response<string>(500, "Something went wrong :(");
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
 
@@ -99,27 +99,27 @@ public class CardController : IController
             var providedCardIds = request.PayloadAsObject<List<Guid>>();
 
             if (providedCardIds == null || providedCardIds.Count() < cardConfig.MaxCardsInDeck)
-                return new Response<string>(400, "The provided deck did not include the required amount of cards");
+                return new Response<string>(400, resConfig["CRD_DECK_NBR_ERR"]);
 
             // create cards from ids, bc for whatever reason, the requestbody
             // only contains the ids w/out keys indicating where the value belongs
             foreach (var id in providedCardIds) { providedCards.Add(new Card { Id = id }); }
 
             if (!IsValidRequestAddCardsToDeck(providedCards, userId))
-                return new Response<string>(403, "At least one of the provided cards does not belong to the user or is not available.");
+                return new Response<string>(403, resConfig["CRD_DECK_ADD_ERR"]);
 
             repo.AddCardsToDeck(providedCards!, userId);
             
             providedCards.ForEach(card => repo.RemoveCardFromStack(card, userId));
 
 
-            return new Response<string>(200, "The deck has been successfully configured");
+            return new Response<string>(200, resConfig["CRD_DECK_ADD_SUCC"]);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
 
-            return new Response<string>(500, "Something went wrong :(");
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
 
@@ -166,7 +166,7 @@ public class CardController : IController
 
             if (card != null)
             {
-                return new Response<Card>(200, card, "Fetched card.");
+                return new Response<Card>(200, card, resConfig["CRD_GETBYID_SUCC"]);
             }
             else
                 throw new Exception("Failed");
@@ -175,7 +175,7 @@ public class CardController : IController
         {
             Console.WriteLine($"ex");
             
-            return new ResponseWithoutPayload(500, $"Failed to fetch card.\n${ex}");
+            return new ResponseWithoutPayload(500, $"{resConfig["CRD_GETBYID_ERR"]}\n${ex}");
         }
     }
 
@@ -211,13 +211,13 @@ public class CardController : IController
                 repo.AddCardToStack(card, userId);
             }
 
-            return new Response<string>(200, "Cards successfully added to stack.");
+            return new Response<string>(200, resConfig["CRD_STACK_ADD_SUCC"]);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to add cards to stack.\n{ex}");
 
-            return new Response<string>(500, "Something went wrong :(");
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
 
@@ -238,7 +238,7 @@ public class CardController : IController
         {
             Console.WriteLine($"Failed to fetch all cards.\n{ex}");
 
-            return new Response<string>(500, "Something went wrong :(");
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
 

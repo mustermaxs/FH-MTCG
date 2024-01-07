@@ -39,18 +39,18 @@ public class UserController : IController
             var hashedPwd = CryptoHandler.Encode(password);
 
             if (user == null || hashedPwd != user.Password)
-                return new Response<User>(401, "Invalid username/password provided");
+                return new Response<User>(401, resConfig["USR_CRD_INVALID"]);
 
             string authToken = SessionManager.CreateAuthToken(user.ID.ToString());
             SessionManager.CreateSessionForUser(authToken, user);
 
-            return new SuccessResponse<object>(200, new { authToken }, "");
+            return new Response<object>(200, new { authToken }, resConfig["USR_LOGIN_SUCC"]);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to login user. {ex.Message}");
 
-            return new ErrorResponse<User>($"Failed to login user.");
+            return new Response<string>(500, resConfig["USR_LOGIN_ERR"]);
         }
     }
 
@@ -67,7 +67,7 @@ public class UserController : IController
             var user = JsonSerializer.Deserialize<User>(request.Payload);
 
             if (user == null)
-                return new ErrorResponse<User>($"No or wrong user provided", 500);
+                return new Response<string>(500, resConfig["USR_ADD_NO_USER"]);
 
             user.Password = CryptoHandler.Encode(user.Password);
 
@@ -77,10 +77,10 @@ public class UserController : IController
         }
         catch (PostgresException pex) // in case registration failed due to user already existing or other reasons
         {
-            ErrorResponse<User> errResponse = new("", 500);
+            ErrorResponse<User> errResponse = new(resConfig["USR_ADD_EXISTS_ERR"], 500);
 
-            if (pex.SqlState == "23505") errResponse = new($"User with same username already registered", 500);
-            else errResponse = new($"Failed to register new user.");
+            if (pex.SqlState == "23505") errResponse = new(resConfig["USR_ADD_EXISTS_ERR"], 500);
+            else errResponse = new(resConfig["USR_ADD_ERR"]);
 
             Console.WriteLine($"{errResponse.Description}. {pex}");
 
@@ -90,7 +90,7 @@ public class UserController : IController
         {
             Console.WriteLine(ex);
 
-            return new ErrorResponse<User>($"Failed to register new user. {ex}", 500);
+            return new ErrorResponse<User>($"{resConfig["USR_ADD_ERR"]} {ex}", 500);
         }
     }
 
@@ -115,11 +115,11 @@ public class UserController : IController
 
                 repo.Update(user);
 
-                return new Response<string>(200, "User sucessfully updated.");
+                return new Response<string>(200, resConfig["USR_UPDATE_SUCC"]);
             }
             else
             {
-                return new Response<string>(404, "User not found.");
+                return new Response<string>(404, resConfig["USR_NOT_FOUND"]);
             }
 
         }
@@ -127,7 +127,7 @@ public class UserController : IController
         {
             Console.WriteLine($"Failed to update user.\n{ex}");
 
-            return new Response<string>(500, "Something went wrong :(");
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
 
@@ -200,7 +200,7 @@ public class UserController : IController
         
         if (payload.TryGetValue("language", out string language))
         {   
-            if (resConfig.Responses.ContainsKey(language))
+            if (resConfig.Response.ContainsKey(language))
             {
                 return new Response<string>(200, "Language successfully changed.");
             }

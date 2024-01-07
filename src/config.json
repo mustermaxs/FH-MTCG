@@ -22,26 +22,57 @@
         ]
     },
     "responses": {
-        "english": {
-            "Responses": {
+        "DefaultLanguage": "english",
+        "Response": {
+            "english": {
                 "INT_SVR_ERR": "Internal server error. Something went wrong :(",
                 "PCK_ADD_SUCC": "Package and cards successfully created",
                 "PCK_ADD_EXISTS": "At least one card in the packages already exists",
                 "PCK_GETALL_NO_PCKS": "The request was fine, but there are no packages",
                 "PCK_GETALL_SUCC": "The response contains all packages",
                 "PCK_REQ_OK_NOTEXISTS": "The request was fine, but the package doesn't exist",
-                "PCK_BYID_SUCC": "The response contains the package"
-            }
-        },
-        "german": {
-            "Responses": {
+                "PCK_BYID_SUCC": "The response contains the package",
+                "USR_CRD_INVALID": "Invalid username/password provided",
+                "USR_LOGIN_SUCC": "Login successfull. Payload contains the authentication token.",
+                "USR_LOGIN_ERR": "Failed to login user.",
+                "USR_ADD_NO_USER": "No or wrong user provided.",
+                "USR_ADD_EXISTS_ERR": "User with same username already registered",
+                "USR_ADD_ERR": "Failed to register new user.",
+                "USR_UPDATE_SUCC": "User successfully updated.",
+                "USR_NOT_FOUND": "User not found.",
+                "CRD_DECK_EMPTY": "The request was fine, but the deck doesn't have any cards",
+                "CRD_DECK_SUCC": "The deck has cards, the response contains these",
+                "CRD_DECK_NBR_ERR": "The provided deck did not include the required amount of cards",
+                "CRD_DECK_ADD_ERR": "At least one of the provided cards does not belong to the user or is not available.",
+                "CRD_DECK_ADD_SUCC": "The deck has been successfully configured",
+                "CRD_GETBYID_SUCC":"Fetched card.",
+                "CRD_GETBYID_ERR": "Failed to fetch card.",
+                "CRD_STACK_ADD_SUCC": "Cards successfully added to stack."
+            },
+            "german": {
                 "INT_SVR_ERR": "Interner Serverfehler. Etwas ist schiefgegangen :(",
                 "PCK_ADD_SUCC": "Paket und Karten wurden erfolgreich erstellt",
                 "PCK_ADD_EXISTS": "Mindestens eine Karte im Paket existiert bereits",
                 "PCK_GETALL_NO_PCKS": "Die Anfrage war in Ordnung, aber es gibt keine Pakete",
                 "PCK_GETALL_SUCC": "Die Antwort enthält alle Pakete",
                 "PCK_REQ_OK_NOTEXISTS": "Die Anfrage war in Ordnung, aber das Paket existiert nicht",
-                "PCK_BYID_SUCC": "Die Antwort enthält das Paket"
+                "PCK_BYID_SUCC": "Die Antwort enthält das Paket",
+                "USR_CRD_INVALID": "Username/Passwort ungültig.",
+                "USR_LOGIN_SUCC": "Login erfolgreich. Payload beinhaltet den authentication token.",
+                "USR_LOGIN_ERR": "Login fehlgeschlagen.",
+                "USR_ADD_NO_USER": "Keine oder fehlerhafte Daten übermittelt.",
+                "USR_ADD_EXISTS_ERR": "User mit diesem Namen ist bereits registriert.",
+                "USR_ADD_ERR": "User konnte nicht registriert werden.",
+                "USR_UPDATE_SUCC": "User erfolgreich upgedated.",
+                "USR_NOT_FOUND": "User konnte nicht gefunden werden",
+                "CRD_DECK_EMPTY": "Die Anfrage war in Ordnung, aber das Deck hat keine Karten",
+                "CRD_DECK_SUCC": "Das Deck enthält Karten, die Antwort enthält diese",
+                "CRD_DECK_NBR_ERR": "Das bereitgestellte Deck enthielt nicht die erforderliche Anzahl von Karten",
+                "CRD_DECK_ADD_ERR": "Mindestens eine der bereitgestellten Karten gehört nicht dem Benutzer oder steht nicht zur Verfügung.",
+                "CRD_DECK_ADD_SUCC": "Das Deck wurde erfolgreich konfiguriert",
+                "CRD_GETBYID_SUCC":"Karte gefetcht.",
+                "CRD_GETBYID_ERR": "Karte konnte nicht gefetcht werden.",
+                "CRD_STACK_ADD_SUCC": "Karte wurde zum Stack hinzugefügt."
             }
         }
     }

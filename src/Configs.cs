@@ -22,9 +22,25 @@ namespace MTCG
     {
         public override string Name => "ResponseConfig";
         public void SetSection(string section) => this.Section = section;
-        public override string Section { get; protected set;} = "responses/german";
-        public Dictionary<string, dynamic> Responses { get; set; }
+        public override string Section { get; protected set;} = "responses";
+        public Dictionary<string, Dictionary<string, string>> Response { get; set; }
+        public string DefaultLanguage { get; set; }
+        protected string chosenLanguage = string.Empty;
 
+        public bool SetLanguage(string lang)
+        {
+            if (!TranslationExists(lang)) return false;
+            chosenLanguage = lang;
+
+            return true;                        
+        }
+
+
+
+        public bool TranslationExists(string lang)
+        {
+            return Response.ContainsKey(lang);
+        }
         
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
@@ -34,9 +50,11 @@ namespace MTCG
         {
             get
             {
-                if (Responses.TryGetValue(key, out dynamic value))
+                var language = chosenLanguage == string.Empty ? DefaultLanguage : chosenLanguage;
+                var languageSet = Response[language];
+                if (languageSet.TryGetValue(key, out string value))
                 {
-                    return value.ToString();
+                    return value;
                 }
 
                 Console.WriteLine($"[ERROR] No response found for key: {key}");

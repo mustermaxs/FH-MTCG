@@ -86,7 +86,6 @@ namespace MTCG
 
                 tasks.Add(Task.Run(() =>
                 {
-                    Console.WriteLine("RUN TASK");
                     string data = string.Empty;
                     while (client.GetStream().DataAvailable || (string.IsNullOrEmpty(data)))
                     {

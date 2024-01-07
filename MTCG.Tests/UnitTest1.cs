@@ -34,6 +34,17 @@ public class MTCG_UrlParser
                     $"Generated regex '{generatedRegex}' does not match expected pattern '{expectedRoutePattern}'.");
     }
 
+    [TestCase("/wrong/test", "/cards/all")]
+    public void DoesntMatchIfPrefixWrong(string wrong, string requested)
+    {
+        var trimmedWrong = parser.TrimUrl(wrong);
+        var timmedRequested = parser.TrimUrl(requested);
+        string generatedRegex = this.parser?.ReplaceTokensWithRegexPatterns(trimmedWrong) ?? "";
+        Assert.That(this.parser.PatternMatches(wrong, generatedRegex));
+    }
+
+
+
     public void Test_ParserReturnsNamedParamsInUrl(string routeTemplate, string expectedRoutePattern, string key, string expectedValue)
     {
         string trimmedRouteTemplate = parser.TrimUrl(routeTemplate);
@@ -169,7 +180,7 @@ public class Test_ConfigService
     public void GetsSubSections()
     {
         string section = "a/b/c";
-        string[] res = { "a", "b", "c"};
+        string[] res = { "a", "b", "c" };
 
         Assert.That(ConfigService.GetSubsectionKeys(section).Any(s => res.Contains(s)), "Failed to get subsections");
     }
@@ -200,7 +211,7 @@ public class Test_ConfigService
     {
         configService.Register<ListConfig>("config.json");
         var config = (ListConfig)ConfigService.Get<ListConfig>();
-        var expected = new List<int>{1,2,3,4,5};
+        var expected = new List<int> { 1, 2, 3, 4, 5 };
 
         Assert.That(config.Answers.SequenceEqual(expected), "Failed to save enumerable to config object.");
     }
@@ -245,7 +256,7 @@ public class Test_ConfigService
         public override string FilePath => "config.json";
         public string SERVER_IP { get; set; } = "";
         public int SERVER_PORT { get; set; } = 0;
-        public override string Section => "mockserver";
+        public override string Section { get; protected set; } = "mockserver";
     }
 
     public class NestedConfig : IConfig
@@ -253,14 +264,14 @@ public class Test_ConfigService
         override public string Name { get; } = "NestedConfig";
         public override string FilePath => "config.json";
         public int AnswerIs { get; set; }
-        public override string Section => "section/subsection/subsubsection";
+        public override string Section { get; protected set; } = "section/subsection/subsubsection";
     }
     public class ListConfig : IConfig
     {
         override public string Name { get; } = "ListConfig";
         public override string FilePath => "config.json";
         public IEnumerable<int> Answers { get; set; }
-        public override string Section => "section/listconfig";
+        public override string Section { get; protected set; } = "section/listconfig";
     }
 }
 
@@ -395,15 +406,21 @@ public class Tests_Response
 [TestFixture]
 public class MTCG_RouteRegistry
 {
-    IEndpointMapper? routeRegistry;
+    RouteRegistry? routeRegistry;
     private IUrlParser parser = new UrlParser();
 
     [SetUp]
     public void SetUp()
     {
-
-        routeRegistry = RouteRegistry.GetInstance(parser);
+        routeRegistry = (RouteRegistry)RouteRegistry.GetInstance(parser);
     }
+
+    [TearDown]
+    public void TearDown()
+    {
+        routeRegistry!.Dispose();
+    }
+
 
 
     [TestCase("/mtcg/user/{userid:int}/", "mtcg/user/23", true, HTTPMethod.GET)]
@@ -439,6 +456,36 @@ public class MTCG_RouteRegistry
             $"Pattern:      {endpoint.Object.EndpointPattern}");
         }
 
+    }
+
+    [TestCase("/cards/{id:alphanum}", "/cards/all", "/cards/all")]
+    public void PrioritizesExactMatchOverRegex(string template1, string template2, string requested)
+    {
+        var endpoint = new Mock<IEndpoint>();
+        var p1 = this.parser.ReplaceTokensWithRegexPatterns(template1);
+        endpoint.Setup(e => e.HttpMethod).Returns(HTTPMethod.GET);
+        endpoint.Setup(e => e.RouteTemplate).Returns(template1);
+        endpoint.Setup(e => e.EndpointPattern).Returns(p1);
+        endpoint.Setup(e => e.ControllerType).Returns(typeof(TestController));
+        endpoint.Setup(e => e.ControllerMethod).Returns(typeof(TestController).GetMethod("TestMethod")!);
+        endpoint.Setup(e => e.AccessLevel).Returns(Role.ANONYMOUS);
+        var endpoint2 = new Mock<IEndpoint>();
+        var p2 = this.parser.ReplaceTokensWithRegexPatterns(template2);
+        endpoint2.Setup(e => e.HttpMethod).Returns(HTTPMethod.GET);
+        endpoint2.Setup(e => e.RouteTemplate).Returns(template2);
+        endpoint2.Setup(e => e.EndpointPattern).Returns(p2);
+        endpoint2.Setup(e => e.ControllerType).Returns(typeof(TestController));
+        endpoint2.Setup(e => e.ControllerMethod).Returns(typeof(TestController).GetMethod("TestMethod")!);
+        endpoint2.Setup(e => e.AccessLevel).Returns(Role.ANONYMOUS);
+
+        this.routeRegistry!.RegisterEndpoint(endpoint.Object);
+        this.routeRegistry!.RegisterEndpoint(endpoint2.Object);
+
+        var resEndpoint = routeRegistry!.MapRequestToEndpoint(requested, HTTPMethod.GET);
+
+
+        Assert.That(resEndpoint != null && resEndpoint.RouteTemplate == requested,
+        $"Detected {resEndpoint?.EndpointPattern} instead of {requested}");
     }
 
 

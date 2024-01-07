@@ -236,7 +236,7 @@ public class RouteRegistry : IEndpointMapper, IDisposable
 
         if (endpoint == null)
             throw new RouteDoesntExistException(requestedUrl);
-        
+
         return endpoint;
     }
 

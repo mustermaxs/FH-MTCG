@@ -108,7 +108,10 @@ public class PackageController : IController
             foreach (var card in cards)
                 cardRepo.AddCardToStack(card, UserId);
             
-            repo.Delete(package);       
+            repo.Delete(package);
+            var userRepo = new UserRepository();
+            LoggedInUser.Coins = LoggedInUser.Coins - cardConfig.PricePerPackage;
+            userRepo.Update(LoggedInUser);
 
             return new Response<string>(200, resConfig["PCK_BUY_SUCC"]);
         }

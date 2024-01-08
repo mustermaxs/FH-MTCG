@@ -49,12 +49,14 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
         .UpdateSet("bio", "@bio")
         .UpdateSet("image", "@image")
         .UpdateSet("name", "@name")
+        .UpdateSet("coins", "@coins")
         .UpdateSet("language", "@lang")
       .Where("id=@id")
     .AddParam("@bio", user.Bio)
     .AddParam("@image", user.Image)
     .AddParam("@name", user.Name)
     .AddParam("@id", user.ID)
+    .AddParam("@coins", user.Coins)
     .AddParam("@lang", user.Language)
     .Build();
 

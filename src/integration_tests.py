@@ -2,6 +2,7 @@ import requests
 import unittest
 import json
 import pickle
+import inspect
 
 api = {
     "GET": {
@@ -175,67 +176,86 @@ class Colors:
 def print_colored(text, color):
     print(f"{color}{text}{Colors.RESET}")
 
-def expect_status(res, expected_status, doAssert=False):
+def with_caller_name(func):
+    def wrapper(*args, **kwargs):
+        cn = inspect.currentframe().f_back.f_code.co_name
+        kwargs['cn'] = cn
+        return func(*args, **kwargs)
+    return wrapper
+
+
+@with_caller_name
+def test_status(res, expected_status, doAssert=False, cn=None):
     if (res.status_code != expected_status):
-        print_colored(f" FAILED {res.status_code} : {res.reason}", Colors.RED)
+        print_colored(f" FAILED {cn:<40} : {res.status_code} : {res.reason}", Colors.RED)
         if doAssert:
             assert res.status_code == expected_status
         return False
     else:
-        print_colored(f" PASSED {res.requested_method} {res.requested_url} : {res.reason}", Colors.GREEN)
+        print_colored(f" PASSED {cn:<40} : {res.status_code} - {res.reason}", Colors.GREEN)
         if doAssert:
             assert res.status_code == expected_status
         return True
 
-
-def test_login(user : User):
+def login_as(user: User):
     creds = {"Name": user.Name, "Password": user.Password}
     res = req.post(url("session", "POST"), json=creds)
 
-    if expect_status(res, 200, True):        
+    if res.status_code == 200:        
+        user.token = res.json()["authToken"]
+        return user
+
+
+@with_caller_name
+def test_login(user : User, cn=None):
+    creds = {"Name": user.Name, "Password": user.Password}
+    res = req.post(url("session", "POST"), json=creds)
+
+    if test_status(res, 200, True):        
         return res.json()["authToken"]
 
 
 
 
-
-def test_retrieve_packages_has_packages():
+@with_caller_name
+def test_retrieve_packages_has_packages(cn=None):
     res = req.get(url("packages", "GET"))
     assert res.status_code == 200
 
-    if expect_status(res, 200):
+    if test_status(res, 200):
         return res.json()
     else:
         return None
-    
-def test_retrieve_packages_no_packages():
+
+@with_caller_name  
+def test_retrieve_packages_no_packages(cn=None):
     res = req.get(url("packages", "GET"))
-    assert res.status_code == 204
+    # assert res.status_code == 204
+    test_status(res, 204, True)
 
-    if res.status_code == 204:
-        print("Packages retrieved successfully. No packages exist.")
-
-def test_delete_package(id):
+@with_caller_name
+def test_delete_package(id : str, cn=None):
     test_login(users["admin"])
     u = url("packages", "DELETE")
     u = u.replace(":id", id)
     res = req.delete(u, headers=Headers(users["admin"].token))
-    expect_status(res, 200)
+    test_status(res, 200)
 
 
 # Returns package id
-def test_create_package(cards : list, user : User):
+@with_caller_name
+def test_create_package(cards : list, user : User, cn=None):
     cards_list = [card.to_dict() for card in cards.values()]
     token = test_login(user)
     res = req.post(url("packages", "POST"), json=cards_list, headers=Headers(token))
     
-    if expect_status(res, 200, True):
+    if test_status(res, 200, True):
         packages = test_retrieve_packages_has_packages()
         packageId = packages[0]["Id"]
         return packageId
 
-
-def test_aquire_package(id : str):
+@with_caller_name
+def test_aquire_package(id : str, user: User, cn=None):
     # delete preexisting packages
     packages = test_retrieve_packages_has_packages()
     for package in packages:
@@ -245,37 +265,83 @@ def test_aquire_package(id : str):
     test_create_package(cards, users["admin"])
 
     # buy package
-    test_login(users["max"])
-    res = req.post(url("transactions/packages", "POST"), headers=Headers(users["max"].token))
+    test_login(user)
+    res = req.post(url("transaction_packages", "POST"), headers=Headers(user.token))
+    test_status(res, 200)
+    test_retrieve_packages_no_packages()
 
-    expect_status(res, 200)
-
-def test_register_user(user: User):
+@with_caller_name
+def test_register_user(user: User , cn=None):
     res = req.post(url("users", "POST"), json=user.to_dict())
-    if expect_status(res, 201, True):
+    if test_status(res, 201, True):
         response = res.json()
         user.token = response["authToken"]
         return user
     else:
         return None
-    
-def test_register_alreadyexisting_user(user: User):
+
+@with_caller_name
+def test_register_alreadyexisting_user(user: User, cn=None):
     res = req.post(url("users", "POST"), json=user.to_dict())
-    if expect_status(res, 500, True):
+    if test_status(res, 500, True):
         return user
     else:
         return None
+    
+
+@with_caller_name  
+def test_user_no_cards_in_stack_true(user: User, cn=None):
+    test_login(user)
+    res = req.get(url("deck", "GET"), headers=Headers(user.token))
+    test_status(res, 204)
+
+@with_caller_name
+def test_user_cards_in_deck_true(user: User, cn=None):
+    test_login(user)
+    res = req.get(url("deck", "GET"), headers=Headers(user.token))
+    test_status(res, 200, True)
+    return res.json()
+
+
+
+@with_caller_name
+def test_get_all_users(cn=None):
+    admin = login_as(users["admin"])
+    res = req.get(url("users", "GET"), headers=Headers(admin.token))
+    if test_status(res, 200):
+        return res.json()
+    
+def get_all_packages():
+    res = req.get(url("packages", "GET"))
+    if res.status_code == 200:
+        return res.json()
+    else:
+        return None
+
+def delete_all_packages():
+    packages = get_all_packages()
+    if packages is None:
+        return
+    for package in packages:
+        test_delete_package(package["Id"])
 
 test_user = User("test", "test", "", ":)", 100, "", "")
 
 # test_user = test_register_user(test_user)
+# SETUP
+delete_all_packages()
+
 test_register_alreadyexisting_user(test_user)
 test_retrieve_packages_no_packages()
 test_login(users["max"])
-test_create_package(cards, users["max"])
+test_create_package(cards, users["admin"])
 packages = test_retrieve_packages_has_packages()
 
 if packages is not None:
     test_delete_package(packages[0]["Id"])
-# test_create_package(cards, users["admin"])
-# test_aquire_package()
+test_get_all_users()
+test_user_no_cards_in_stack_true(users["max"])
+
+packageid = test_create_package(cards, users["admin"])
+
+test_aquire_package(packageid, users["max"])

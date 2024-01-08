@@ -7,14 +7,14 @@ namespace MTCG;
 public class PackageController : IController
 {
     protected static PackageRepository repo = new PackageRepository();
-    protected CardConfig config = (CardConfig)ConfigService.Get<CardConfig>();
+    protected CardConfig cardConfig = (CardConfig)ConfigService.Get<CardConfig>();
     public PackageController(IRequest request) : base(request) { }
     const int MIN_COINS_NORMAL_PACKAGE = 5;
 
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-    [Route("/packages", HTTPMethod.POST, Role.USER)] // CHANGE only ADMIN
+    [Route("/packages", HTTPMethod.POST, Role.ADMIN)] // CHANGE only ADMIN
     public IResponse AddPackage()
     {
         try
@@ -23,7 +23,7 @@ public class PackageController : IController
             var cardRepo = new CardRepository();
             List<Guid> addedCardIds = new List<Guid>();
 
-            if (cards == null || cards.Count < config.ReqNbrCardsInPackage) return new Response<string>(400, "Package must consist of 5 cards");
+            if (cards == null || cards.Count < cardConfig.ReqNbrCardsInPackage) return new Response<string>(400, "Package must consist of 5 cards");
 
             cards.ForEach(card => card.Id = cardRepo.SaveAndGetInsertedId(card));
             var package = new Package();
@@ -92,15 +92,32 @@ public class PackageController : IController
     [Route("/transactions/packages", HTTPMethod.POST, Role.USER)]
     public IResponse UserBuysPackage()
     {
-        throw new NotImplementedException();
-        // var user = LoggedInUser;
-        // Guid? packageId = repo.GetAllPackageIds().FirstOrDefault();
+        try
+        {
+            var packages = repo.GetAll();
 
-        // if (packageId == Guid.Empty || packageId == null)
-        //     return new Response<string>(404, "No card package available for buying");
-        
-        // if (user.Coins >= 5)
-        
+            if (packages == null || packages.Count() == 0) return new Response<string>(204, resConfig["PCK_BUY_NO_PCKS"]);
+
+            if (LoggedInUser.Coins < cardConfig.PricePerPackage) return new Response<string>(403, resConfig["PCK_BUY_NO_COINS"]);
+
+            var package = packages.First();
+            var cardRepo = new CardRepository();
+            var cards = package.Cards;
+            var cardIds = new List<Guid>();
+
+            foreach (var card in cards)
+                cardRepo.AddCardToStack(card, UserId);
+            
+            repo.Delete(package);       
+
+            return new Response<string>(200, resConfig["PCK_BUY_SUCC"]);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to buy package.\n{ex}");
+
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
+        }     
     }
 
     [Route("/packages/{id:alphanum}", HTTPMethod.DELETE, Role.ADMIN)]
@@ -111,7 +128,7 @@ public class PackageController : IController
             var package = repo.Get(id);
 
             if (package == null) return new Response<string>(400, resConfig["PCK_REQ_OK_NOTEXISTS"]);
-            
+
             repo.Delete(package);
 
             return new Response<string>(200, "Package was deleted.");

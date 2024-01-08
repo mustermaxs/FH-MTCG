@@ -70,7 +70,7 @@ public class CardController : IController
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
             var userCards = repo.GetDeckByUserId(userId);
 
-            if (userCards == null) return new Response<string>(204, resConfig["CRD_DECK_EMPTY"]);
+            if (userCards == null || userCards.Count() == 0) return new Response<string>(204, resConfig["CRD_DECK_EMPTY"]);
 
             return new Response<IEnumerable<Card>>(200, userCards, resConfig["CRD_DECK_SUCC"]);
         }

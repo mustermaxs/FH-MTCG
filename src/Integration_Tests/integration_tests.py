@@ -27,6 +27,6 @@ def main():
     test_user_no_cards_in_stack_true(users["max"])
     test_aquire_package_and_create_deck(users["max"], cards)
     test_add_trading_deal(users["max"])
-    
+
 if __name__ == "__main__":
     main()

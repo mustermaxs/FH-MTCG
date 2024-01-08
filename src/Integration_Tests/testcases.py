@@ -168,17 +168,25 @@ def test_aquire_package_and_create_deck(user: User, cards: list, cn=None):
     res = req.put(url("deck", "PUT"), json=cards_list, headers=Headers(user.token))
     test_status(res, 200)
 
+@with_caller_name
+def get_user_deck(user: User, cn=None):
+    user = login_as(user)
+    res = req.get(url("deck", "GET"), headers=Headers(user.token))
+    if test_status(res, 200, True):
+        return res.json()
 
 
 @with_caller_name
 def test_add_trading_deal(user: User, deal=None , cn=None):
     # setup
     reset()
-    test_login(user)
-    packageid = test_aquire_package_and_create_deck(users["admin"], cards)
+    user = login_as(users["max"])
+    packageid = test_aquire_package_and_create_deck(user, cards)
 
     if deal is None:
-        deal = Trade("firekraken", "fire", 10.0)
+        deckCards = get_user_deck(user)
+        card = deckCards[0]
+        deal = Trade(card["Id"], card["Type"], card["Damage"])
 
     res = req.post(url("tradings", "POST"), json=deal.to_dict(), headers=Headers(user.token))
     test_status(res, 201, True)

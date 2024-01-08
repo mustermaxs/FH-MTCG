@@ -16,6 +16,7 @@ namespace MTCG
         public int MaxCardsInDeck { get; set; }
         public int MinCardsInDeck { get; set; }
         public int ReqNbrCardsInPackage { get; set; }
+        public int PricePerPackage { get; set; }
     }
 
     public class ResponseConfig : IConfig

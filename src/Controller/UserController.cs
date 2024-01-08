@@ -95,6 +95,7 @@ public class UserController : IController
     }
 
 
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
@@ -136,7 +137,7 @@ public class UserController : IController
     //////////////////////////////////////////////////////////////////////
 
 
-    [Route("/users/", HTTPMethod.GET, Role.ALL)]
+    [Route("/users/", HTTPMethod.GET, Role.ADMIN)]
     public IResponse GetAllUsers()
     {
         try

@@ -7,7 +7,8 @@
     "cards": {
         "MaxCardsInDeck": 5,
         "ReqNbrCardsInPackage": 5,
-        "MinCardsInDeck": 0
+        "MinCardsInDeck": 0,
+        "PricePerPackage": 5
     },
     "user": {
         "StartAmountCoins": 20
@@ -32,6 +33,9 @@
                 "PCK_GETALL_SUCC": "The response contains all packages",
                 "PCK_REQ_OK_NOTEXISTS": "The request was fine, but the package doesn't exist",
                 "PCK_BYID_SUCC": "The response contains the package",
+                "PCK_BUY_NOTEXISTS": "No card package available for buying",
+                "PCK_BUY_SUCC": "A package has been successfully bought",
+                "PCK_BUY_NO_MONEY": "Not enough money for buying a card package",
                 "USR_CRD_INVALID": "Invalid username/password provided",
                 "USR_LOGIN_SUCC": "Login successfull. Payload contains the authentication token.",
                 "USR_LOGIN_ERR": "Failed to login user.",
@@ -56,6 +60,9 @@
                 "PCK_ADD_EXISTS": "Mindestens eine Karte im Paket existiert bereits",
                 "PCK_GETALL_NO_PCKS": "Die Anfrage war in Ordnung, aber es gibt keine Pakete",
                 "PCK_GETALL_SUCC": "Die Antwort enthält alle Pakete",
+                "PCK_BUY_NOTEXISTS": "Kein Package verfügbar.",
+                "PCK_BUY_NO_MONEY": "Nicht genug Geld um Package zu kaufen.",
+                "PCK_BUY_SUCC": "Package wurde erfolgreich gekauft.",
                 "PCK_REQ_OK_NOTEXISTS": "Die Anfrage war in Ordnung, aber das Paket existiert nicht",
                 "PCK_BYID_SUCC": "Die Antwort enthält das Paket",
                 "USR_CRD_INVALID": "Username/Passwort ungültig.",

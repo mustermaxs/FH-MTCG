@@ -81,6 +81,27 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
 
   //////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////
+  
+  
+  public override IEnumerable<User> GetAll()
+  {
+    ObjectBuilder<User> objectBuilder = _Fill;
+    using var builder = new QueryBuilder(Connect());
+    builder
+      .Select("u.*", "r.id", "r.role AS rolename")
+      .From("users u")
+      .Join("roles r")
+      .On("r.id=u.role")
+      .Build();
+
+    IEnumerable<User> users = builder.ReadMultiple<User>(objectBuilder);
+
+    return users;
+  }
+
+
+  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
 
 
 

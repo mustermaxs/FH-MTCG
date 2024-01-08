@@ -51,7 +51,7 @@ namespace MTCG
         {
             try
             {
-                NpgsqlConnection connection = new NpgsqlConnection("Host=localhost;Username=admin;Password=12345;Database=mtc");
+                NpgsqlConnection connection = new NpgsqlConnection("Host=localhost;Username=admin;Password=12345;Database=mtc;MaxPoolSize=1000;");
 
                 connection.Open();
 

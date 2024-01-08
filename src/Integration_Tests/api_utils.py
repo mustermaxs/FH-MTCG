@@ -7,7 +7,7 @@ api = {
     "GET": {
         "stack": "/stack",
         "deck": "/deck",
-        "cards": "/cards/{cardId:alphanum}",
+        "card_by_id": "/cards/:id",
         "all_cards": "/cards/all",
         "packages": "/packages",
         "package": "/packages/{packageid:alphanum}",
@@ -26,12 +26,15 @@ api = {
         "packages": "/packages",
         "transaction_packages": "/transactions/packages",
         "tradings": "/tradings",
+        "accept_card_trade": "/tradings/:id",
         "session": "/session/",
         "users": "/users/",
-        "users_settings_language": "/users/settings/language"
+        "users_settings_language": "/users/settings/language",
+        "add_to_stack": "/stack/:id",
+        "add_card_glob": "/cards"
     },
     "DELETE": {
-        "tradings": "/tradings/{tradingdealid:alphanum}",
+        "tradings": "/tradings/:id",
         "packages": "/packages/:id",
         "cards_all": "/cards"
     }

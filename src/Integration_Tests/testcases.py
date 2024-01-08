@@ -27,7 +27,11 @@ def login_as(user: User):
         user.token = res.json()["authToken"]
         return user
 
-
+@with_caller_name
+def add_card_globally(card: Card):
+    admin = login_as(users["admin"])
+    res = req.post(url("cards", "POST"), json=card.to_dict(), headers=Headers(admin.token))
+    test_status(res, 201, True)
 @with_caller_name
 def test_login(user : User, cn=None):
     creds = {"Name": user.Name, "Password": user.Password}
@@ -179,9 +183,9 @@ def get_user_deck(user: User, cn=None):
 @with_caller_name
 def test_add_trading_deal(user: User, deal=None , cn=None):
     # setup
-    reset()
+    # reset()
     user = login_as(users["max"])
-    packageid = test_aquire_package_and_create_deck(user, cards)
+    test_aquire_package_and_create_deck(user, cards)
 
     if deal is None:
         deckCards = get_user_deck(user)
@@ -202,4 +206,72 @@ def delete_all_cards(cn=None):
     res = req.delete(url("cards_all", "DELETE"), headers=Headers(admin.token))
     test_status(res, 200, True)
 
+def get_cardtrades():
+    res = req.get(url("tradings", "GET"))
+    if res.status_code == 200:
+        return res
+    else:
+        return None
 
+@with_caller_name
+def test_get_cardtrades_exists(cn=None):
+    res = get_cardtrades()
+    
+    if test_status(res, 200, True):
+        return res.json()
+
+@with_caller_name
+def add_card_to_stack(user: User, card, cn=None): # card is json object
+    admin = login_as(users["admin"])
+    URL = url("add_to_stack", "POST").replace(":id", user.ID)
+    cardlist = []
+    cardlist.append(card)
+    res = req.post(URL, json=cardlist, headers=Headers(admin.token))
+    test_status(res, 200, True)
+
+@with_caller_name
+def get_card_by_id(id : str, cn=None):
+    admin = login_as(users["admin"])
+    URL = url("card_by_id", "GET").replace(":id", id)
+    res = req.get(URL, headers=Headers(admin.token))
+    if test_status(res, 200, True):
+        return res.json()
+
+
+def card_meets_deal_requirements(card, dealcard):
+    if card["Type"] == dealcard["Type"] and card["Damage"] == dealcard["MinimumDamage"]:
+        return True
+    else:
+        return False
+
+@with_caller_name
+def test_accept_card_trading_deal(offerer: User, buyer: User, cn=None):
+    # reset()
+    test_add_trading_deal(offerer)
+    dealsRes = get_cardtrades()
+    if dealsRes is None:
+        raise Exception("No trading deals found")
+    if dealsRes.status_code != 200:
+        raise Exception("No trading deals found")
+    deals = dealsRes.json()
+    dealid = deals[0]["Id"]
+    dealcardid = deals[0]["CardToTrade"]
+    dealcard = get_card_by_id(dealcardid)
+    URL = url("accept_card_trade", "POST")
+    URL = URL.replace(":id", dealid)
+    
+    buyer = login_as(buyer)
+    # find matching card in users deck
+    buyerdeck = get_user_deck(buyer)
+    suitablecard = None
+
+    for buyercard in buyerdeck:
+        if card_meets_deal_requirements(buyercard, dealcard):
+            suitablecard = buyercard
+    
+    if suitablecard is None:
+        raise Exception("No suitable card found")
+    
+    res = req.post(URL, headers=Headers(buyer.token))
+
+    test_status(res, 200, True)

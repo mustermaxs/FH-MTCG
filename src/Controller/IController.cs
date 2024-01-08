@@ -19,7 +19,6 @@ namespace MTCG
             {
                 this.LoggedInUser = SessionManager.GetUserBySessionId(request.SessionId);
                 this.UserId = LoggedInUser.ID;
-                // this.LoggedInUser.Language;
             }
         }
     }

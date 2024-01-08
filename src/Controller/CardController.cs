@@ -147,8 +147,12 @@ public class CardController : IController
         {
             var userStackCards = repo.GetAllCardsInStackByUserId(userId);
             IEnumerable<Card>? deckCards = repo.GetDeckByUserId(userId);
-
-            var userOwnsProvidedCards = providedCards.All<Card>(pc => userStackCards.Any<Card>(uc => uc.Id == pc.Id));
+            bool userOwnsProvidedCards = true;
+            // var userOwnsProvidedCards = providedCards.All<Card>(pc => userStackCards.Any<Card>(uc => uc.Id == pc.Id));
+            foreach (var stackCard in userStackCards)
+            {
+                userOwnsProvidedCards = providedCards.Any<Card>(c => c.Id == stackCard.Id) && userOwnsProvidedCards;
+            }
             var deckIsEmpty = deckCards == null || deckCards.Count() == cardConfig.MinCardsInDeck;
 
             return userOwnsProvidedCards && deckIsEmpty;
@@ -206,12 +210,18 @@ public class CardController : IController
     }
 
 
-    [Route("/cards", HTTPMethod.POST, Role.USER)]
-    public IResponse AddCardsToStack()
+    [Route("/stack/{userid:alphanum}", HTTPMethod.POST, Role.ADMIN)] // CHANGED from /cards -> /stack
+    public IResponse AddCardsToStack(Guid userid)
     {
         try
         {
-            Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
+            var userRepo = new UserRepository();
+            var user = userRepo.Get(userid);
+
+            if (user == null) return new Response<string>(204, "User not found.");
+
+            var userId = user.ID;
+
             var cards = request.PayloadAsObject<List<Card>>();
             
             if (cards == null || cards.Count() == 0)
@@ -225,6 +235,28 @@ public class CardController : IController
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to add cards to stack.\n{ex}");
+
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
+        }
+    }
+
+
+    [Route("/cards", HTTPMethod.POST, Role.ADMIN)]
+    public IResponse AddCard()
+    {
+        try
+        {
+            var card = request.PayloadAsObject<Card>();
+
+            if (card == null) return new Response<string>(400, "No card provided.");
+
+            repo.Save(card);
+
+            return new Response<string>(200, "Created card.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to add card.\n{ex}");
 
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }

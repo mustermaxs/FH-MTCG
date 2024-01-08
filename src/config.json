@@ -35,7 +35,7 @@
                 "PCK_BYID_SUCC": "The response contains the package",
                 "PCK_BUY_NOTEXISTS": "No card package available for buying",
                 "PCK_BUY_SUCC": "A package has been successfully bought",
-                "PCK_BUY_NO_MONEY": "Not enough money for buying a card package",
+                "PCK_BUY_NO_COINS": "Not enough money for buying a card package",
                 "USR_CRD_INVALID": "Invalid username/password provided",
                 "USR_LOGIN_SUCC": "Login successfull. Payload contains the authentication token.",
                 "USR_LOGIN_ERR": "Failed to login user.",
@@ -52,7 +52,8 @@
                 "CRD_DECK_ADD_SUCC": "The deck has been successfully configured",
                 "CRD_GETBYID_SUCC":"Fetched card.",
                 "CRD_GETBYID_ERR": "Failed to fetch card.",
-                "CRD_STACK_ADD_SUCC": "Cards successfully added to stack."
+                "CRD_STACK_ADD_SUCC": "Cards successfully added to stack.",
+                "CRD_STACK_ADD_ERR": "No cards provided."
             },
             "german": {
                 "INT_SVR_ERR": "Interner Serverfehler. Etwas ist schiefgegangen :(",
@@ -61,7 +62,7 @@
                 "PCK_GETALL_NO_PCKS": "Die Anfrage war in Ordnung, aber es gibt keine Pakete",
                 "PCK_GETALL_SUCC": "Die Antwort enthält alle Pakete",
                 "PCK_BUY_NOTEXISTS": "Kein Package verfügbar.",
-                "PCK_BUY_NO_MONEY": "Nicht genug Geld um Package zu kaufen.",
+                "PCK_BUY_NO_COINS": "Nicht genug Geld um Package zu kaufen.",
                 "PCK_BUY_SUCC": "Package wurde erfolgreich gekauft.",
                 "PCK_REQ_OK_NOTEXISTS": "Die Anfrage war in Ordnung, aber das Paket existiert nicht",
                 "PCK_BYID_SUCC": "Die Antwort enthält das Paket",
@@ -81,7 +82,8 @@
                 "CRD_DECK_ADD_SUCC": "Das Deck wurde erfolgreich konfiguriert",
                 "CRD_GETBYID_SUCC":"Karte gefetcht.",
                 "CRD_GETBYID_ERR": "Karte konnte nicht gefetcht werden.",
-                "CRD_STACK_ADD_SUCC": "Karte wurde zum Stack hinzugefügt."
+                "CRD_STACK_ADD_SUCC": "Karte wurde zum Stack hinzugefügt.",
+                "CRD_STACK_ADD_ERR": "Keine Karten erhalten."
             }
         }
     }

@@ -95,6 +95,21 @@ class Card:
             "Element": self.Element,
             "Type": self.Type
         }
+    
+class Trade:
+    def __init__(self, card_to_trade, type, minimum_damage):
+        self.CardToTrade = card_to_trade
+        self.Type = type
+        self.MinimumDamage = minimum_damage
+
+    def to_dict(self):
+        return {
+            "CardToTrade": self.CardToTrade,
+            "Type": self.Type,
+            "MinimumDamage": self.MinimumDamage
+        }
+
+trade = Trade("firekraken", "fire", 10.0)
 
 firekraken = Card("", 20.0, "FireKraken", "fire", "monster")
 firetroll = Card("", 10.0, "FireTroll", "fire", "monster")
@@ -246,8 +261,8 @@ def test_delete_package(id : str, cn=None):
 @with_caller_name
 def test_create_package(cards : list, user : User, cn=None):
     cards_list = [card.to_dict() for card in cards.values()]
-    token = test_login(user)
-    res = req.post(url("packages", "POST"), json=cards_list, headers=Headers(token))
+    admin = login_as(users["admin"])
+    res = req.post(url("packages", "POST"), json=cards_list, headers=Headers(admin.token))
     
     if test_status(res, 200, True):
         packages = test_retrieve_packages_has_packages()
@@ -255,18 +270,19 @@ def test_create_package(cards : list, user : User, cn=None):
         return packageId
 
 @with_caller_name
-def test_aquire_package(id : str, user: User, cn=None):
+def test_aquire_package( user: User, cn=None):
     # delete preexisting packages
-    packages = test_retrieve_packages_has_packages()
-    for package in packages:
-        test_delete_package(package["Id"])
+    packages = get_all_packages()
+    if packages is not None:
+        for package in packages:
+            test_delete_package(package["Id"])
     
     # create package
     test_create_package(cards, users["admin"])
 
     # buy package
-    test_login(user)
-    res = req.post(url("transaction_packages", "POST"), headers=Headers(user.token))
+    buyer = login_as(user)
+    res = req.post(url("transaction_packages", "POST"), headers=Headers(buyer.token))
     test_status(res, 200)
     test_retrieve_packages_no_packages()
 
@@ -325,6 +341,37 @@ def delete_all_packages():
     for package in packages:
         test_delete_package(package["Id"])
 
+
+@with_caller_name
+def test_get_user_stack(user: User, cn=None):
+    test_login(user)
+    res = req.get(url("stack", "GET"), headers=Headers(user.token))
+    if test_status(res, 200):
+        return res.json()
+
+def test_create_deck(user: User, cards: list, cn=None):
+    # setup
+    test_login(user)
+    admintoken = login_as(users["admin"])
+    packageid = test_create_package(cards, users["admin"])
+    test_aquire_package( user)
+    stackcards = test_get_user_stack(user)
+    cards_list = [card["Id"] for card in stackcards]
+    res = req.put(url("deck", "PUT"), json=cards_list, headers=Headers(user.token))
+    test_status(res, 200)
+
+
+
+@with_caller_name
+def test_add_trading_deal(user: User, deal=trade , cn=None):
+    # setup
+    test_login(user)
+    packageid = test_create_package(cards, users["admin"])
+    test_aquire_package( user)
+
+    res = req.post(url("tradings", "POST"), json=deal, headers=Headers(user.token))
+    
+
 test_user = User("test", "test", "", ":)", 100, "", "")
 
 # test_user = test_register_user(test_user)
@@ -341,7 +388,6 @@ if packages is not None:
     test_delete_package(packages[0]["Id"])
 test_get_all_users()
 test_user_no_cards_in_stack_true(users["max"])
-
-packageid = test_create_package(cards, users["admin"])
-
-test_aquire_package(packageid, users["max"])
+test_aquire_package( users["max"])
+test_get_user_stack(users["max"])
+test_create_deck(users["max"], cards)

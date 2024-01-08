@@ -45,18 +45,6 @@ public class CardController : IController
     }
 
 
-
-
-    //////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
@@ -79,6 +67,29 @@ public class CardController : IController
             Console.WriteLine(ex);
 
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
+        }
+    }
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    
+    
+    [Route("/cards", HTTPMethod.DELETE, Role.ADMIN)]
+    public IResponse DeleteAllCardsGlobally()
+    {
+        try
+        {
+            repo.DeleteAll();
+
+            return new Response<string>(200, "Successfully deleted all cards.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to delete all cards.\n{ex}");
+
+            return new Response<string>(500, "Failed to delete all cards globally.");
         }
     }
 
@@ -138,8 +149,7 @@ public class CardController : IController
             IEnumerable<Card>? deckCards = repo.GetDeckByUserId(userId);
 
             var userOwnsProvidedCards = providedCards.All<Card>(pc => userStackCards.Any<Card>(uc => uc.Id == pc.Id));
-            var deckIsEmpty = deckCards == null || deckCards.Count() == cardConfig.MaxCardsInDeck;
-            // bool cardsLockedInDeck = providedCards.All<Card>(c => !c.Locked);
+            var deckIsEmpty = deckCards == null || deckCards.Count() == cardConfig.MinCardsInDeck;
 
             return userOwnsProvidedCards && deckIsEmpty;
         }
@@ -165,9 +175,7 @@ public class CardController : IController
             Card? card = repo.Get(cardId);
 
             if (card != null)
-            {
                 return new Response<Card>(200, card, resConfig["CRD_GETBYID_SUCC"]);
-            }
             else
                 throw new Exception("Failed");
         }
@@ -206,10 +214,11 @@ public class CardController : IController
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
             var cards = request.PayloadAsObject<List<Card>>();
             
+            if (cards == null || cards.Count() == 0)
+                return new Response<string>(500, resConfig["CRD_STACK_ADD_ERR"]);
+
             foreach (Card card in cards)
-            {
                 repo.AddCardToStack(card, userId);
-            }
 
             return new Response<string>(200, resConfig["CRD_STACK_ADD_SUCC"]);
         }

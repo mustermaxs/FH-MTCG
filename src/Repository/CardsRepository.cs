@@ -405,7 +405,29 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
     public override void Delete(Card card)
     {
-        throw new NotImplementedException();
+        var builder = new QueryBuilder(Connect());
+
+        builder
+            .DeleteFrom("cards")
+            .Where("id=@cardid")
+            .AddParam("@cardid", card.Id)
+            .Build();
+        
+        builder.ExecuteNonQuery();
+    }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    
+    public void DeleteAll()
+    {
+        var builder = new QueryBuilder(Connect());
+        builder
+            .DeleteFrom("cards")
+            .Build();
+        
+        builder.ExecuteNonQuery();
     }
 
 

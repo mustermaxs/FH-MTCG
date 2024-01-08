@@ -181,6 +181,7 @@ public class CardTradingController : IController
                 return new Response<string>(403, "The deal contains a card that is not owned by the user or locked in the deck.");
 
             trade.OfferingUserId = UserId;
+            trade.DeckId = deckCard.DeckId;
             deckCard.Locked = true;
 
             cardRepo.UpdateDeckCard(deckCard);
@@ -199,7 +200,7 @@ public class CardTradingController : IController
 
             Console.WriteLine($"{ex}\nFailed to add new trading deal.");
 
-            return new Response<string>(500, $"Something went wrong :(\nPerhaps misconfigured JSON request object.\nReq. structure: {postTradeJsonStructure}");
+            return new Response<string>(500, @$"Something went wrong :(\nPerhaps misconfigured JSON request object.\nReq. structure: {postTradeJsonStructure}");
         }
     }
 

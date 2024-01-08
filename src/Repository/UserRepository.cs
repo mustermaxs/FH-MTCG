@@ -141,7 +141,7 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
       .From("users u")
       .Join("roles r")
       .On("r.id=u.role")
-      .Where("id=@id")
+      .Where("u.id=@id")
       .AddParam("@id", id)
       .Build();
 

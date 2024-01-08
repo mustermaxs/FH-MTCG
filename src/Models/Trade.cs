@@ -45,6 +45,7 @@ public class CardTrade : IModel
     public Guid AcceptingUserId { get; set; }
     public User? AcceptingUser { get; set; }
     public Guid? AcceptedDeckCardId { get; set; }
+    public Guid? DeckId { get; set; }
     public bool Settled { get; set; } = false;
 
     public object ToSerializableObj()

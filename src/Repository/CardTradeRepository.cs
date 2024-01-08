@@ -23,6 +23,22 @@ public class CardTradeRepository : BaseRepository<CardTrade>, IRepository<CardTr
     //////////////////////////////////////////////////////////////////////
 
 
+    public override IEnumerable<CardTrade> GetAll()
+    {
+        ObjectBuilder<CardTrade> fill = Fill;
+        var builder = new QueryBuilder(Connect());
+        builder
+            .Select("*")
+            .From("cardtrades")
+            .Build();
+
+        return builder.ReadMultiple<CardTrade>(fill);
+    }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
 
     protected override void Fill(CardTrade trade, IDataReader re)
     {

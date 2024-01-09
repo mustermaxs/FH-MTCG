@@ -74,8 +74,8 @@ public class CardController : IController
 
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-    
-    
+
+
     [Route("/cards", HTTPMethod.DELETE, Role.ADMIN)]
     public IResponse DeleteAllCardsGlobally()
     {
@@ -120,7 +120,7 @@ public class CardController : IController
                 return new Response<string>(403, resConfig["CRD_DECK_ADD_ERR"]);
 
             repo.AddCardsToDeck(providedCards!, userId);
-            
+
             providedCards.ForEach(card => repo.RemoveCardFromStack(card, userId));
 
 
@@ -186,7 +186,7 @@ public class CardController : IController
         catch (Exception ex)
         {
             Console.WriteLine($"ex");
-            
+
             return new ResponseWithoutPayload(500, $"{resConfig["CRD_GETBYID_ERR"]}\n${ex}");
         }
     }
@@ -210,6 +210,11 @@ public class CardController : IController
     }
 
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
     [Route("/stack/{userid:alphanum}", HTTPMethod.POST, Role.ADMIN)] // CHANGED from /cards -> /stack
     public IResponse AddCardsToStack(Guid userid)
     {
@@ -223,7 +228,7 @@ public class CardController : IController
             var userId = user.ID;
 
             var cards = request.PayloadAsObject<List<Card>>();
-            
+
             if (cards == null || cards.Count() == 0)
                 return new Response<string>(500, resConfig["CRD_STACK_ADD_ERR"]);
 
@@ -239,6 +244,12 @@ public class CardController : IController
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
 
 
     [Route("/cards", HTTPMethod.POST, Role.ADMIN)]
@@ -263,8 +274,12 @@ public class CardController : IController
     }
 
 
+
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
+
+
 
     [Route("/cards/all", HTTPMethod.GET, Role.ALL)]
     public IResponse GetAllCards()
@@ -282,67 +297,5 @@ public class CardController : IController
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
-
-
-    //TODO
-    protected Card GetCardByUserId(Guid userId)
-    {
-        throw new NotImplementedException("");
-    }
-
-
-
-    //////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////
-
-
-
-    //TODO
-    protected bool DeleteCardFromStack(Guid cardId, Guid userId)
-    {
-        throw new NotImplementedException("");
-    }
-
-
-
-    //////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////
-
-
-
-    //TODO
-    public IResponse BuyCard()
-    {
-        throw new NotImplementedException("");
-        // try
-        // {
-        //     Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
-        //     var package = request.PayloadAsObject<IEnumerable<Card>>();
-
-        //     var cards = repo.BuyCard(userId, package);
-
-        //     return new Response<IEnumerable<Card>>(200, cards, $"The user has cards, the response contains these");
-        // }
-        // catch (Exception ex)
-        // {
-        //     Console.WriteLine(ex);
-
-        //     return new Response<string>(500, "Internal server error. Something went wrong :()");
-        // }
-    }
-
-
-
-    //////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////
-
-
-
-    // TODO
-    protected bool CardExists(Card card)
-    {
-        throw new NotImplementedException("");
-    }
-
 }
 

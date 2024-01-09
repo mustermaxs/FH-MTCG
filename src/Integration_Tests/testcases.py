@@ -12,6 +12,8 @@ def reset():
 
 @with_caller_name
 def test_status(res, expected_status, doAssert=False, cn=None):
+    if cn != None:
+        cn = cn.replace("_", " ").replace("test", "")
     if (res.status_code != expected_status):
         print_colored(f" \nFAILED {cn:<35} : {res.status_code} : {res.reason}\n", Colors.RED)
         if doAssert:
@@ -108,7 +110,11 @@ def create_package(cards):
     cards_list = [card.to_dict() for card in cards.values()]
     admin = login_as(users["admin"])
     res = req.post(url("packages", "POST"), json=cards_list, headers=Headers(admin.token))
-    return res
+
+    if res.status_code == 200:
+        return res
+    else:
+        assert res.status_code == 200
 
 
 # Returns package id
@@ -225,7 +231,10 @@ def delete_all_packages():
         test_delete_package(package["Id"])
 
 
-
+def get_user_stack(user: User):
+    res = req.get(url("stack", "GET"), headers=Headers(user.token))
+    
+    return res.json()
 
 
 @with_caller_name
@@ -242,12 +251,12 @@ def test_get_user_stack(user: User, cn=None):
 
 @with_caller_name
 def test_aquire_package_and_create_deck(user: User, cards: list, cn=None):
-    # setup
+    reset()
     admintoken = login_as(users["admin"])
-    packageid = test_create_package(cards, users["admin"])
+    packageid = create_package(cards)
     user = login_as(user)
-    test_aquire_package( user)
-    stackcards = test_get_user_stack(user)
+    aquire_package( user, packageid)
+    stackcards = get_user_stack(user)
     cards_list = [card["Id"] for card in stackcards]
     res = req.put(url("deck", "PUT"), json=cards_list, headers=Headers(user.token))
     test_status(res, 200)
@@ -281,22 +290,51 @@ def test_add_trading_deal(user: User, deal=None , cn=None):
     res = req.post(url("tradings", "POST"), json=deal.to_dict(), headers=Headers(user.token))
     test_status(res, 201, True)
 
+def aquire_package(user: User, packageId: str):
+    buyer = login_as(user)
+    res = req.post(url("transaction_packages", "POST"), headers=Headers(buyer.token))
 
 
+def push_cards_to_deck(user: User, cards):
+    user = login_as(user)
+    cards_list = [card["Id"] for card in cards]
+    res = req.put(url("deck", "PUT"), json=cards_list, headers=Headers(user.token))
+    assert res.status_code == 200
+
+def add_cardtrade_deal(user: User, card: Card):
+    deal = Trade(card["Id"], card["Type"], card["Damage"])
+    res = req.post(url("tradings", "POST"), json=deal.to_dict(), headers=Headers(user.token))
+    assert res.status_code == 201
 
 @with_caller_name
 def test_accept_cardtrade_deal(cn=None):
     reset()
-    test_aquire_package_and_create_deck(users["test"], cards)
-    test_add_trading_deal(users["test"])
-    test_aquire_package_and_create_deck(users["max"], cards)
-    pendingdeals = get_cardtrades().json()
+
+    dealer = users["max"]
+    buyer = users["test"]
+
+    create_package(cards)
+    packages = get_all_packages()
+    aquire_package(dealer, packages[0]["Id"])
+    stackcards = get_user_stack(dealer)
+    push_cards_to_deck(dealer, stackcards)
+
+    create_package(cards)
+    packages = get_all_packages()
+    aquire_package(buyer, packages[0]["Id"])
+    buyerstackcards = get_user_stack(buyer)
+    push_cards_to_deck(buyer, buyerstackcards)
+
+    add_cardtrade_deal(dealer, stackcards[0])
+
+    pendingDeals = get_cardtrades()
     
-    deck = get_user_deck(users["max"])
-    payload = deck[0]["Id"]
-    URL = url("accept_card_trade", "POST").replace(":id", pendingdeals[0]["Id"])
-    user = login_as(users["max"])
-    res = req.post(URL, json=payload, headers=Headers(user.token))
+    buyerDeck = get_user_deck(buyer)
+    offeredCardForDeal = buyerDeck[0]["Id"]
+
+    URL = url("accept_card_trade", "POST").replace(":id", pendingDeals[0]["Id"])
+    buyer = login_as(buyer)
+    res = req.post(URL, json=offeredCardForDeal, headers=Headers(buyer.token))
     test_status(res, 200, True)
 
 
@@ -318,9 +356,9 @@ def delete_all_cards(cn=None):
 def get_cardtrades():
     res = req.get(url("tradings", "GET"))
     if res.status_code == 200:
-        return res
+        return res.json()
     else:
-        return None
+        assert res.status_code == 200
 
 
 

@@ -44,7 +44,7 @@ public class Card : IModel
     public string? Description { get; set; } = string.Empty;
     public float Damage { get; set; } = 0.0f;
     [JsonConverter(typeof(StringEnumConverter))]
-    public CardName Name { get; set; } = CardName.DEFAULT;
+    public string? Name { get; set; } = string.Empty;
     public string? Element { get; set; } = string.Empty;
     public string? Type { get; set; } = string.Empty;
     public bool Locked { get; set; } = false;
@@ -65,7 +65,7 @@ public class Card : IModel
         Id = Guid.NewGuid();
         Description = string.Empty;
         Damage = 0.0f;
-        Name = CardName.DEFAULT;
+        Name = string.Empty;
         Element = string.Empty;
         Type = string.Empty;
     }

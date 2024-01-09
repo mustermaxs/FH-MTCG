@@ -344,7 +344,8 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
             FillDeckCard(card as DeckCard, re);
 
         card.Id = re.GetGuid(re.GetOrdinal("id"));
-        card.Name = (CardName)Enum.Parse(typeof(CardName), re.GetString(re.GetOrdinal("name")));
+        // card.Name = (CardName)Enum.Parse(typeof(CardName), re.GetString(re.GetOrdinal("name")));
+        card.Name = re.GetString(re.GetOrdinal("name"));
         card.Description = re.GetString(re.GetOrdinal("descr"));
         card.Damage = (float)re.GetDouble(re.GetOrdinal("damage"));
         card.Element = re.GetString(re.GetOrdinal("element"));
@@ -373,7 +374,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     protected override void _Fill(Card card, IDataReader re)
     {
         card.Id = re.GetGuid(re.GetOrdinal("id"));
-        card.Name = (CardName)Enum.Parse(typeof(CardName), re.GetString(re.GetOrdinal("name")));
+        card.Name = re.GetString(re.GetOrdinal("name"));
         card.Description = re.GetString(re.GetOrdinal("descr"));
         card.Damage = (float)re.GetDouble(re.GetOrdinal("damage"));
         card.Element = re.GetString(re.GetOrdinal("element"));
@@ -462,7 +463,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
         builder
             .Update("cards")
             .UpdateSet("name", "@name")
-            .AddParam("@name", card.Name)
+            .AddParam("@name", card.Name ?? string.Empty)
             .UpdateSet("descr", "@descr")
             .AddParam("@descr", card.Description!)
             .UpdateSet("damage", "@damage")

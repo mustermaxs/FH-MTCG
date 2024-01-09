@@ -107,7 +107,7 @@ public class QueryBuilder : IDisposable
         {
             _connection.Close();
             _connection.Dispose();
-            Console.WriteLine("CLOSED CONNECTION");
+            // Console.WriteLine("CLOSED CONNECTION");
             if (_connection.State == System.Data.ConnectionState.Open)
             {
                 Console.WriteLine("!!!!!!!!!!!!!!!!Connection is open.");

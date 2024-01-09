@@ -4,6 +4,8 @@ print_deco() {
     echo -e "###############################################"
 }
 
+echo -e "\n\n\n"
+
 if [ "$#" -eq 0 ]; then
     echo "[Error] Please provide an argument (integration, unit, both)"
     exit 1
@@ -13,6 +15,7 @@ run_integration_tests() {
     print_deco
     echo -e "############   INTEGRATION TESTS   ############"
     print_deco
+    echo -e "\n\n"
     find src/Integration_Tests -name "integration_tests.py" -exec python3 {} \;
 }
 
@@ -20,6 +23,7 @@ run_unit_tests() {
     print_deco
     echo -e "############      UNIT TESTS       ############"
     print_deco
+    echo -e "\n\n"
     cd MTCG.Tests && find . -name "*.csproj" -exec dotnet test {} \; && cd ..
 }
 

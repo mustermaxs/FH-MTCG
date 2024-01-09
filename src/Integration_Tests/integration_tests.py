@@ -39,6 +39,7 @@ def main():
     failed = stats["failed"]
     print_colored(f"PASSED: {passed}", Colors.GREEN)
     print_colored(f"FAILED: {failed}", Colors.RED)
-
+    print("\n\n\n")
+    
 if __name__ == "__main__":
     main()

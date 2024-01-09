@@ -10,9 +10,11 @@ public class User : IModel
     public string Image { get; set; } = string.Empty;
     public int Coins { get; set; }
     public Role UserAccessLevel { get; set;} = Role.ANONYMOUS;
+    public string Token { get; set; } = string.Empty;
     public Guid ID { get; set; } = Guid.NewGuid();
     public string Language { get; set; } = "english";
-
+    public IEnumerable<Card> Stack { get; set; } = new List<Card>();
+    public IEnumerable<DeckCard> Deck { get; set; } = new List<DeckCard>();
 
     public User()
     {

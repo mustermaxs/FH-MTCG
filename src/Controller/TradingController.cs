@@ -267,75 +267,8 @@ public class CardTradingController : IController
     //////////////////////////////////////////////////////////////////////
 
 
-    // [Route("/tradings/{tradingdealid:alphanum}", HTTPMethod.POST, Role.USER | Role.ADMIN)]
-    // public IResponse AcceptTradingDeal(Guid tradingdealid)
-    // {
-    //     try
-    //     {
-    //         var reqParams = request.Endpoint!.UrlParams;
-    //         string? queryFilter = "store"; // default value
-    //         StoreTrade? trade = null;
-
-    //         if (!reqParams.QueryString.TryGetValue("filter", out queryFilter) || queryFilter == "store")
-    //             return HandleAcceptStoreTradingDeal(tradingdealid);
-    //         else if (queryFilter == "users")
-    //             return HandleAcceptUserTradingDeal(tradingdealid);
-
-
-    //         if (trade == null)
-    //             return new Response<string>(404, "The provided deal ID was not found.");
-
-
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine("Failed to accept trading deal.\n{ex}");
-
-    //         return new Response<string>(500, "Something went wrong :(");
-    //     }
-    // }
-
     private IResponse HandleAcceptUserTradingDeal(Guid tradingdealid)
     {
         throw new NotImplementedException();
     }
-
-    // public IResponse HandleAcceptStoreTradingDeal(Guid tradingdealid)
-    // {
-    //     try
-    //     {
-    //         StoreTrade? trade = repo.GetTradeById<StoreTrade>(tradingdealid);
-    //         bool tradeIsValid = true;
-
-    //         if (trade == null)
-    //             return new Response<string>(404, "The provided deal ID was not found.");
-
-    //         Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
-    //         var cardRepo = new CardRepository();
-    //         List<Card> deckCards = cardRepo.GetAllCardsInStackByUserId(userId).ToList();
-
-    //         if (!OfferedCardIsOwnedByUser(trade.CardToTrade, userId))
-    //             tradeIsValid = false;
-
-    //         var cards = cardRepo.GetAll();
-    //         var acceptedCard = cards.SingleOrDefault<Card>(c =>
-    //             c.Damage >= trade.MinimumDamage &&
-    //             c.Type == trade.Type);
-
-    //         if (acceptedCard == null)
-    //             return new Response<string>(403, "The offered card is not owned by the user, or the requirements are not met (Type, MinimumDamage), or the offered card is locked in the deck.");
-
-    //         cardRepo.AddCardToStack
-
-    //         repo.Save(trade);
-
-    //         return new Response<string>(201, "Trading deal successfully created");
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine($"Failed to add new trading deal.\n{ex}");
-
-    //         return new Response<string>(500, "Something went wrong :(");
-    //     }
-    // }
 }

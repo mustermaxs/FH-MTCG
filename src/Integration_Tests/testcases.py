@@ -7,6 +7,9 @@ def reset():
     delete_all_cards()
     delete_all_packages()
 
+
+
+
 @with_caller_name
 def test_status(res, expected_status, doAssert=False, cn=None):
     if (res.status_code != expected_status):
@@ -19,6 +22,9 @@ def test_status(res, expected_status, doAssert=False, cn=None):
         if doAssert:
             assert res.status_code == expected_status
         return True
+
+
+
 
 @with_caller_name
 def custom_assert(expect, actual, doAssert=False, msg="", cn=None):
@@ -42,11 +48,17 @@ def login_as(user: User):
         user.token = res.json()["authToken"]
         return user
 
+
+
+
 @with_caller_name
 def add_card_globally(card: Card):
     admin = login_as(users["admin"])
     res = req.post(url("cards", "POST"), json=card.to_dict(), headers=Headers(admin.token))
     test_status(res, 201, True)
+
+
+
 @with_caller_name
 def test_login(user : User, cn=None):
     creds = {"Name": user.Name, "Password": user.Password}
@@ -54,6 +66,9 @@ def test_login(user : User, cn=None):
 
     if test_status(res, 200, True):        
         return res.json()["authToken"]
+
+
+
 
 
 
@@ -68,11 +83,17 @@ def test_retrieve_packages_has_packages(cn=None):
     else:
         return None
 
+
+
+
 @with_caller_name  
 def test_retrieve_packages_no_packages(cn=None):
     res = req.get(url("packages", "GET"))
     # assert res.status_code == 204
     test_status(res, 204, True)
+
+
+
 
 @with_caller_name
 def test_delete_package(id : str, cn=None):
@@ -91,6 +112,9 @@ def create_package(cards):
 
 
 # Returns package id
+
+
+
 @with_caller_name
 def test_create_package(cards : list, user : User, cn=None):
     res = create_package(cards)
@@ -99,6 +123,9 @@ def test_create_package(cards : list, user : User, cn=None):
         packages = test_retrieve_packages_has_packages()
         packageId = packages[0]["Id"]
         return packageId
+
+
+
 
 @with_caller_name
 def test_aquire_package( user: User, cn=None):
@@ -117,6 +144,9 @@ def test_aquire_package( user: User, cn=None):
     test_status(res, 200)
     # test_retrieve_packages_no_packages()
 
+
+
+
 @with_caller_name
 def test_register_user(user: User , cn=None):
     res = req.post(url("users", "POST"), json=user.to_dict())
@@ -127,6 +157,9 @@ def test_register_user(user: User , cn=None):
     else:
         return None
 
+
+
+
 @with_caller_name
 def test_register_alreadyexisting_user(user: User, cn=None):
     res = req.post(url("users", "POST"), json=user.to_dict())
@@ -136,11 +169,17 @@ def test_register_alreadyexisting_user(user: User, cn=None):
         return None
     
 
+
+
+
 @with_caller_name  
 def test_user_no_cards_in_stack_true(user: User, cn=None):
     test_login(user)
     res = req.get(url("deck", "GET"), headers=Headers(user.token))
     test_status(res, 204)
+
+
+
 
 @with_caller_name
 def test_user_cards_in_deck_true(user: User, cn=None):
@@ -151,12 +190,18 @@ def test_user_cards_in_deck_true(user: User, cn=None):
 
 
 
+
+
+
 @with_caller_name
 def test_get_all_users(cn=None):
     admin = login_as(users["admin"])
     res = req.get(url("users", "GET"), headers=Headers(admin.token))
     if test_status(res, 200):
         return res.json()
+
+
+
 
 @with_caller_name
 def test_getall_cards(cn=None):
@@ -180,6 +225,9 @@ def delete_all_packages():
         test_delete_package(package["Id"])
 
 
+
+
+
 @with_caller_name
 def test_get_user_stack(user: User, cn=None):
     test_login(user)
@@ -188,6 +236,9 @@ def test_get_user_stack(user: User, cn=None):
         return res.json()
     else:
         raise Exception("Could not get stack")
+
+
+
 
 @with_caller_name
 def test_aquire_package_and_create_deck(user: User, cards: list, cn=None):
@@ -201,12 +252,18 @@ def test_aquire_package_and_create_deck(user: User, cards: list, cn=None):
     res = req.put(url("deck", "PUT"), json=cards_list, headers=Headers(user.token))
     test_status(res, 200)
 
+
+
+
 @with_caller_name
 def get_user_deck(user: User, cn=None):
     user = login_as(user)
     res = req.get(url("deck", "GET"), headers=Headers(user.token))
     if test_status(res, 200, True):
         return res.json()
+
+
+
 
 
 @with_caller_name
@@ -224,6 +281,9 @@ def test_add_trading_deal(user: User, deal=None , cn=None):
     res = req.post(url("tradings", "POST"), json=deal.to_dict(), headers=Headers(user.token))
     test_status(res, 201, True)
 
+
+
+
 @with_caller_name
 def test_accept_cardtrade_deal(cn=None):
     reset()
@@ -239,9 +299,15 @@ def test_accept_cardtrade_deal(cn=None):
     res = req.post(URL, json=payload, headers=Headers(user.token))
     test_status(res, 200, True)
 
+
+
+
 @with_caller_name
 def test_post_cardtrade(cn=None):
     pass
+
+
+
 
 @with_caller_name
 def delete_all_cards(cn=None):
@@ -256,12 +322,18 @@ def get_cardtrades():
     else:
         return None
 
+
+
+
 @with_caller_name
 def test_get_cardtrades_exists(cn=None):
     res = get_cardtrades()
     
     if test_status(res, 200, True):
         return res.json()
+
+
+
 
 @with_caller_name
 def test_add_card_to_stack(user: User, card, cn=None): # card is json object
@@ -271,6 +343,9 @@ def test_add_card_to_stack(user: User, card, cn=None): # card is json object
     cardlist.append(card)
     res = req.post(URL, json=cardlist, headers=Headers(admin.token))
     test_status(res, 200, True)
+
+
+
 
 @with_caller_name
 def get_card_by_id(id : str, cn=None):
@@ -295,6 +370,9 @@ def add_cards_to_stack(cards, user: User):
     # test_status(res, 200, True)
     if res.status_code != 200:
         raise Exception("Could not add cards to stack")
+
+
+
 
 
 @with_caller_name

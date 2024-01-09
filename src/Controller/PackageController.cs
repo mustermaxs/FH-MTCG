@@ -11,8 +11,17 @@ public class PackageController : IController
     public PackageController(IRequest request) : base(request) { }
     const int MIN_COINS_NORMAL_PACKAGE = 5;
 
+
+
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
 
     [Route("/packages", HTTPMethod.POST, Role.ADMIN)] // CHANGE only ADMIN
     public IResponse AddPackage()
@@ -46,6 +55,9 @@ public class PackageController : IController
     //////////////////////////////////////////////////////////////////////
 
 
+
+
+
     [Route("/packages", HTTPMethod.GET, Role.ALL)]
     public IResponse GetAvailablePackages()
     {
@@ -68,7 +80,10 @@ public class PackageController : IController
 
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-    
+
+
+
+
     [Route("/packages/{packageid:alphanum}", HTTPMethod.GET, Role.ALL)]
     public IResponse GetPackageById(Guid packageid)
     {
@@ -91,8 +106,11 @@ public class PackageController : IController
 
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-    
-    
+
+
+
+
+
     [Route("/transactions/packages", HTTPMethod.POST, Role.USER)]
     public IResponse UserBuysPackage()
     {
@@ -111,7 +129,7 @@ public class PackageController : IController
 
             foreach (var card in cards)
                 cardRepo.AddCardToStack(card, UserId);
-            
+
             repo.Delete(package);
             var userRepo = new UserRepository();
             LoggedInUser.Coins = LoggedInUser.Coins - cardConfig.PricePerPackage;
@@ -124,8 +142,15 @@ public class PackageController : IController
             Console.WriteLine($"Failed to buy package.\n{ex}");
 
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
-        }     
+        }
     }
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
 
     [Route("/packages/{id:alphanum}", HTTPMethod.DELETE, Role.ADMIN)]
     public IResponse DeletePackage(Guid id)

@@ -34,9 +34,9 @@ public class SessionManager : BaseSessionManager
     {
         string sessionId = SessionManager.CreateSessionIdFromAuthToken(authToken);
         Session session = new Session(sessionId).WithAuthToken(authToken).WithUser(user);
-
         try
         {
+            user.Token = authToken;
             Sessions.TryAdd(sessionId, session);
         }
         catch (Exception e)
@@ -60,6 +60,17 @@ public class SessionManager : BaseSessionManager
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
+    public static void UpdateUser(User user)
+    {
+        if (!TryGetSessionWithToken(user.Token, out Session session))
+            throw new Exception("Session not found");
+    
+        session.User = user;
+    }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
 
     public static string CreateAnonymSessionReturnId(string id)
@@ -89,8 +100,8 @@ public class SessionManager : BaseSessionManager
 
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-    
-    
+
+
     public static bool EndSessionWithSessionId(string sessionId)
     {
         bool removedSession = false;

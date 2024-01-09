@@ -1,6 +1,8 @@
 #!/bin/bash
 
-echo "############   RUNNING TESTS   ############"
+print_deco() {
+    echo -e "###############################################"
+}
 
 if [ "$#" -eq 0 ]; then
     echo "[Error] Please provide an argument (integration, unit, both)"
@@ -8,12 +10,16 @@ if [ "$#" -eq 0 ]; then
 fi
 
 run_integration_tests() {
-    echo -e "\n\n############   INTEGRATION TESTS   ############\n\n"
+    print_deco
+    echo -e "############   INTEGRATION TESTS   ############"
+    print_deco
     find src/Integration_Tests -name "integration_tests.py" -exec python3 {} \;
 }
 
 run_unit_tests() {
-    echo -e "\n\n############      UNIT TESTS       ############\n\n"
+    print_deco
+    echo -e "############      UNIT TESTS       ############"
+    print_deco
     cd MTCG.Tests && find . -name "*.csproj" -exec dotnet test {} \; && cd ..
 }
 

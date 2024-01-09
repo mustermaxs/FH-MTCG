@@ -14,12 +14,23 @@ public abstract class BaseJsonResponse<T> : IResponse where T : class?
     virtual public string Description { get; protected set; }
     virtual public string ContentType { get; } = "application/json";
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
     public BaseJsonResponse(int statusCode, T? payload, string? description)
     {
         this.Payload = payload;
         this.StatusCode = statusCode;
         this.Description = description ?? string.Empty;
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
     public BaseJsonResponse(int statusCode, string? description)
     {
         this.Payload = null;
@@ -27,12 +38,20 @@ public abstract class BaseJsonResponse<T> : IResponse where T : class?
         this.Description = description ?? string.Empty;
     }
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
     virtual public BaseJsonResponse<T> SetPayload(T payload)
     {
         this.Payload = payload;
 
         return this;
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
     protected virtual string HandleEnumerablePayload()
     {
@@ -45,6 +64,12 @@ public abstract class BaseJsonResponse<T> : IResponse where T : class?
 
         return JsonConvert.SerializeObject(list);
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
 
     virtual public string PayloadAsJson()
     {

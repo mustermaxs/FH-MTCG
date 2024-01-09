@@ -1,6 +1,7 @@
 from api_utils import *
 from utils import *
 from models import *
+import random
 
 def reset():
     delete_all_cards()
@@ -9,7 +10,7 @@ def reset():
 @with_caller_name
 def test_status(res, expected_status, doAssert=False, cn=None):
     if (res.status_code != expected_status):
-        print_colored(f" FAILED {cn:<35} : {res.status_code} : {res.reason}", Colors.RED)
+        print_colored(f" \nFAILED {cn:<35} : {res.status_code} : {res.reason}\n", Colors.RED)
         if doAssert:
             assert res.status_code == expected_status
         return False
@@ -18,6 +19,20 @@ def test_status(res, expected_status, doAssert=False, cn=None):
         if doAssert:
             assert res.status_code == expected_status
         return True
+
+@with_caller_name
+def custom_assert(expect, actual, doAssert=False, msg="", cn=None):
+    if type(expect) == "Response":
+        return test_status(expect, actual, doAssert, cn)
+    if expect != actual:
+        print_colored(f" FAILED {cn:<35} : {msg}", Colors.RED)
+        if doAssert:
+            assert expect == actual
+    else:
+        print_colored(f" PASSED {cn:<35} : {msg}", Colors.GREEN)
+        if doAssert:
+            assert expect == actual
+
 
 def login_as(user: User):
     creds = {"Name": user.Name, "Password": user.Password}
@@ -67,14 +82,19 @@ def test_delete_package(id : str, cn=None):
     res = req.delete(u, headers=Headers(users["admin"].token))
     test_status(res, 200)
 
+# returns response
+def create_package(cards):
+    cards_list = [card.to_dict() for card in cards.values()]
+    admin = login_as(users["admin"])
+    res = req.post(url("packages", "POST"), json=cards_list, headers=Headers(admin.token))
+    return res
+
 
 # Returns package id
 @with_caller_name
 def test_create_package(cards : list, user : User, cn=None):
-    cards_list = [card.to_dict() for card in cards.values()]
-    admin = login_as(users["admin"])
-    res = req.post(url("packages", "POST"), json=cards_list, headers=Headers(admin.token))
-    
+    res = create_package(cards)
+
     if test_status(res, 200, True):
         packages = test_retrieve_packages_has_packages()
         packageId = packages[0]["Id"]
@@ -137,7 +157,14 @@ def test_get_all_users(cn=None):
     res = req.get(url("users", "GET"), headers=Headers(admin.token))
     if test_status(res, 200):
         return res.json()
-    
+
+@with_caller_name
+def test_getall_cards(cn=None):
+    res = req.get(url("all_cards", "GET"))
+    if test_status(res, 200):
+        return res.json()
+
+
 def get_all_packages():
     res = req.get(url("packages", "GET"))
     if res.status_code == 200:
@@ -163,9 +190,9 @@ def test_get_user_stack(user: User, cn=None):
 @with_caller_name
 def test_aquire_package_and_create_deck(user: User, cards: list, cn=None):
     # setup
-    test_login(user)
     admintoken = login_as(users["admin"])
     packageid = test_create_package(cards, users["admin"])
+    user = login_as(user)
     test_aquire_package( user)
     stackcards = test_get_user_stack(user)
     cards_list = [card["Id"] for card in stackcards]
@@ -184,7 +211,7 @@ def get_user_deck(user: User, cn=None):
 def test_add_trading_deal(user: User, deal=None , cn=None):
     # setup
     # reset()
-    user = login_as(users["max"])
+    user = login_as(user)
     test_aquire_package_and_create_deck(user, cards)
 
     if deal is None:
@@ -195,6 +222,20 @@ def test_add_trading_deal(user: User, deal=None , cn=None):
     res = req.post(url("tradings", "POST"), json=deal.to_dict(), headers=Headers(user.token))
     test_status(res, 201, True)
 
+@with_caller_name
+def test_accept_cardtrade_deal(cn=None):
+    reset()
+    test_aquire_package_and_create_deck(users["test"], cards)
+    test_add_trading_deal(users["test"])
+    test_aquire_package_and_create_deck(users["max"], cards)
+    pendingdeals = get_cardtrades().json()
+    
+    deck = get_user_deck(users["max"])
+    payload = deck[0]["Id"]
+    URL = url("accept_card_trade", "POST").replace(":id", pendingdeals[0]["Id"])
+    user = login_as(users["max"])
+    res = req.post(URL, json=payload, headers=Headers(user.token))
+    test_status(res, 200, True)
 
 @with_caller_name
 def test_post_cardtrade(cn=None):
@@ -221,7 +262,7 @@ def test_get_cardtrades_exists(cn=None):
         return res.json()
 
 @with_caller_name
-def add_card_to_stack(user: User, card, cn=None): # card is json object
+def test_add_card_to_stack(user: User, card, cn=None): # card is json object
     admin = login_as(users["admin"])
     URL = url("add_to_stack", "POST").replace(":id", user.ID)
     cardlist = []
@@ -238,40 +279,41 @@ def get_card_by_id(id : str, cn=None):
         return res.json()
 
 
+
 def card_meets_deal_requirements(card, dealcard):
     if card["Type"] == dealcard["Type"] and card["Damage"] == dealcard["MinimumDamage"]:
         return True
     else:
         return False
+    
+def add_cards_to_stack(cards, user: User):
+    admin = login_as(users["admin"])
+    URL = url("add_to_stack", "POST").replace(":id", user.ID)
+    res = req.post(URL, json=cards, headers=Headers(admin.token))
+    # test_status(res, 200, True)
+    if res.status_code != 200:
+        raise Exception("Could not add cards to stack")
+
 
 @with_caller_name
-def test_accept_card_trading_deal(offerer: User, buyer: User, cn=None):
-    # reset()
-    test_add_trading_deal(offerer)
-    dealsRes = get_cardtrades()
-    if dealsRes is None:
-        raise Exception("No trading deals found")
-    if dealsRes.status_code != 200:
-        raise Exception("No trading deals found")
-    deals = dealsRes.json()
-    dealid = deals[0]["Id"]
-    dealcardid = deals[0]["CardToTrade"]
-    dealcard = get_card_by_id(dealcardid)
-    URL = url("accept_card_trade", "POST")
-    URL = URL.replace(":id", dealid)
-    
-    buyer = login_as(buyer)
-    # find matching card in users deck
-    buyerdeck = get_user_deck(buyer)
-    suitablecard = None
+def test_add_card_to_stack(cn=None):
+    reset()
+    packageres = create_package(cards)
+    if packageres.status_code != 200:
+        raise Exception("Could not create package")
 
-    for buyercard in buyerdeck:
-        if card_meets_deal_requirements(buyercard, dealcard):
-            suitablecard = buyercard
-    
-    if suitablecard is None:
-        raise Exception("No suitable card found")
-    
-    res = req.post(URL, headers=Headers(buyer.token))
+    all_cards = test_getall_cards()
+    add_cards_to_stack(all_cards, users["test"])
+    randomcard = all_cards[random.randint(0, len(all_cards)-1)]  
+    stack = test_get_user_stack(users["test"])
+    # print(stack)
+    # print(all_cards)
+    success = True
+    if len(stack) < len(all_cards):
+        raise Exception("Card was not added to stack")
 
-    test_status(res, 200, True)
+    for stackcard in stack:
+        if any(stackcard["Name"] != stackcard["Name"] for card in cards):
+            success = False
+            break
+    custom_assert(True, success, "Card was not added to stack")

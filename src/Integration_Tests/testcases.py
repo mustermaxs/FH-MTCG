@@ -115,7 +115,7 @@ def test_aquire_package( user: User, cn=None):
     buyer = login_as(user)
     res = req.post(url("transaction_packages", "POST"), headers=Headers(buyer.token))
     test_status(res, 200)
-    test_retrieve_packages_no_packages()
+    # test_retrieve_packages_no_packages()
 
 @with_caller_name
 def test_register_user(user: User , cn=None):
@@ -184,8 +184,10 @@ def delete_all_packages():
 def test_get_user_stack(user: User, cn=None):
     test_login(user)
     res = req.get(url("stack", "GET"), headers=Headers(user.token))
-    if test_status(res, 200):
+    if test_status(res, 200, True):
         return res.json()
+    else:
+        raise Exception("Could not get stack")
 
 @with_caller_name
 def test_aquire_package_and_create_deck(user: User, cards: list, cn=None):

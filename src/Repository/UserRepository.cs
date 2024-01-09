@@ -43,7 +43,7 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
 
   public void Update(User user)
   {
-    var builder = new QueryBuilder(Connect());
+    using var builder = new QueryBuilder(Connect());
     builder
       .Update("users")
         .UpdateSet("bio", "@bio")
@@ -70,7 +70,7 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
 
   public override void Delete(User obj)
   {
-    var builder = new QueryBuilder(Connect());
+    using var builder = new QueryBuilder(Connect());
     builder
       .DeleteFrom("users")
       .Where("id=@id")
@@ -135,7 +135,7 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
   public override User? Get(Guid id)
   {
     ObjectBuilder<User> objectBuilder = _Fill;
-    var builder = new QueryBuilder(Connect());
+    using var builder = new QueryBuilder(Connect());
     builder
       .Select("u.*", "r.id", "r.role AS rolename")
       .From("users u")

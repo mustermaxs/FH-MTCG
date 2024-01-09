@@ -26,7 +26,7 @@ public class CardTradeRepository : BaseRepository<CardTrade>, IRepository<CardTr
     public override IEnumerable<CardTrade> GetAll()
     {
         ObjectBuilder<CardTrade> fill = Fill;
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .Select("*")
             .From("cardtrades")
@@ -73,7 +73,7 @@ public class CardTradeRepository : BaseRepository<CardTrade>, IRepository<CardTr
 
     public override void Save(CardTrade obj)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .InsertInto("cardtrades", "offeringuserid", "offeredcardid", "minimumdamage", "requiredtype")
             .InsertValues("@offeringuserid", "@offeredcardid", "@minimumdamage", "@requiredtype")
@@ -88,7 +88,7 @@ public class CardTradeRepository : BaseRepository<CardTrade>, IRepository<CardTr
 
     public void Update(CardTrade obj)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .Update("cardtrades")
             .UpdateSet("offeringuserid", "@ouserid")
@@ -112,7 +112,7 @@ public class CardTradeRepository : BaseRepository<CardTrade>, IRepository<CardTr
 
     protected void SaveTradeAmongUsers(CardTrade obj)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .InsertInto("cardtrades", "offeringuserid", "offeredcardid", "minimumdamage", "requiredtype", "tradetype")
             .InsertValues("@offeringuserid", "@offeredcardid", "@minimumdamage", "@requiredtype", "@tradetype")
@@ -128,7 +128,7 @@ public class CardTradeRepository : BaseRepository<CardTrade>, IRepository<CardTr
 
     public override void Delete(CardTrade obj)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .DeleteFrom("cardtrades")
             .Where("id=@id")

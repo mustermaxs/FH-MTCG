@@ -39,7 +39,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
         //     command.Dispose(); connection!.Dispose();
         // }
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .InsertInto("cards", "name", "descr", "damage", "type", "element")
             .InsertValues("@name", "@descr", "@damage", "@type", "@element")
@@ -57,7 +57,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     // BUG: Npgsql.PostgresException (0x80004005): 42601: syntax error at or near "DEFAULT"
     public Guid SaveAndGetInsertedId(Card card)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .InsertInto("cards", "name", "descr", "damage", "type", "element")
             .InsertValues("@name", "@descr", "@damage", "@type", "@element")
@@ -82,7 +82,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
     public void AddCardToStack(Card card, Guid userId)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
 
         builder
             .InsertInto("stackcards", "userid", "cardid")
@@ -101,7 +101,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
     public Guid? GetStackIdOfCard(Guid cardId, Guid userId)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .Select("id")
             .From("stackcards")
@@ -126,7 +126,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
         if (!stackCardId.HasValue) throw new Exception("Failed to get stackid of card.");
 
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .DeleteFrom("stackcards")
             .Where("id=@id")
@@ -141,7 +141,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
     public void RemoveCardFromDeck(Card card, Guid userId)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .Select("id")
             .From("deck")
@@ -175,7 +175,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     [Obsolete("")]
     public Guid? GetStackIdForUserId(Guid userId)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .Select("id")
             .From("stack")
@@ -203,7 +203,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     public override IEnumerable<Card> GetAll()
     {
         ObjectBuilder<Card> fill = Fill;
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .Select("*")
             .From("cards")
@@ -260,7 +260,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     public IEnumerable<DeckCard>? GetDeckByUserId(Guid userId)
     {
         ObjectBuilder<DeckCard> objectBuilder = Fill;
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .Select("c.*", "d.cardid", "d.userid", "d.id as deckid", "d.locked as locked")
             .From("cards c")
@@ -283,7 +283,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     public DeckCard? GetDeckCardForUser(Guid cardId, Guid userId)
     {
         ObjectBuilder<DeckCard> objectBuilder = Fill;
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .Select("c.*", "d.*", "d.id as deckid")
             .From("cards c")
@@ -307,7 +307,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
     public void AddCardsToDeck(IEnumerable<Card> cards, Guid userId)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder.InsertInto("deck", "cardid", "userid");
         int i = 0;
 
@@ -388,7 +388,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     public override Card? Get(Guid id)
     {
         ObjectBuilder<Card> fill = Fill;
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
         .Select("*")
         .From("cards")
@@ -406,7 +406,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
     public override void Delete(Card card)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
 
         builder
             .DeleteFrom("cards")
@@ -423,7 +423,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     
     public void DeleteAll()
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .DeleteFrom("cards")
             .Build();
@@ -438,7 +438,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
     public void UpdateDeckCard(DeckCard card)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .Update("deck")
             .UpdateSet("cardid", "@cardid")
@@ -459,7 +459,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
     public void Update(Card card)
     {
-        var builder = new QueryBuilder(Connect());
+        using var builder = new QueryBuilder(Connect());
         builder
             .Update("cards")
             .UpdateSet("name", "@name")

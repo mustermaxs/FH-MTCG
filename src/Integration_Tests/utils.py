@@ -15,12 +15,9 @@ def print_colored(text, color):
 
 def with_caller_name(func):
     def wrapper(*args, **kwargs):
-        try:
-            cn = inspect.currentframe().f_back.f_code.co_name
-            kwargs['cn'] = cn
-            return func(*args, **kwargs)
-        except Exception as e:
-            print(e)
-            print_colored(f" FAILED {cn:<35}", Colors.RED)
+        cn = inspect.currentframe().f_back.f_code.co_name
+        kwargs['cn'] = cn
+        return func(*args, **kwargs)
+
 
     return wrapper

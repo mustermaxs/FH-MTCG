@@ -13,8 +13,12 @@ namespace MTCG
             return url.Trim('/');
         }
 
+
+
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
+
+
 
         /// <summary>
         /// Removes trailing slaches from URL.
@@ -24,8 +28,12 @@ namespace MTCG
             return RemoveTrailingSlashes(url);
         }
 
+
+
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
+
+
 
 
         /// <summary>
@@ -50,9 +58,16 @@ namespace MTCG
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:alphanum)\})", @"(?<$2>[a-zA-Z0-9-]+)");
             urlPattern = Regex.Replace(urlPattern, @"(\{([a-zA-Z0-9-]+)(\:int)\})", @"(?<$2>[0-9]+)");
             urlPattern = "^" + urlPattern;
-            
+
             return urlPattern;
         }
+
+
+
+        //////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////
+
+
 
         protected Match? MatchAndIgnoreQueryString(string url, string pattern)
         {
@@ -66,8 +81,13 @@ namespace MTCG
         }
 
 
+
+
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
+
+
+
 
         /// <summary>Performs regex match to check if requested url matches provided pattern urlPattern</summary>
         /// <param name="urlPattern">Regex pattern (string)</param>
@@ -103,8 +123,12 @@ namespace MTCG
         }
 
 
+
+
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
+
+
 
         public Dictionary<string, string> ExtractNamedParams(string url, string urlPattern)
         {
@@ -126,8 +150,12 @@ namespace MTCG
             return namedGroups;
         }
 
+
+
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
+
+
 
         /// <summary>
         /// Checks if the provided URL matches

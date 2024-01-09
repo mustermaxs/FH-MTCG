@@ -1,6 +1,17 @@
+import socket
 import requests
+import json
 
-base_url = "http://localhost:12000" 
+base_url = "http://localhost:12000"
+ip = "127.0.0.1"
+port = 12000
+
+with open("./src/config.json", "r") as file:
+    content = json.load(file)
+    port = content["server"]["SERVER_PORT"]
+    ip = content["server"]["SERVER_IP"]
+
+
 bearer_token = "7944947a9f442df12c947d07c71221d3ccf929fdc02837d74baec3e1b47dc1a1"
 
 api = {
@@ -87,6 +98,21 @@ class CustomRequests:
         response.requested_method = method
 
         return response
+
+
+
+
+
+def check_connection(host, port):
+    try:
+        # Create a socket object
+        with socket.create_connection((host, port), timeout=5) as sock:
+            sock.close()
+            return True
+        
+    except (socket.timeout, socket.error):
+        print(f"Failed to connect to {host}:{port}")
+        return False
 
 ###########################################################
 

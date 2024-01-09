@@ -1,11 +1,15 @@
 using System;
 using System.Data;
 using Npgsql;
+using System.Linq;
 
 namespace MTCG;
 
 public class UserRepository : BaseRepository<User>, IRepository<User>
 {
+
+  protected CardRepository cardRepo = new CardRepository();
+
   public UserRepository()
   : base()
   {
@@ -36,6 +40,20 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
     }
   }
 
+  // OBSOLETE
+  public void SaveSession(User user, string token)
+  {
+    var builder = new QueryBuilder(Connect());
+    builder
+      .InsertInto("session")
+      .InsertValues("@userid", "@token")
+      .AddParam("@userid", user.ID)
+      .AddParam("@token", token)
+      .Build();
+
+    builder.ExecuteNonQuery();
+  }
+
 
   //////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////
@@ -61,6 +79,7 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
     .Build();
 
     builder.ExecuteNonQuery();
+    SessionManager.UpdateUser(user);
   }
 
 
@@ -83,8 +102,8 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
 
   //////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////
-  
-  
+
+
   public override IEnumerable<User> GetAll()
   {
     ObjectBuilder<User> objectBuilder = _Fill;
@@ -98,8 +117,31 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
 
     IEnumerable<User> users = builder.ReadMultiple<User>(objectBuilder);
 
+    foreach (var user in users)
+      LoadUserCards(user);
+
     return users;
   }
+
+
+  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
+
+
+  /// <summary>
+  /// CLoads a users stack and deck cards.
+  /// </summary>
+  /// <param name="user"></param>
+  public void LoadUserCards(User? user)
+  {
+    if (user == null)
+      return;
+
+    user.Stack = new List<Card>(cardRepo.GetAllCardsInStackByUserId(user.ID));
+    var deckCards = cardRepo.GetDeckByUserId(user.ID);
+    user.Deck = deckCards != null ? new List<DeckCard>(deckCards) : new List<DeckCard>();
+  }
+
 
 
   //////////////////////////////////////////////////////////////////////
@@ -145,7 +187,9 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
       .AddParam("@id", id)
       .Build();
 
+
     User? user = builder.Read<User>(objectBuilder);
+    LoadUserCards(user);
 
     return user ?? null;
   }

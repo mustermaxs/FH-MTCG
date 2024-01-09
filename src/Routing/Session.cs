@@ -11,7 +11,8 @@ public class Session
 
     public string SessionId { get; private set; } = string.Empty;
     public string AuthToken { get; private set; } = string.Empty;
-    public User? User { get; private set; } = null;
+    public User? User { get; set; } = null; // set used to be private, updating 
+                                            // is easier like this
     public bool IsLoggedIn { get => User != null && AuthToken != ""; }
     public IEnumerable<IConfig> Configs { get; set; } = new List<IConfig>();
     public string Language { get; set; } = "english";

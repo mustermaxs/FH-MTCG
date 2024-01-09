@@ -54,7 +54,9 @@
                 "CRD_GETBYID_ERR": "Failed to fetch card.",
                 "CRD_STACK_ADD_SUCC": "Cards successfully added to stack.",
                 "CRD_STACK_ADD_ERR": "No cards provided.",
-                "SETTINGS_LANG_CHANGE_SUCC": "Language changed successfully."
+                "SETTINGS_LANG_CHANGE_SUCC": "Language changed successfully.",
+                "LOGOUT_ERR": "Failed to logout user.",
+                "LOGOUT_SUCC": "Logged out user."
             },
             "german": {
                 "INT_SVR_ERR": "Interner Serverfehler. Etwas ist schiefgegangen :(",
@@ -85,7 +87,9 @@
                 "CRD_GETBYID_ERR": "Karte konnte nicht gefetcht werden.",
                 "CRD_STACK_ADD_SUCC": "Karte wurde zum Stack hinzugefügt.",
                 "CRD_STACK_ADD_ERR": "Keine Karten erhalten.",
-                "SETTINGS_LANG_CHANGE_SUCC": "Sprache erfolgreich geändert."
+                "SETTINGS_LANG_CHANGE_SUCC": "Sprache erfolgreich geändert.",
+                "LOGOUT_ERR": "User konnte nicht abgemeldet werden.",
+                "LOGOUT_SUCC": "User wurde ausegeloggt."
             }
         }
     }

@@ -47,6 +47,9 @@ public class SessionManager : BaseSessionManager
         return sessionId;
     }
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
 
     public static bool IsLoggedIn(string token)
     {
@@ -54,11 +57,16 @@ public class SessionManager : BaseSessionManager
     }
 
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
     public static string CreateAnonymSessionReturnId(string id)
     {
         string sessionId = SessionManager.CreateAuthToken(id);
         Session session = new Session(sessionId).WithUser(new User());
-        
+
 
         return session.SessionId;
     }
@@ -66,7 +74,7 @@ public class SessionManager : BaseSessionManager
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-
+    // TODO return true on success
     public static void EndSession(string authToken)
     {
         var sessionId = SessionManager.CreateSessionIdFromAuthToken(authToken);
@@ -75,6 +83,24 @@ public class SessionManager : BaseSessionManager
         {
             Sessions.Remove(sessionId, out _);
         }
+    }
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    
+    
+    public static bool EndSessionWithSessionId(string sessionId)
+    {
+        bool removedSession = false;
+
+        lock (_sessionLock)
+        {
+            removedSession = Sessions.Remove(sessionId, out _);
+        }
+
+        return removedSession;
     }
 
 

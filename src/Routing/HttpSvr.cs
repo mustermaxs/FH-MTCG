@@ -115,6 +115,10 @@ namespace MTCG
             }
         }
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
         protected IRequest BuildRequest(HttpSvrEventArgs svrEventArgs)
         {
             CookieContainer cookieContainer = new CookieContainer();
@@ -123,7 +127,6 @@ namespace MTCG
             string? authToken = svrEventArgs.Headers.SingleOrDefault<HttpHeader>(header => header.Name == "Authorization")?.Value;
             var request = new RequestBuilder();
 
-
             request
             .WithHeaders(svrEventArgs.Headers)
             .WithHttpMethod(svrEventArgs.Method)
@@ -131,12 +134,7 @@ namespace MTCG
             .WithRoute(svrEventArgs.Path);
 
             if (authToken == null)
-            {
-                // var sessionId = CreateOrGetAnonymSessionId(clientPort!.ToString());
-                // request.WithSessionId(sessionId);
-
                 return request.Build();
-            }
 
             if (SessionManager.TryGetSessionWithToken(authToken, out session))
             {

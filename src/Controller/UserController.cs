@@ -55,6 +55,44 @@ public class UserController : IController
     }
 
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
+    [Route("/session/logout", HTTPMethod.POST, Role.USER | Role.ADMIN)]
+    public IResponse Logout()
+    {
+        try
+        {
+            bool endedSession = false;
+
+            if (request.TryGetHeader("authToken", out string token))
+                endedSession = SessionManager.EndSessionWithSessionId(token);
+
+            if (!endedSession) return new Response<string>(403, resConfig["LOGOUT_ERR"]);
+
+            return new Response<string>(200, resConfig["LOGOUT_SUCC"]);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to logout user.\n{ex}");
+
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
@@ -155,7 +193,7 @@ public class UserController : IController
     }
 
 
-    [Route("/users/{id:alphanum}", HTTPMethod.DELETE, Role.ADMIN     )]
+    [Route("/users/{id:alphanum}", HTTPMethod.DELETE, Role.ADMIN)]
     public IResponse DeleteUser(Guid id)
     {
         try
@@ -221,9 +259,9 @@ public class UserController : IController
     public IResponse ChangeResponseLanguage()
     {
         var payload = request.PayloadAsObject<Dictionary<string, string>>();
-        
+
         if (payload.TryGetValue("language", out string language))
-        {   
+        {
             if (resConfig.Response.ContainsKey(language))
             {
                 return new Response<string>(200, "Language successfully changed.");

@@ -10,12 +10,12 @@ public class SettingsController : IController
     public SettingsController(IRequest request) : base(request) {}
 
 
-    [Route("/settings/language/{lang:alpha}", HTTPMethod.PUT, Role.USER | Role.ADMIN | Role.ALL)]
+    [Route("/settings/language/{lang:alpha}", HTTPMethod.PUT, Role.USER | Role.ADMIN)]
     public IResponse ChangeLanguageSettings(string lang)
     {
         try
         {
-            if (!resConfig.TranslationExists(lang))  return new Response<string>(403, "Language unknown.");
+            if (!resConfig.TranslationExists(lang))  return new Response<string>(403, resConfig["SETTINGS_LANG_UNKNOWN"]);
 
             resConfig.SetLanguage(lang);
 
@@ -25,7 +25,7 @@ public class SettingsController : IController
         {
             Console.WriteLine(ex);
 
-            return new Response<string>(403, "Failed to change language settings.");
+            return new Response<string>(403, resConfig["INT_SVR_ERR"]);
         }
     }
 }

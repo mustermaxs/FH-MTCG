@@ -24,7 +24,7 @@ api = {
         "package": "/packages/{packageid:alphanum}",
         "tradings": "/tradings",
         "users": "/users/",
-        "user_by_id": "/users/{username:alphanum}",
+        "user_by_id": "/users/:id",
         "user_by_name": "/users/{username:alpha}",
         "score": "/score"
     },

@@ -27,20 +27,29 @@ def test_status(res, expected_status, doAssert=False, cn=None):
         return True
 
 
+@with_caller_name
+def test_rename_user(cn=None):
+    user = login_as(users["max"])
+    user_res = get_user_by_id(user.ID)
+    user.Name = "klax"
+    user.Bio = "geaendert"
+    user.Image = ":("
+    res = req.put(url("users", "PUT"), json=user.to_dict(), headers=Headers(user.token))
+    test_status(res, 200, True)
 
 
 @with_caller_name
-def custom_assert(expect, actual, doAssert=False, msg="", cn=None):
-    if type(expect) == "Response":
-        return test_status(expect, actual, doAssert, cn)
-    if expect != actual:
+def custom_assert(isTrue: bool, doAssert=False, msg="", cn=None):
+    if not isTrue:
         print_colored(f" FAILED {cn:<35} : {msg}", Colors.RED)
+        stats["failed"] += 1
         if doAssert:
-            assert expect == actual
+            assert isTrue
     else:
         print_colored(f" PASSED {cn:<35} : {msg}", Colors.GREEN)
+        stats["passed"] += 1
         if doAssert:
-            assert expect == actual
+            assert isTrue
 
 
 
@@ -48,9 +57,12 @@ def custom_assert(expect, actual, doAssert=False, msg="", cn=None):
 
 @with_caller_name
 def add_card_globally(card: Card):
+    reset()
     admin = login_as(users["admin"])
     res = req.post(url("cards", "POST"), json=card.to_dict(), headers=Headers(admin.token))
-    test_status(res, 201, True)
+    cards = test_getall_cards()
+    
+    custom_assert(len(cards) > 0 and res.status_code == 201, True)
 
 
 
@@ -71,86 +83,104 @@ def test_login(user : User, cn=None):
 @with_caller_name
 def test_retrieve_packages_has_packages(cn=None):
     res = req.get(url("packages", "GET"))
-    assert res.status_code == 200
-
-    if test_status(res, 200):
-        return res.json()
-    else:
-        return None
+    
+    custom_assert(res.status_code == 200 and len(res.json()) > 0, True)
 
 
 
 
 @with_caller_name  
 def test_retrieve_packages_no_packages(cn=None):
+    reset()
     res = req.get(url("packages", "GET"))
     # assert res.status_code == 204
-    test_status(res, 204, True)
+    custom_assert(res.status_code == 204, True)
 
 
 
 
 @with_caller_name
 def test_delete_package(id : str, cn=None):
+    reset()
+
+    create_package(cards)
     test_login(users["admin"])
     u = url("packages", "DELETE")
     u = u.replace(":id", id)
     res = req.delete(u, headers=Headers(users["admin"].token))
-    test_status(res, 200)
-
-
-@with_caller_name
-def test_create_package(cards : list, user : User, cn=None):
-    res = create_package(cards)
-
-    if test_status(res, 200, True):
-        packages = test_retrieve_packages_has_packages()
-        packageId = packages[0]["Id"]
-        return packageId
-
-
-
-
-@with_caller_name
-def test_aquire_package( user: User, cn=None):
-    # delete preexisting packages
     packages = get_all_packages()
-    if packages is not None:
-        for package in packages:
+    custom_assert(len(packages) == 0, True)
+
+
+@with_caller_name
+def test_create_package(cn=None):
+    reset()
+
+    res = create_package(cards)
+    packages = get_all_packages()
+
+    custom_assert(res.status_code == 200 and len(packages) == 1)
+
+
+
+
+@with_caller_name
+def test_aquire_package(cn=None):
+    reset()
+    # delete preexisting packages
+    all_packages = get_all_packages()
+    if all_packages is not None:
+        for package in all_packages:
             delete_package(package["Id"])
     
     # create package
-    test_create_package(cards, users["admin"])
+    create_package(cards)
 
     # buy package
-    buyer = login_as(user)
+    buyer = login_as(users["test"])
     res = req.post(url("transaction_packages", "POST"), headers=Headers(buyer.token))
-    test_status(res, 200)
-    # test_retrieve_packages_no_packages()
+
+    #check if package was deleted
+    packages = get_all_packages()
+    packages_count = len(packages)
+    package_was_deleted = packages_count == 0
+
+    stackcards = get_user_stack(buyer)
+    stackcards_count = len(stackcards)
+    user_got_cards = stackcards_count > 0
+
+    custom_assert(user_got_cards and package_was_deleted)
 
 
 
 
 @with_caller_name
-def test_register_user(user: User , cn=None):
-    res = req.post(url("users", "POST"), json=user.to_dict())
-    if test_status(res, 201, True):
-        response = res.json()
-        user.token = response["authToken"]
-        return user
-    else:
-        return None
+def test_register_user(cn=None):
+    users_before_registration = get_all_users()
+    count_before = len(users_before_registration)
+    
+    test_user = users["registration_test_user"]
+    res = req.post(url("users", "POST"), json=test_user.to_dict())
+
+    is_success_response = res.status_code == 201
+    users_after_registration = get_all_users()
+    count_after = len(users_after_registration)
+
+    custom_assert(count_before + 1 == count_after and is_success_response, True)
 
 
 
 
 @with_caller_name
-def test_register_alreadyexisting_user(user: User, cn=None):
+def test_register_alreadyexisting_user(cn=None):
+    user_count_before = len(get_all_users())
+    user = users["test"]
+    
     res = req.post(url("users", "POST"), json=user.to_dict())
-    if test_status(res, 500, True):
-        return user
-    else:
-        return None
+    
+    user_count_after = len(get_all_users())
+
+    custom_assert(user_count_before == user_count_after and res.status_code == 500, True)
     
 
 
@@ -179,10 +209,9 @@ def test_user_cards_in_deck_true(user: User, cn=None):
 
 @with_caller_name
 def test_get_all_users(cn=None):
-    admin = login_as(users["admin"])
-    res = req.get(url("users", "GET"), headers=Headers(admin.token))
-    if test_status(res, 200):
-        return res.json()
+    users = get_all_users()
+    
+    custom_assert(len(users) > 0, True)
 
 
 
@@ -240,7 +269,7 @@ def test_add_trading_deal(user: User, deal=None , cn=None):
     # reset()
     user = login_as(user)
     test_aquire_package_and_create_deck(user, cards)
-
+    
     if deal is None:
         deckCards = get_user_deck(user)
         card = deckCards[0]
@@ -357,4 +386,4 @@ def test_add_card_to_stack(cn=None):
         if any(stackcard["Name"] != stackcard["Name"] for card in cards):
             success = False
             break
-    custom_assert(True, success, "Card was not added to stack")
+    custom_assert(success==True, "Card was not added to stack")

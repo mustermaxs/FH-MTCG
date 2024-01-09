@@ -15,10 +15,10 @@ def main():
 
     test_user = User("test", "test", "", ":)", 100, "", "")
 
-    test_register_alreadyexisting_user(test_user)
+    test_register_alreadyexisting_user()
     test_retrieve_packages_no_packages()
     test_login(users["max"])
-    test_create_package(cards, users["admin"])
+    test_create_package()
     packages = test_retrieve_packages_has_packages()
 
     if packages is not None:
@@ -30,6 +30,7 @@ def main():
     test_add_trading_deal(users["max"])
     test_add_card_to_stack()
     test_accept_cardtrade_deal()
+    test_aquire_package()
 
 
     print("\n\n\n")

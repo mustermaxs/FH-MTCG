@@ -35,7 +35,7 @@ def get_all_packages():
     if res.status_code == 200:
         return res.json()
     else:
-        return None
+        return []
 
 def delete_all_packages():
     packages = get_all_packages()
@@ -93,3 +93,19 @@ def add_cards_to_stack(cards, user: User):
     if res.status_code != 200:
         raise Exception("Could not add cards to stack")
 
+def get_user_by_id(id: str):
+    admin = login_as(users["admin"])
+    URL = url("user_by_id", "GET").replace(":id", id)
+    res = req.get(URL, headers=Headers(admin.token))
+    if res.status_code == 200:
+        return res.json()
+    else:
+        return None
+
+def get_all_users():
+    admin = login_as(users["admin"])
+    res = req.get(url("users", "GET"), headers=Headers(admin.token))
+    if res.status_code == 200:
+        return res.json()
+    else:
+        assert res.status_code == 200

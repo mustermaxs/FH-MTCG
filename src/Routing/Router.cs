@@ -119,6 +119,7 @@ public class Router : IRouter
         }
 
         Role userAccessLevel = session.User!.UserAccessLevel;
+        Logger.ToConsole($"[Request]\t{request.HttpMethod} {request.RawUrl}", true);
 
         return userAccessLevel == (requestAccessLevel & userAccessLevel);
     }
@@ -139,14 +140,9 @@ public class Router : IRouter
     {
         try
         {
-            // var resConfig = JsonConfigLoader.Load<ResponseConfig>("config.json", "responses/german");
-            // if (SessionManager.TryGetSessionWithToken(request.SessionId!, out Session session))
-            //     session.Configs.Append(resConfig);
-            Console.WriteLine($"[Request]\t{request.HttpMethod} {request.RawUrl}");
-
             routeRegistry.MapRequestToEndpoint(ref request);
 
-            if (request.RouteFound) Console.Write($"[Map to]\t{request.Endpoint.RouteTemplate}\n");
+            if (request.RouteFound) Logger.ToConsole($"[Map to]\t{request.Endpoint.RouteTemplate}\n", true);
 
             if (!ClientHasPermissionToRequest(request))
                 throw new AuthenticationFailedException($"[DENIED]\tClient doesn't have access to ressource.\n");
@@ -161,7 +157,7 @@ public class Router : IRouter
             MethodInfo controllerAction = request.Endpoint.ControllerMethod;
             IResponse response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, request.Endpoint.UrlParams.NamedParams);
 
-            Console.WriteLine($"Response: {response.Description}\nStatus: {response.StatusCode}");
+            Console.WriteLine($"Status: {response.StatusCode}\nResponse: {response.Description}");
 
             return response;
         }

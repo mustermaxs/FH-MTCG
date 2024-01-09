@@ -135,6 +135,7 @@ public class PackageController : IController
             LoggedInUser.Coins = LoggedInUser.Coins - cardConfig.PricePerPackage;
             userRepo.Update(LoggedInUser);
 
+
             return new Response<string>(200, resConfig["PCK_BUY_SUCC"]);
         }
         catch (Exception ex)

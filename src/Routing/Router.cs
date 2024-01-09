@@ -2,6 +2,7 @@ using System;
 using System.Security;
 using System.Reflection;
 using System.Threading.Tasks;
+using Npgsql;
 
 namespace MTCG;
 
@@ -178,7 +179,6 @@ public class Router : IRouter
 
             return new Response<string>(404, $"Access token is missing or invalid.");
         }
-
         catch (Exception ex)
         {
             Console.WriteLine($"ERROR\n{ex}");

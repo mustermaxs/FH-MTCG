@@ -47,7 +47,8 @@ api = {
     "DELETE": {
         "tradings": "/tradings/:id",
         "packages": "/packages/:id",
-        "cards_all": "/cards"
+        "cards_all": "/cards",
+        "user": "/users/:id"
     }
 }
 

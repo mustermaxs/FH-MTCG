@@ -109,3 +109,29 @@ def get_all_users():
         return res.json()
     else:
         assert res.status_code == 200
+
+
+def get_all_cards():
+    admin = login_as(users["admin"])
+    res = req.get(url("all_cards", "GET"), headers=Headers(admin.token))
+    if res.status_code == 200:
+        return res.json()
+    else:
+        assert res.status_code == 200
+
+def put_cards_in_deck(user: User, cards):
+    admin = login_as(users["admin"])
+    for card in cards:
+        res = req.post(url("cards", "POST"), json=card.to_dict(), headers=Headers(admin.token))
+        assert res.status_code == 200
+    
+    cards = get_all_cards()
+    add_cards_to_stack(cards, user)
+    push_cards_to_deck(user, cards)
+
+def delete_user(id: str):
+    admin = login_as(users["admin"])
+    URL = url("user", "DELETE").replace(":id", id)
+    res = req.delete(URL, headers=Headers(admin.token))
+    assert res.status_code == 200
+    return res

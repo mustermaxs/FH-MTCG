@@ -20,7 +20,7 @@ public static class ReflectionUtils
 
 
     public static TReturnType MapArgumentsAndInvoke<TReturnType, TValueType>(
-        this MethodBase self, object classInstance, Dictionary<string, TValueType> providedParams)
+        this MethodBase self, object classInstance, Dictionary<string, TValueType> providedParams) where TReturnType :  IResponse
     {
         if (providedParams == null || providedParams.Count == 0)
         {
@@ -33,7 +33,20 @@ public static class ReflectionUtils
                 MapProvidedArgumentsToSignature<TValueType>(self, providedParams)); // CHANGED
         }
     }
-
+    public static TReturnType MapArgumentsAndInvoke<TReturnType, TValueType>(
+        this MethodBase self, object classInstance, Dictionary<string, TValueType> providedParams) where TReturnType :  IResponse
+    {
+        if (providedParams == null || providedParams.Count == 0)
+        {
+            return (TReturnType)self.Invoke(classInstance, null);
+        }
+        else
+        {
+            return (TReturnType)self.Invoke(
+                classInstance,
+                MapProvidedArgumentsToSignature<TValueType>(self, providedParams)); // CHANGED
+        }
+    }
 
 
     /// <summary>

@@ -3,6 +3,9 @@ from utils import *
 from models import *
 from helpers import *
 import random
+import time
+import asyncio
+
 
 stats = {
     "passed": 0,
@@ -429,3 +432,19 @@ def test_update_user(cn=None):
     URL = url("users", "PUT").replace(":id", updated_user.Name)
 
     res = req.put(URL, json=user.to_dict(), headers=Headers(updated_user.token))
+
+
+@with_caller_name
+async def test_battle(cn=None):
+    player1 = users["max"]
+    player2 = users["test"]
+
+    login_as(player1)
+    res1 = await req.post(url("battle", "POST"), headers=Headers(player1.token))
+
+    time.sleep(2)
+
+    login_as(player2)
+    res2 = await req.post(url("battle", "POST"), headers=Headers(player2.token))
+    
+    print(res2.reason)

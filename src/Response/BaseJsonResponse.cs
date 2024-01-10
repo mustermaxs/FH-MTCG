@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 namespace MTCG;
 
+
 /// <summary>
 /// Base class for all JSON responses.
 /// </summary>

@@ -42,7 +42,8 @@ api = {
         "users": "/users/",
         "users_settings_language": "/users/settings/language",
         "add_to_stack": "/stack/:id",
-        "add_card_glob": "/cards"
+        "add_card_glob": "/cards",
+        "battle": "/battle"
     },
     "DELETE": {
         "tradings": "/tradings/:id",

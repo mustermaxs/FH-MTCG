@@ -64,7 +64,7 @@ def test_add_card_globally(card: Card):
     reset()
     admin = login_as(users["admin"])
     res = req.post(url("cards", "POST"), json=card.to_dict(), headers=Headers(admin.token))
-    cards = test_getall_cards()
+    cards = get_all_cards()
     
     assert_true(len(cards) > 0 and res.status_code == 201, True, res.reason)
 
@@ -386,10 +386,10 @@ def test_add_card_to_stack(cn=None):
     if packageres.status_code != 200:
         raise Exception("Could not create package")
 
-    all_cards = test_getall_cards()
+    all_cards = get_all_cards()
     add_cards_to_stack(all_cards, users["test"])
     randomcard = all_cards[random.randint(0, len(all_cards)-1)]  
-    stack = test_get_user_stack(users["test"])
+    stack = get_user_stack(users["test"])
     # print(stack)
     # print(all_cards)
     success = True

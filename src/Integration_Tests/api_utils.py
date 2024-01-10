@@ -80,30 +80,27 @@ def url(endpoint, method):
 class CustomRequests:
     def __init__(self, base_url):
         self.base_url = base_url
+        self.default_timeout = 5
 
-    def get(self, endpoint, **kwargs):
-        return self._make_request("GET", endpoint, **kwargs)
+    def get(self, endpoint, timeout=None, **kwargs):
+        return self._make_request("GET", endpoint, timeout=timeout, **kwargs)
 
-    def post(self, endpoint, **kwargs):
-        return self._make_request("POST", endpoint, **kwargs)
+    def post(self, endpoint, timeout=None, **kwargs):
+        return self._make_request("POST", endpoint, timeout=timeout, **kwargs)
 
-    def delete(self, endpoint, **kwargs):
-        return self._make_request("DELETE", endpoint, **kwargs)
+    def delete(self, endpoint, timeout=None, **kwargs):
+        return self._make_request("DELETE", endpoint, timeout=timeout, **kwargs)
 
-    def put(self, endpoint, **kwargs):
-        return self._make_request("PUT", endpoint, **kwargs)
+    def put(self, endpoint, timeout=None, **kwargs):
+        return self._make_request("PUT", endpoint, timeout=timeout, **kwargs)
 
-    def _make_request(self, method, endpoint, **kwargs):
+    def _make_request(self, method, endpoint, timeout=None, **kwargs):
         url = endpoint
-        response = requests.request(method, url, **kwargs)
+        timeout = timeout if timeout is not None else kwargs.pop("timeout", self.default_timeout)
+        response = requests.request(method, url, timeout=timeout, **kwargs)
         response.requested_url = url
         response.requested_method = method
-
         return response
-
-
-
-
 
 def check_connection(host, port):
     try:

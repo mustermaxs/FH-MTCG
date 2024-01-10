@@ -103,6 +103,7 @@ public class Router : IRouter
 
     public bool ClientHasPermissionToRequest(IRequest request)
     {
+        Logger.ToConsole($"[Request]\t{request.HttpMethod} {request.RawUrl}", true);
         Role requestAccessLevel = request.Endpoint!.AccessLevel;
         Session session = null;
 
@@ -119,7 +120,6 @@ public class Router : IRouter
         }
 
         Role userAccessLevel = session.User!.UserAccessLevel;
-        Logger.ToConsole($"[Request]\t{request.HttpMethod} {request.RawUrl}", true);
 
         return userAccessLevel == (requestAccessLevel & userAccessLevel);
     }
@@ -142,7 +142,7 @@ public class Router : IRouter
         {
             routeRegistry.MapRequestToEndpoint(ref request);
 
-            if (request.RouteFound) Logger.ToConsole($"[Map to]\t{request.Endpoint.RouteTemplate}\n", true);
+            Logger.ToConsole($"[Map to]\t{request.Endpoint!.RouteTemplate}\n", true);
 
             if (!ClientHasPermissionToRequest(request))
                 throw new AuthenticationFailedException($"[DENIED]\tClient doesn't have access to ressource.\n");
@@ -164,20 +164,19 @@ public class Router : IRouter
 
         catch (RouteDoesntExistException ex)
         {
-            Console.WriteLine($"{ex}\nRequested endpoint: {ex.Url}");
-
+            Logger.ToConsole($"[ERROR]\n{ex}\nRoute doesn't exist: {ex.Url}", true);
             return new Response<string>(404, $"The requested endpoint {ex.Url} doesn't seem to exist.");
         }
 
         catch (AuthenticationFailedException ex)
         {
-            Console.WriteLine($"Access token is missing or invalid.\n{ex}");
+            Logger.ToConsole($"[ERROR]\n{ex}\nAuthentication failed.", true);
 
             return new Response<string>(404, $"Access token is missing or invalid.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR\n{ex}");
+            Logger.ToConsole($"[ERROR]\n{ex}\nSomething went wrong.", true);
 
             return new Response<string>(500, $"Something went wrong.\n{ex.Message}");
         }

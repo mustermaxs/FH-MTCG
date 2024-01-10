@@ -32,7 +32,7 @@ public class CardController : IController
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
             IEnumerable<Card> cards = repo.GetAllCardsInStackByUserId(userId);
 
-            if (cards.Count() == 0) return new Response<string>(204, "The request was fine, but the user doesn't have any cards");
+            if (cards.Count() == 0) return new Response<IEnumerable<Card>>(204, cards, "The request was fine, but the user doesn't have any cards");
 
             return new Response<IEnumerable<Card>>(200, cards, $"The user has cards, the response contains these");
         }
@@ -40,7 +40,7 @@ public class CardController : IController
         {
             Console.WriteLine(ex);
 
-            return new Response<string>(500, "Internal server error. Something went wrong :()");
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
 
@@ -58,9 +58,9 @@ public class CardController : IController
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
             var userCards = repo.GetDeckByUserId(userId);
 
-            if (userCards == null || userCards.Count() == 0) return new Response<string>(204, resConfig["CRD_DECK_EMPTY"]);
+            if (userCards == null || userCards.Count() == 0) return new Response<IEnumerable<DeckCard>>(204, userCards, resConfig["CRD_DECK_EMPTY"]);
 
-            return new Response<IEnumerable<Card>>(200, userCards, resConfig["CRD_DECK_SUCC"]);
+            return new Response<IEnumerable<DeckCard>>(200, userCards, resConfig["CRD_DECK_SUCC"]);
         }
         catch (Exception ex)
         {
@@ -106,7 +106,6 @@ public class CardController : IController
         try
         {
             List<Card> providedCards = new();
-            Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
             var providedCardIds = request.PayloadAsObject<List<Guid>>();
 
             if (providedCardIds == null || providedCardIds.Count() < cardConfig.MaxCardsInDeck)
@@ -116,12 +115,12 @@ public class CardController : IController
             // only contains the ids w/out keys indicating where the value belongs
             foreach (var id in providedCardIds) { providedCards.Add(new Card { Id = id }); }
 
-            if (!IsValidRequestAddCardsToDeck(providedCards, userId))
+            if (!IsValidRequestAddCardsToDeck(providedCards, UserId))
                 return new Response<string>(403, resConfig["CRD_DECK_ADD_ERR"]);
 
-            repo.AddCardsToDeck(providedCards!, userId);
+            repo.AddCardsToDeck(providedCards!, UserId);
 
-            providedCards.ForEach(card => repo.RemoveCardFromStack(card, userId));
+            providedCards.ForEach(card => repo.RemoveCardFromStack(card, UserId));
 
 
             return new Response<string>(200, resConfig["CRD_DECK_ADD_SUCC"]);

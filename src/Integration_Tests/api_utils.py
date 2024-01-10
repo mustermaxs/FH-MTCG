@@ -30,7 +30,7 @@ api = {
     },
     "PUT": {
         "deck": "/deck",
-        "users": "/users/{username:alphanum}"
+        "users": "/users/:id"
     },
     "POST": {
         "cards": "/cards",

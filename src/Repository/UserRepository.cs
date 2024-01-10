@@ -97,6 +97,8 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
       .Build();
 
     builder.ExecuteNonQuery();
+
+    SessionManager.EndSession(obj.Token);
   }
 
 
@@ -119,7 +121,7 @@ public class UserRepository : BaseRepository<User>, IRepository<User>
 
     foreach (var user in users)
       LoadUserCards(user);
-
+  
     return users;
   }
 

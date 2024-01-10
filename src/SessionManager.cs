@@ -62,10 +62,16 @@ public class SessionManager : BaseSessionManager
 
     public static void UpdateUser(User user)
     {
-        if (!TryGetSessionWithToken(user.Token, out Session session))
-            throw new Exception("Session not found");
-    
-        session.User = user;
+        lock (_sessionLock)
+        {
+            Session? session = null;
+            var id = CreateSessionIdFromAuthToken(user.Token);
+            if (Sessions.TryGetValue(id, out session))
+            {
+                session.User = user;
+                Sessions[id] = session;
+            }
+        }
     }
 
 

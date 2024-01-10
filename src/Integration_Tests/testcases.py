@@ -39,6 +39,8 @@ def test_status(res, expected_status, doAssert=False, cn=None):
 
 @with_caller_name
 def assert_true(isTrue: bool, doAssert=False, msg="", cn=None):
+    if cn != None:
+        cn = cn.replace("_", " ").replace("test", "")
     if not isTrue:
         print_colored(f" FAILED {cn:<35} : {msg}", Colors.RED)
         stats["failed"] += 1
@@ -61,7 +63,7 @@ def test_add_card_globally(card: Card):
     res = req.post(url("cards", "POST"), json=card.to_dict(), headers=Headers(admin.token))
     cards = test_getall_cards()
     
-    assert_true(len(cards) > 0 and res.status_code == 201, True)
+    assert_true(len(cards) > 0 and res.status_code == 201, True, res.reason)
 
 
 
@@ -83,7 +85,7 @@ def test_login(user : User, cn=None):
 def test_retrieve_packages_has_packages(cn=None):
     res = req.get(url("packages", "GET"))
     packages = res.json()
-    assert_true(res.status_code == 200 and len(packages) > 0, True)
+    assert_true(res.status_code == 200 and len(packages) > 0, True,res.reason)
 
 
 
@@ -93,7 +95,7 @@ def test_retrieve_packages_no_packages(cn=None):
     reset()
     res = req.get(url("packages", "GET"))
     # assert res.status_code == 204
-    assert_true(res.status_code == 204, True)
+    assert_true(res.status_code == 204, True,res.reason)
 
 
 
@@ -108,7 +110,7 @@ def test_delete_package(id : str, cn=None):
     u = u.replace(":id", id)
     res = req.delete(u, headers=Headers(users["admin"].token))
     packages = get_all_packages()
-    assert_true(len(packages) == 0, True)
+    assert_true(len(packages) == 0, True, res.reason)
 
 
 @with_caller_name
@@ -118,7 +120,7 @@ def test_create_package(cn=None):
     res = create_package(cards)
     packages = get_all_packages()
 
-    assert_true(res.status_code == 200 and len(packages) == 1)
+    assert_true(res.status_code == 200 and len(packages) == 1, True, res.reason)
 
 
 
@@ -148,7 +150,7 @@ def test_aquire_package(cn=None):
     stackcards_count = len(stackcards)
     user_got_cards = stackcards_count > 0
 
-    assert_true(user_got_cards and package_was_deleted)
+    assert_true(user_got_cards and package_was_deleted, True,res.reason)
 
 
 
@@ -169,7 +171,7 @@ def test_register_user(cn=None):
     # get newly registered user and delete him
     new_user = [user for user in users_after_registration if user["Name"] == test_user.Name]
     delete_res = delete_user(new_user[0]["ID"])
-    assert_true(count_before + 1 == count_after and is_success_response, True)
+    assert_true(count_before + 1 == count_after and is_success_response, True,res.reason)
 
 
 
@@ -183,7 +185,7 @@ def test_register_alreadyexisting_user(cn=None):
     
     user_count_after = len(get_all_users())
 
-    assert_true(user_count_before == user_count_after and res.status_code == 500, True)
+    assert_true(user_count_before == user_count_after and res.status_code == 500, True,res.reason)
     
 
 
@@ -195,7 +197,7 @@ def test_user_no_cards_in_stack_true(cn=None):
     user = login_as(users["max"])
     res = req.get(url("deck", "GET"), headers=Headers(user.token))
 
-    assert_true(res.status_code == 204)
+    assert_true(res.status_code == 204, True,res.reason)
 
 
 
@@ -206,7 +208,7 @@ def test_user_cards_in_deck_true(cn=None):
     put_cards_in_deck(users["max"], cards.values())
     user = login_as(users["max"])
     res = req.get(url("deck", "GET"), headers=Headers(user.token))
-    assert_true(res.status_code == 200 and len(res.json()) > 0)
+    assert_true(res.status_code == 200 and len(res.json()) > 0, True,res.reason)
 
 
 
@@ -253,7 +255,7 @@ def test_aquire_package_and_create_deck(user: User, cards: list, cn=None):
     stackcards = get_user_stack(user)
     cards_list = [card["Id"] for card in stackcards]
     res = req.put(url("deck", "PUT"), json=cards_list, headers=Headers(user.token))
-    test_status(res, 200)
+    assert_true(res.status_code == 200, True ,res.reason)
 
 
 
@@ -281,12 +283,12 @@ def test_add_trading_deal(cn=None):
     deal = Trade(card["Id"], card["Type"], card["Damage"])
 
     res = req.post(url("tradings", "POST"), json=deal.to_dict(), headers=Headers(user.token))
-    assert_true(res.status_code == 201, True)
+    
     trades = get_cardtrades()
-    assert_true(len(trades) > 0, True)
+    assert_true(len(trades) > 0 and res.status_code == 201, True,res.reason)
     
 
-
+# BUG
 @with_caller_name
 def test_accept_cardtrade_deal(cn=None):
     reset()
@@ -299,6 +301,7 @@ def test_accept_cardtrade_deal(cn=None):
     aquire_package(dealer, packages[0]["Id"])
     stackcards = get_user_stack(dealer)
     push_cards_to_deck(dealer, stackcards)
+    put_cards_in_deck(dealer, cards)
 
     create_package(cards)
     packages = get_all_packages()
@@ -354,7 +357,7 @@ def test_add_card_to_stack(user: User, card, cn=None): # card is json object
     cardlist = []
     cardlist.append(card)
     res = req.post(URL, json=cardlist, headers=Headers(admin.token))
-    test_status(res, 200, True)
+    assert_true(res.status_code == 200, True,res.reason)
 
 
 
@@ -394,7 +397,7 @@ def test_add_card_to_stack(cn=None):
         if any(stackcard["Name"] != stackcard["Name"] for card in cards):
             success = False
             break
-    assert_true(success==True, "Card was not added to stack")
+    assert_true(success==True, "Card was not added to stack", True)
 
 
 @with_caller_name
@@ -402,16 +405,27 @@ def test_update_user(cn=None):
     reset()
     user = login_as(users["max"])
 
-    URL = url("users", "PUT").replace(":id", user.Name)
-    login_as(users["max"])
+    URL = url("users", "PUT").replace(":id", users["max"].Name)
+    
     user.Name = "klax"
     user.Bio = "geaendert"
     user.Image = ":("
+
     res = req.put(URL, json=user.to_dict(), headers=Headers(user.token))
+
     updated_user = get_user_by_id(user.ID)
-    assert_true(updated_user["Name"] == user.Name and updated_user["Bio"] == user.Bio and updated_user["Image"] == user.Image, True)
+    
+    assert_true(updated_user["Name"] == user.Name and updated_user["Bio"] == user.Bio and updated_user["Image"] == user.Image, True, res.reason)
+    
     user.Name = "max"
     user.Bio = ""
     user.Image = ":)"
+
     #reverse update
-    res = req.put(URL, json=users["max"].to_dict(), headers=Headers(user.token))
+    updated_user = User(updated_user["Name"], user.Password, updated_user["Bio"], updated_user["Image"], user.Coins, updated_user["ID"], user.token)
+
+    login_as(updated_user)
+    
+    URL = url("users", "PUT").replace(":id", updated_user.Name)
+
+    res = req.put(URL, json=user.to_dict(), headers=Headers(updated_user.token))

@@ -140,9 +140,9 @@ public class Router : IRouter
     {
         try
         {
+            Logger.ToConsole($"[Map from]  {request.HttpMethod} {request.RawUrl}", true);
             routeRegistry.MapRequestToEndpoint(ref request);
-
-            Logger.ToConsole($"[Map to]\t{request.Endpoint!.RouteTemplate}\n", true);
+            Logger.ToConsole($"[Map to]  {request.Endpoint!.RouteTemplate}\n", true);
 
             if (!ClientHasPermissionToRequest(request))
                 throw new AuthenticationFailedException($"[DENIED]\tClient doesn't have access to ressource.\n");

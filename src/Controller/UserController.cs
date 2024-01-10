@@ -34,7 +34,8 @@ public class UserController : IController
 
             string username = payload?.Name;
             string password = payload?.Password;
-
+            Console.WriteLine($"USERNAME: {username}");
+            // Console.WriteLine($"USERNAME: {username}");
             User? user = repo.GetByName(username);
             var hashedPwd = CryptoHandler.Encode(password);
 
@@ -145,6 +146,10 @@ public class UserController : IController
             var user = SessionManager.GetUserBySessionId(request.SessionId);
             var updatedUser = request.PayloadAsObject<User>();
             var userInDb = repo.GetByName(username);
+            
+            if (userInDb == null)
+                return new Response<string>(404, resConfig["USR_NOT_FOUND"]);
+
 
             if (user.Name == userInDb.Name && user.Bio == userInDb.Bio && user.Name == username)
             {
@@ -220,14 +225,15 @@ public class UserController : IController
     //////////////////////////////////////////////////////////////////////
 
 
-    // [Route("/users/{userid:alphanum}", HTTPMethod.GET, Role.ALL)]
-    [Obsolete("Don't need this.")]
+    [Route("/users/{userid:alphanum}", HTTPMethod.GET, Role.ADMIN)]
     public IResponse GetUserById(Guid userid)
     {
         User? user = repo.Get(userid);
-        Thread.Sleep(2000);
 
-        return new SuccessResponse<User>(200, user, "");
+        if (user == null)
+            return new Response<string>(404, "User not found.");
+
+        return new Response<User>(200, user, "");
     }
 
 

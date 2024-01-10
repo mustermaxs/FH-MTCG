@@ -30,9 +30,9 @@ def main():
     test_user_no_cards_in_stack_true()
     test_add_trading_deal()
     test_add_card_to_stack()
-    test_accept_cardtrade_deal()
-    # test_aquire_package()
-    # test_register_user()
+    # test_accept_cardtrade_deal() #BUG
+    test_aquire_package()
+    test_register_user()
     test_update_user()
 
     print("\n\n\n")

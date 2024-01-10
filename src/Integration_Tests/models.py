@@ -82,7 +82,7 @@ class User:
 
 # already in database
 admin = User("admin", "admin", "admin bio", ":)", 100, "14076953-be7d-4bfb-9180-a797d9dad345", "33b039518718ba03b03e08e473032c9c4d72a2f9d5b27a43938c1bc49d4598a3")
-normal_user = User("max", "max", "", ":)", 100, "d324b594-06d6-42e2-b921-f371180edb8b", "7944947a9f442df12c947d07c71221d3ccf929fdc02837d74baec3e1b47dc1a1")
+normal_user = User("max", "max", "", ":)", 100, "060ab0c4-abef-4d89-bf45-c33af92a7c89", "7944947a9f442df12c947d07c71221d3ccf929fdc02837d74baec3e1b47dc1a1")
 normal_user2 = User("test", "test", "", ":)", 100, "5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2", "e622d2e010c5289b1e19f697180f094c4b1bcc220e5d40f4484b72052d18b8ba")
 
 # for registration test

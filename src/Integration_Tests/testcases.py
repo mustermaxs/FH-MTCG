@@ -27,15 +27,15 @@ def test_status(res, expected_status, doAssert=False, cn=None):
         return True
 
 
-@with_caller_name
-def test_rename_user(cn=None):
-    user = login_as(users["max"])
-    user_res = get_user_by_id(user.ID)
-    user.Name = "klax"
-    user.Bio = "geaendert"
-    user.Image = ":("
-    res = req.put(url("users", "PUT"), json=user.to_dict(), headers=Headers(user.token))
-    test_status(res, 200, True)
+# @with_caller_name
+# def test_rename_user(cn=None):
+#     user = login_as(users["max"])
+#     user_res = get_user_by_id(user.ID)
+#     user.Name = "klax"
+#     user.Bio = "geaendert"
+#     user.Image = ":("
+#     res = req.put(url("users", "PUT"), json=user.to_dict(), headers=Headers(user.token))
+#     test_status(res, 200, True)
 
 @with_caller_name
 def assert_true(isTrue: bool, doAssert=False, msg="", cn=None):
@@ -55,7 +55,7 @@ def assert_true(isTrue: bool, doAssert=False, msg="", cn=None):
 
 
 @with_caller_name
-def add_card_globally(card: Card):
+def test_add_card_globally(card: Card):
     reset()
     admin = login_as(users["admin"])
     res = req.post(url("cards", "POST"), json=card.to_dict(), headers=Headers(admin.token))
@@ -270,19 +270,21 @@ def get_user_deck(user: User, cn=None):
 
 
 @with_caller_name
-def test_add_trading_deal(user: User, deal=None , cn=None):
+def test_add_trading_deal(cn=None):
     # setup
-    # reset()
-    user = login_as(user)
-    test_aquire_package_and_create_deck(user, cards)
-    
-    if deal is None:
-        deckCards = get_user_deck(user)
-        card = deckCards[0]
-        deal = Trade(card["Id"], card["Type"], card["Damage"])
+    reset()
+    user = login_as(users["max"])
+    put_cards_in_deck(user, cards.values())
+
+    deckCards = get_user_deck(user)
+    card = deckCards[0]
+    deal = Trade(card["Id"], card["Type"], card["Damage"])
 
     res = req.post(url("tradings", "POST"), json=deal.to_dict(), headers=Headers(user.token))
-    test_status(res, 201, True)
+    assert_true(res.status_code == 201, True)
+    trades = get_cardtrades()
+    assert_true(len(trades) > 0, True)
+    
 
 
 @with_caller_name
@@ -393,3 +395,23 @@ def test_add_card_to_stack(cn=None):
             success = False
             break
     assert_true(success==True, "Card was not added to stack")
+
+
+@with_caller_name
+def test_update_user(cn=None):
+    reset()
+    user = login_as(users["max"])
+
+    URL = url("users", "PUT").replace(":id", user.Name)
+    login_as(users["max"])
+    user.Name = "klax"
+    user.Bio = "geaendert"
+    user.Image = ":("
+    res = req.put(URL, json=user.to_dict(), headers=Headers(user.token))
+    updated_user = get_user_by_id(user.ID)
+    assert_true(updated_user["Name"] == user.Name and updated_user["Bio"] == user.Bio and updated_user["Image"] == user.Image, True)
+    user.Name = "max"
+    user.Bio = ""
+    user.Image = ":)"
+    #reverse update
+    res = req.put(URL, json=users["max"].to_dict(), headers=Headers(user.token))

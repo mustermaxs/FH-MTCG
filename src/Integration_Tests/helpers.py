@@ -52,14 +52,24 @@ def delete_package(id: str):
 
 def get_user_stack(user: User):
     res = req.get(url("stack", "GET"), headers=Headers(user.token))
+    if res.status_code == 200:
+        return res.json()
+    else:
+        return []
+
+def save_card(card):
+    admin = login_as(users["admin"])
+    res = req.post(url("cards", "POST"), json=card.to_dict(), headers=Headers(admin.token))
+    assert res.status_code == 200
     
-    return res.json()
+    return res
+
 
 
 def aquire_package(user: User, packageId: str):
     buyer = login_as(user)
     res = req.post(url("transaction_packages", "POST"), headers=Headers(buyer.token))
-
+    assert res.status_code == 200
 
 def push_cards_to_deck(user: User, cards):
     user = login_as(user)
@@ -76,6 +86,8 @@ def get_cardtrades():
     res = req.get(url("tradings", "GET"))
     if res.status_code == 200:
         return res.json()
+    elif res.status_code == 204:
+        return []
     else:
         assert res.status_code == 200
 
@@ -122,9 +134,8 @@ def get_all_cards():
 def put_cards_in_deck(user: User, cards):
     admin = login_as(users["admin"])
     for card in cards:
-        res = req.post(url("cards", "POST"), json=card.to_dict(), headers=Headers(admin.token))
-        assert res.status_code == 200
-    
+        save_card(card)
+        
     cards = get_all_cards()
     add_cards_to_stack(cards, user)
     push_cards_to_deck(user, cards)

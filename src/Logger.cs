@@ -11,8 +11,8 @@ public class Logger
         DateTime utcDate = DateTime.UtcNow;
         var timestamp = withTimeStamp ? localDate.ToString("yyyy-MM-dd HH:mm:ss") : "";
 
-        string decoline = new string('-', 15);
-        string logTxt = $"{decoline}\n{timestamp}\n";
+        string decoline = new string('-', 25);
+        string logTxt = $"{decoline}\n{timestamp}\n{txt}";
         Console.WriteLine(logTxt);
     }
 }

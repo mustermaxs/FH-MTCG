@@ -234,7 +234,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
     //////////////////////////////////////////////////////////////////////
 
 
-    public IEnumerable<DeckCard>? GetDeckByUserId(Guid userId)
+    public IEnumerable<DeckCard> GetDeckByUserId(Guid userId)
     {
         ObjectBuilder<DeckCard> objectBuilder = Fill;
         using var builder = new QueryBuilder(Connect());
@@ -249,7 +249,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>
 
         List<DeckCard>? cards = builder.ReadMultiple<DeckCard>(objectBuilder).ToList();
 
-        return cards ?? null;
+        return cards;
     }
 
 

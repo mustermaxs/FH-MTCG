@@ -26,18 +26,18 @@ public class UserController : IController
 
 
     [Route("/session/", HTTPMethod.POST, Role.ANONYMOUS)]
-    public async Task<IResponse> Login()
+    public IResponse Login()
     {
         try
         {
-            // Thread.Sleep(10000);
-            await Task.Delay(1000);
             User? payload = request.PayloadAsObject<User>();
 
-            string username = payload?.Name;
-            string password = payload?.Password;
+            if (payload == null) return new Response<string>(401, resConfig["USR_CRD_INVALID"]);
+
+            string username = payload.Name;
+            string password = payload.Password;
             Console.WriteLine($"USERNAME: {username}");
-            // Console.WriteLine($"USERNAME: {username}");
+
             User? user = repo.GetByName(username);
             var hashedPwd = CryptoHandler.Encode(password);
 
@@ -106,7 +106,7 @@ public class UserController : IController
         try
         {
             var user = JsonSerializer.Deserialize<User>(request.Payload);
-
+            Logger.ToConsole($"USER: {user!.Name}");
             if (user == null)
                 return new Response<string>(500, resConfig["USR_ADD_NO_USER"]);
 

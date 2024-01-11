@@ -169,6 +169,7 @@ def test_register_user(cn=None):
     count_before = len(users_before_registration)
     
     test_user = users["registration_test_user"]
+    # print(test_user.to_dict())
     res = req.post(url("users", "POST"), json=test_user.to_dict())
 
     is_success_response = res.status_code == 201
@@ -179,7 +180,8 @@ def test_register_user(cn=None):
     # get newly registered user and delete him
     new_user = [user for user in users_after_registration if user["Name"] == test_user.Name]
     delete_res = delete_user(new_user[0]["ID"])
-    assert_true(count_before + 1 == count_after and is_success_response, True,res.reason)
+
+    assert_true((count_before + 1) == count_after and is_success_response, True,res.reason)
 
 
 
@@ -467,6 +469,7 @@ async def test_battle_multiple_clients(cn=None):
     player1 = users["max"]
     player2 = users["test"]
     test_user = users["registration_test_user"]
+    player4 = users["toni"]
     reg_res = req.post(url("users", "POST"), json=test_user.to_dict())
     reg_token = login_as(test_user)
 
@@ -477,11 +480,13 @@ async def test_battle_multiple_clients(cn=None):
                 return res
 
 
-    res1, res2 = await asyncio.gather(
+    res1, res2, res3, res4 = await asyncio.gather(
         make_request(player1, 0),
         make_request(test_user, 0),
-        make_request(test_user, 5),
+        make_request(player4, 5),
         make_request(player2, 3)
     )
 
-    # assert_true(res1.status == 200 and res2.status == 200 and res3.status == 200, True)
+    reasons = f"{res1.reason}, {res2.reason}, {res3.reason}, {res4.reason}"
+
+    assert_true(res1.status == 200 and res2.status == 200 and res3.status == 200 and res4.status == 200, True, reasons)

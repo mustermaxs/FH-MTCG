@@ -21,7 +21,6 @@ namespace MTCG
         /// <summary>TCP listener.</summary>
         private TcpListener? _Listener;
 
-        private IEndpointMapper? routeRegistry;
 
         private IRouter router;
 
@@ -50,7 +49,7 @@ namespace MTCG
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /// <summary>Occurs when a HTTP message has been received.</summary>
-        public event IncomingEventHandler? Incoming;
+        // public event IncomingEventHandler? Incoming;
 
 
 

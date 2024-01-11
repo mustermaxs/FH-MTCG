@@ -84,6 +84,7 @@ class User:
 admin = User("admin", "admin", "admin bio", ":)", 100, "14076953-be7d-4bfb-9180-a797d9dad345", "33b039518718ba03b03e08e473032c9c4d72a2f9d5b27a43938c1bc49d4598a3")
 normal_user = User("max", "max", "", ":)", 100, "060ab0c4-abef-4d89-bf45-c33af92a7c89", "7944947a9f442df12c947d07c71221d3ccf929fdc02837d74baec3e1b47dc1a1")
 normal_user2 = User("test", "test", "", ":)", 100, "5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2", "e622d2e010c5289b1e19f697180f094c4b1bcc220e5d40f4484b72052d18b8ba")
+normal_user4 = User("toni", "toni", "", ":)", 100, "5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2", "6f8b71631056cf8b60d7702b903a06fab6b3eda41b3cfba37b340cd9b89221da")
 
 # for registration test
 # not yet in database
@@ -93,5 +94,6 @@ users = {
     "admin": admin,
     "max": normal_user,
     "test": normal_user2,
-    "registration_test_user": normal_user3
+    "registration_test_user": normal_user3,
+    "toni": normal_user4
 }

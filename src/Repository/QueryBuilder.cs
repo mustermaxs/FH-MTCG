@@ -648,28 +648,5 @@ public class QueryBuilder : IDisposable
 
         return (res != null && res.Count > 0) ? res[0] : null;
 
-        using var command = new NpgsqlCommand(queryString, _connection);
-
-        if (queryString == string.Empty) throw new Exception("Invalid query provided.");
-
-        if (paramSequence.Count > 0)
-        {
-            foreach (var param in paramSequence)
-            {
-                var (_, Key, Value) = param.Value;
-
-                command.Parameters.AddWithValue(Key, Value);
-            }
-        }
-
-        using var reader = command.ExecuteReader();
-        T obj = new();
-
-        if (reader.Read())
-        {
-            callback(obj, reader);
-        }
-
-        return obj;
     }
 }

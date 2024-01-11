@@ -1,6 +1,7 @@
 import socket
 import requests
 import json
+import time
 
 base_url = "http://localhost:12000"
 ip = "127.0.0.1"
@@ -80,7 +81,7 @@ def url(endpoint, method):
 class CustomRequests:
     def __init__(self, base_url):
         self.base_url = base_url
-        self.default_timeout = 100
+        self.default_timeout = 2000
 
     def get(self, endpoint, timeout=None, **kwargs):
         return self._make_request("GET", endpoint, timeout=timeout, **kwargs)
@@ -100,6 +101,7 @@ class CustomRequests:
         response = requests.request(method, url, timeout=timeout, **kwargs)
         response.requested_url = url
         response.requested_method = method
+        # time.sleep(0.2)
         return response
 
 def check_connection(host, port):

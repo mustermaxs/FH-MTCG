@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace MTCG
@@ -18,9 +19,12 @@ namespace MTCG
     public class BattleService
     {
         // public event EventHandler<BattleEventArgs> StartBattle;
-        private static object battleLock = new object();
+        private static object battleLock1 = new object();
+        private static object battleLock2 = new object();
+        private static ConcurrentDictionary<User, TaskCompletionSource<Battle>> pendingBattles = new ConcurrentDictionary<User, TaskCompletionSource<Battle>>();
+        private static SemaphoreSlim foundOpponent = new SemaphoreSlim(0, int.MaxValue);
 
-        public static Queue<User> PendingBattleRequests = new Queue<User>();
+        public static ConcurrentQueue<User> pendingUsers = new ConcurrentQueue<User>();
 
         public BattleService()
         {
@@ -33,47 +37,76 @@ namespace MTCG
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        protected static async Task<User> WaitForOpponent()
+        protected static TaskCompletionSource<Battle> AddToWaitingLine(User player)
         {
-            var tcs = new TaskCompletionSource<User>();
-
-            ThreadPool.QueueUserWorkItem(_ =>
+            lock (battleLock1)
             {
+                var waitingTask = new TaskCompletionSource<Battle>();
+                pendingBattles[player] = waitingTask;
+                OnFindOpponent();
 
-                    Console.WriteLine($"IN QUEUE: {PendingBattleRequests.Count}");
-
-                    lock (battleLock)
-                    {
-                        if (PendingBattleRequests.Count >= 2)
-                        {
-                            tcs.SetResult(PendingBattleRequests.Dequeue());
-                        }
-                    }
-
-                    // You can add a delay here to avoid busy-waiting and reduce CPU usage
-                    Thread.Sleep(100);
-            });
-
-            return await tcs.Task;
+                return waitingTask;
+            }
         }
 
         protected static void AddToQueue(User user)
         {
-            lock (battleLock)
+            lock (battleLock1)
             {
                 Console.WriteLine($"ADDED TO LOBBY {user.Name}");
-                PendingBattleRequests.Enqueue(user);
+                pendingUsers.Enqueue(user);
+            }
+
+        }
+
+        public static void OnFindOpponent()
+        {
+            if (pendingUsers.Count >= 2 && pendingUsers.Count != 1)
+            {
+                Console.WriteLine($"Found opponent.");
+                foundOpponent.Release();
             }
         }
 
-        public static async Task<string> HandleBattle(User player1)
+        public static async Task<Battle> HandleBattle(User player1)
         {
             AddToQueue(player1);
-            await WaitForOpponent();
+            var res = AddToWaitingLine(player1);
             StartBattle();
+
+            Battle battleResult = await res.Task;
+
+            return battleResult;
         }
 
-        public async 
+        public static async void StartBattle()
+        {
+            await foundOpponent.WaitAsync();
+
+            lock (battleLock1)
+            {
+                if (pendingUsers.TryDequeue(out User? player1) &&
+                        pendingUsers.TryDequeue(out User? player2))
+
+                {
+                    Console.WriteLine($"STARTING BATTLE: {player1.Name} vs {player2.Name}");
+                    List<string> actions = new List<string>();
+                    actions.Add($"STARTING BATTLE: {player1.Name} vs {player2.Name}");
+
+                    var battle = new Battle { Player1 = player1, Player2 = player2 };
+
+                    pendingBattles[player1].SetResult(battle);
+                    pendingBattles[player2].SetResult(battle);
+
+                    pendingBattles.TryRemove(player1, out _);
+                    pendingBattles.TryRemove(player2, out _);
+                }
+            }
+
+
+        }
+
+
 
         // protected virtual void OnReadyForBattle(object sender, BattleEventArgs e)
         // {

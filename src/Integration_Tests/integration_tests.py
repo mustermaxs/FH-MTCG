@@ -31,21 +31,13 @@ async def main():
     test_user_no_cards_in_stack_true()
     test_add_trading_deal()
     test_add_card_to_stack()
-    test_accept_cardtrade_deal() #BUG
+    test_accept_cardtrade_deal()
     test_aquire_package()
     test_register_user()
     test_update_user()
     await test_battle()
-    # await test_battle_multiple_clients()
+    await test_battle_multiple_clients()
 
-
-    # print("\n\n\n")
-    # print("-"*15)
-    # passed = stats["passed"]
-    # failed = stats["failed"]
-    # print_colored(f"PASSED: {passed}", Colors.GREEN)
-    # print_colored(f"FAILED: {failed}", Colors.RED)
-    # print("\n\n\n")
 
 if __name__ == "__main__":
     for i in range(1):

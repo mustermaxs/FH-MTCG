@@ -15,11 +15,11 @@ public class BattleController : IController
     {
         try
         {
-            string res = await BattleService.HandleBattle(LoggedInUser);
+            string res = string.Empty;
+            var battleRes = await BattleService.HandleBattle(LoggedInUser);
+            // Console.WriteLine(battleRes.ToSerializableObj);
             
-            Console.WriteLine(res);
-            
-            return new Response<string>(200, res);
+            return new Response<Battle>(200, battleRes, "BATTLE SUCCESSFUL");
         }
         catch (Exception ex)
         {

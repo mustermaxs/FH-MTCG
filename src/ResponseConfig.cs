@@ -8,8 +8,8 @@ namespace MTCG
         public override string Name => "ResponseConfig";
         public void SetSection(string section) => this.Section = section;
         public override string Section { get; protected set;} = "responses";
-        public Dictionary<string, Dictionary<string, string>> Response { get; set; }
-        public string DefaultLanguage { get; set; }
+        public Dictionary<string, Dictionary<string, string>> Response { get; set; } = new Dictionary<string, Dictionary<string, string>>();
+        public string DefaultLanguage { get; set; } = "english";
         protected string chosenLanguage = string.Empty;
 
         public bool SetLanguage(string lang)
@@ -37,7 +37,8 @@ namespace MTCG
             {
                 var language = chosenLanguage == string.Empty ? DefaultLanguage : chosenLanguage;
                 var languageSet = Response[language];
-                if (languageSet.TryGetValue(key, out string value))
+                
+                if (languageSet.TryGetValue(key, out string? value))
                 {
                     return value;
                 }

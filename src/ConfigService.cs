@@ -50,7 +50,7 @@ namespace MTCG
             Console.WriteLine($"[Registered Config] {config.Name}");
             return this;
             // var filePath = path ?? new T().FilePath;
-            
+
             // dynamic completeConfig = FileHandler.ReadJsonFromFile(filePath) ?? throw new Exception("Failed to read config file");
 
             // if (ConfigService.TryGetRelevantSection<T>(completeConfig, out T config))
@@ -78,7 +78,7 @@ namespace MTCG
             if (IsSubSection(sectionString))
             {
                 var sectionKeys = GetSubsectionKeys(sectionString);
-                sectionKey = sectionKeys[sectionKeys.Length-1];
+                sectionKey = sectionKeys[sectionKeys.Length - 1];
                 completeConfig = GetSubSection(completeConfig, sectionKeys);
             }
 
@@ -105,7 +105,7 @@ namespace MTCG
         {
             var currentSection = completeConfig[sections[0]];
 
-            for (int i = 1; i < sections.Length -1; i++)
+            for (int i = 1; i < sections.Length - 1; i++)
             {
                 if (!currentSection.ContainsKey(sections[i])) throw new Exception($"Failed to get subsection {sections[i]}");
 
@@ -188,12 +188,12 @@ namespace MTCG
         /// <typeparam name="T">Type of config object.</typeparam>
         /// <returns>T Config object</returns>
         /// <exception cref="Exception">Exception. If config object isn't registered.</exception>
-        public static IConfig Get<T>() where T : IConfig
+        public static T Get<T>() where T : IConfig
         {
             Type configType = typeof(T);
 
             if (ConfigService.configs.TryGetValue(configType.Name, out IConfig config))
-                return config;
+                return (T)config; // Explicit cast to T
 
             throw new Exception($"Failed to get config {configType.Name}");
         }

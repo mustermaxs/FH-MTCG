@@ -89,6 +89,8 @@ def test_login(user : User, cn=None):
 
 @with_caller_name
 def test_retrieve_packages_has_packages(cn=None):
+    reset()
+    create_package(cards)
     res = req.get(url("packages", "GET"))
     packages = res.json()
     assert_true(res.status_code == 200 and len(packages) > 0, True,res.reason)
@@ -232,6 +234,8 @@ def test_get_all_users(cn=None):
 
 @with_caller_name
 def test_getall_cards(cn=None):
+    reset()
+    create_package(cards)
     res = req.get(url("all_cards", "GET"))
     if test_status(res, 200):
         return res.json()
@@ -241,6 +245,8 @@ def test_getall_cards(cn=None):
 
 @with_caller_name
 def test_get_user_stack(user: User, cn=None):
+    reset()
+    add_cards_to_stack(cards, user)
     test_login(user)
     res = req.get(url("stack", "GET"), headers=Headers(user.token))
     if test_status(res, 200, True):
@@ -444,15 +450,38 @@ async def test_battle(cn=None):
     async def make_request(player, delay):
         login_as(player)
         async with aiohttp.ClientSession() as session:
-            async with session.post(url("battle", "POST"), headers=Headers(player.token)) as response:
-                # Handle response as needed
-                # await asyncio.sleep(delay)  # Simulate some work
-                print("START BATTLE")
+            async with session.post(url("battle", "POST"), headers=Headers(player.token)) as res:
+                return res
 
-    # Concurrently make the two requests
+
     res1, res2 = await asyncio.gather(
         make_request(player1, 0),
-        make_request(player2, 2)  # Add a delay to simulate asynchronous behavior
+        make_request(player2, 2)
     )
 
-    # print(res2.reason)
+    assert_true(res1.status == 200 and res2.status == 200, True)
+
+    
+@with_caller_name
+async def test_battle_multiple_clients(cn=None):
+    player1 = users["max"]
+    player2 = users["test"]
+    test_user = users["registration_test_user"]
+    reg_res = req.post(url("users", "POST"), json=test_user.to_dict())
+    reg_token = login_as(test_user)
+
+    async def make_request(player, delay):
+        login_as(player)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url("battle", "POST"), headers=Headers(player.token)) as res:
+                return res
+
+
+    res1, res2 = await asyncio.gather(
+        make_request(player1, 0),
+        make_request(test_user, 0),
+        make_request(test_user, 5),
+        make_request(player2, 3)
+    )
+
+    # assert_true(res1.status == 200 and res2.status == 200 and res3.status == 200, True)

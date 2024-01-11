@@ -33,23 +33,31 @@ namespace MTCG
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        protected async Task<User> WaitForOpponent()
+        protected static async Task<User> WaitForOpponent()
         {
-            return await Task.Run(() =>
+            var tcs = new TaskCompletionSource<User>();
+
+            ThreadPool.QueueUserWorkItem(_ =>
             {
-                while (true)
-                {
+
                     Console.WriteLine($"IN QUEUE: {PendingBattleRequests.Count}");
 
-                    if (PendingBattleRequests.Count >= 2)
+                    lock (battleLock)
                     {
-                        return PendingBattleRequests.Dequeue();
+                        if (PendingBattleRequests.Count >= 2)
+                        {
+                            tcs.SetResult(PendingBattleRequests.Dequeue());
+                        }
                     }
-                }
+
+                    // You can add a delay here to avoid busy-waiting and reduce CPU usage
+                    Thread.Sleep(100);
             });
+
+            return await tcs.Task;
         }
 
-        protected void AddToQueue(User user)
+        protected static void AddToQueue(User user)
         {
             lock (battleLock)
             {
@@ -58,16 +66,14 @@ namespace MTCG
             }
         }
 
-        public async Task<string> HandleBattle(User player1)
+        public static async Task<string> HandleBattle(User player1)
         {
-            Logger.ToConsole($"Player {player1.Name} entered the lobby.");
-            // AddToQueue(player1);
-            // var player2 = await Task.Delay(10000);
-            await Task.Delay(10000);
-            // Logger.ToConsole($"{player1.Name} vs. {player2.Name}");
-            
-            return $"{player1.Name} vs.";
+            AddToQueue(player1);
+            await WaitForOpponent();
+            StartBattle();
         }
+
+        public async 
 
         // protected virtual void OnReadyForBattle(object sender, BattleEventArgs e)
         // {

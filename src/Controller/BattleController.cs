@@ -15,11 +15,11 @@ public class BattleController : IController
     {
         try
         {
-            string res = await battleService.HandleBattle(LoggedInUser);
+            string res = await BattleService.HandleBattle(LoggedInUser);
             
             Console.WriteLine(res);
             
-            return new Response<string>(200, res, "BATTLE");
+            return new Response<string>(200, res);
         }
         catch (Exception ex)
         {

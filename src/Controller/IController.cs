@@ -7,19 +7,21 @@ namespace MTCG
     {
         // TODO
         protected IRequest request;
-        protected User LoggedInUser { get; private set; }
+        protected User? LoggedInUser { get; private set; }
         protected Guid UserId {get; private set;}
-        protected ResponseConfig resConfig = (ResponseConfig)ConfigService.Get<ResponseConfig>();
+        protected ResponseConfig resConfig = ConfigService.Get<ResponseConfig>();
 
         public IController(IRequest request)
         {
             this.request = request;
 
-            if (request.SessionId != string.Empty)
+            if (request.SessionId != string.Empty && request.SessionId != null)
             {
                 this.LoggedInUser = SessionManager.GetUserBySessionId(request.SessionId);
-                this.UserId = LoggedInUser.ID;
+                this.UserId = LoggedInUser!.ID;
             }
+            else
+                this.LoggedInUser = null;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 
 namespace MTCG;
 
@@ -24,15 +25,15 @@ public class CardTradingController : IController
         {
             List<CardTrade> trades = repo.GetAll().Where(t => !t.Settled).ToList();
 
-            if (trades.Count == 0) return new Response<string>(204, "The request was fine, but there are no trading deals available");
+            if (trades.Count == 0) return new Response<string>(204, resConfig["TRADE_GETALL_EMPTY"]);
 
-            return new Response<List<CardTrade>>(200, trades, "There are trading deals available, the response contains these");
+            return new Response<List<CardTrade>>(200, trades, resConfig["TRADE_GETALL_SUCC"]);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to fetch all pending trading deals.\n{ex}");
 
-            return new Response<string>(500, "Something went wrong :(");
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
 
@@ -54,14 +55,14 @@ public class CardTradingController : IController
             CardTrade? trade = repo.Get(tradeid);
 
             if (trade == null || trade.Settled)
-                return new Response<string>(404, "The provided deal ID was not found.");
+                return new Response<string>(404, resConfig["TRADE_ID_NOT_FOUND"]);
 
             Card offeredCard = cardRepo.GetDeckCardForUser(trade.CardToTrade.Value, trade.OfferingUserId);
 
             if (!OfferedCardIsOwnedByUser(acceptedCardId, userId) ||
                 userId == trade.OfferingUserId ||
                 !AcceptedDealMeetsRequirements(trade, acceptedCard))
-                return new Response<string>(403, "The offered card is not owned by the user, or the requirements are not met (Type, MinimumDamage), or the offered card is locked in the deck.");
+                return new Response<string>(403, resConfig["TRADE_ACCEPT_ERR"]);
 
             trade.AcceptingUserId = userId;
             trade.Settled = true;
@@ -71,14 +72,14 @@ public class CardTradingController : IController
             ExchangeDeckCards(acceptedCard, offeredCard!, userId, trade.OfferingUserId);
             repo.Update(trade);
 
-            return new Response<string>(200, "Trading deal successfully executed.");
+            return new Response<string>(200, resConfig["TRADE_ACCEPT_SUCC"]);
 
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to remove trading deal.\n{ex}");
 
-            return new Response<string>(500, "Something went wrong :(");
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
 
@@ -178,7 +179,7 @@ public class CardTradingController : IController
             DeckCard deckCard = cardRepo.GetDeckCardForUser(trade.CardToTrade.Value, UserId);
 
             if (deckCard == null || !deckCard.DeckId.HasValue || deckCard.Locked)
-                return new Response<string>(403, "The deal contains a card that is not owned by the user or locked in the deck.");
+                return new Response<string>(403, resConfig["TRADE_ADD_ERR"]);
 
             trade.OfferingUserId = UserId;
             trade.DeckId = deckCard.DeckId;
@@ -188,7 +189,7 @@ public class CardTradingController : IController
 
             repo.Save(trade);
 
-            return new Response<string>(201, "Trading deal successfully created");
+            return new Response<string>(201, resConfig["TRADE_ADD_SUCC"]);
         }
         catch (Exception ex)
         {
@@ -217,20 +218,20 @@ public class CardTradingController : IController
             var trade = repo.Get(tradingdealid);
 
             if (trade == null || trade.Settled || trade.OfferingUserId != UserId)
-                return new Response<string>(404, "The provided deal ID was not found.");
+                return new Response<string>(404, resConfig["TRADE_DEL_NOT_FOUND"]);
 
             if (!OfferedCardIsOwnedByUser(trade.CardToTrade!.Value, UserId))
-                return new Response<string>(403, "The deal contains a card that is not owned by the user.");
+                return new Response<string>(403, resConfig["TRADE_DEL_ERR"]);
 
             repo.Delete(trade);
 
-            return new Response<string>(200, "Trading deal successfully deleted");
+            return new Response<string>(200, resConfig["TRADE_DEL_SUCC"]);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to remove trading deal.\n{ex}");
 
-            return new Response<string>(500, "Something went wrong :(");
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
 

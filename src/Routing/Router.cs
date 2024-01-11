@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Npgsql;
 
+
 namespace MTCG;
 
 //////////////////////////////////////////////////////////////////////
@@ -103,7 +104,7 @@ public class Router : IRouter
 
     public bool ClientHasPermissionToRequest(IRequest request)
     {
-        Logger.ToConsole($"[Request]\t{request.HttpMethod} {request.RawUrl}", true);
+        // Logger.ToConsole($"[Request]\t{request.HttpMethod} {request.RawUrl}", true);
         Role requestAccessLevel = request.Endpoint!.AccessLevel;
         Session session = null;
 
@@ -136,16 +137,16 @@ public class Router : IRouter
     /// <param name="svrEventArgs">
     /// Object containing the received client request.
     /// </param>
-    public IResponse HandleRequest(ref IRequest request)
+    public async Task<IResponse> HandleRequest(IRequest request)
     {
         try
         {
             Logger.ToConsole($"[Map from]  {request.HttpMethod} {request.RawUrl}", true);
             routeRegistry.MapRequestToEndpoint(ref request);
-            Logger.ToConsole($"[Map to]  {request.Endpoint!.RouteTemplate}\n", true);
+            Logger.ToConsole($"[Map to]  {request.HttpMethod} {request.Endpoint!.RouteTemplate}\n", true);
 
             if (!ClientHasPermissionToRequest(request))
-                throw new AuthenticationFailedException($"[DENIED]\tClient doesn't have access to ressource.\n");
+                throw new AuthenticationFailedException($"[DENIED]\tClient doesn't have access to ressource.\n{request.Payload}");
 
             var controllerType = request.Endpoint!.ControllerType;
             var controller = (IController)Activator.CreateInstance(controllerType, request);
@@ -155,8 +156,15 @@ public class Router : IRouter
 
 
             MethodInfo controllerAction = request.Endpoint.ControllerMethod;
-            IResponse response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, request.Endpoint.UrlParams.NamedParams);
 
+            IResponse? response = null;
+
+            if (controllerAction.ReturnType == typeof(IResponse))
+                response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, request.Endpoint.UrlParams.NamedParams);
+            
+            else
+                response = await controllerAction.MapArgumentsAndInvokeAsync<IResponse, string>(controller, request.Endpoint.UrlParams.NamedParams);
+            
             Console.WriteLine($"Status: {response.StatusCode}\nResponse: {response.Description}");
 
             return response;
@@ -176,8 +184,9 @@ public class Router : IRouter
         }
         catch (Exception ex)
         {
+            
             Logger.ToConsole($"[ERROR]\n{ex}\nSomething went wrong.", true);
-
+            
             return new Response<string>(500, $"Something went wrong.\n{ex.Message}");
         }
     }

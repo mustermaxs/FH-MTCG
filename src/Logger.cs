@@ -5,7 +5,7 @@ namespace MTCG;
 public class Logger
 {
     public readonly static string decoline = new string('-', 15);
-    public static void ToConsole(string txt, bool withTimeStamp=false)
+    public static void ToConsole(string txt, bool withTimeStamp = false)
     {
         DateTime localDate = DateTime.Now;
         DateTime utcDate = DateTime.UtcNow;
@@ -13,6 +13,12 @@ public class Logger
 
         string decoline = new string('-', 25);
         string logTxt = $"{decoline}\n{timestamp}\n{txt}";
+        
+        if (txt.Contains("[ERROR]"))
+            Console.ForegroundColor = ConsoleColor.Red;
+            
         Console.WriteLine(logTxt);
+        
+        Console.ResetColor();
     }
 }

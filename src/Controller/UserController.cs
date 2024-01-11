@@ -26,10 +26,12 @@ public class UserController : IController
 
 
     [Route("/session/", HTTPMethod.POST, Role.ANONYMOUS)]
-    public IResponse Login()
+    public async Task<IResponse> Login()
     {
         try
         {
+            // Thread.Sleep(10000);
+            await Task.Delay(1000);
             User? payload = request.PayloadAsObject<User>();
 
             string username = payload?.Name;

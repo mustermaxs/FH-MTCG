@@ -33,12 +33,14 @@ namespace MTCG
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        protected static async Task<User> WaitForOpponent()
+        protected async Task<User> WaitForOpponent()
         {
             return await Task.Run(() =>
             {
                 while (true)
                 {
+                    Console.WriteLine($"IN QUEUE: {PendingBattleRequests.Count}");
+
                     if (PendingBattleRequests.Count >= 2)
                     {
                         return PendingBattleRequests.Dequeue();
@@ -47,22 +49,24 @@ namespace MTCG
             });
         }
 
-        protected static void AddToQueue(User user)
+        protected void AddToQueue(User user)
         {
             lock (battleLock)
             {
+                Console.WriteLine($"ADDED TO LOBBY {user.Name}");
                 PendingBattleRequests.Enqueue(user);
             }
         }
 
-        public static async Task<string> HandleBattle(User player1)
+        public async Task<string> HandleBattle(User player1)
         {
             Logger.ToConsole($"Player {player1.Name} entered the lobby.");
-            AddToQueue(player1);
-            var player2 = await WaitForOpponent();
-            Logger.ToConsole($"{player1.Name} vs. {player2.Name}");
+            // AddToQueue(player1);
+            // var player2 = await Task.Delay(10000);
+            await Task.Delay(10000);
+            // Logger.ToConsole($"{player1.Name} vs. {player2.Name}");
             
-            return $"{player1.Name} vs. {player2.Name}";
+            return $"{player1.Name} vs.";
         }
 
         // protected virtual void OnReadyForBattle(object sender, BattleEventArgs e)

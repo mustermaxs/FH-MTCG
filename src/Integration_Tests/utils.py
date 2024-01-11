@@ -1,5 +1,6 @@
 import inspect
 from api_utils import *
+import time
 
 class Colors:
     RESET = '\033[0m'
@@ -17,7 +18,8 @@ def with_caller_name(func):
     def wrapper(*args, **kwargs):
         cn = inspect.currentframe().f_back.f_code.co_name
         kwargs['cn'] = cn
+        time.sleep(0.05)
         return func(*args, **kwargs)
 
-
+    
     return wrapper

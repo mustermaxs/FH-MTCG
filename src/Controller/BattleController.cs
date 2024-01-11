@@ -11,11 +11,11 @@ public class BattleController : IController
     public BattleController(IRequest request) : base(request) { }
 
     [Route("/battle", HTTPMethod.POST, Role.USER)]
-    public IResponse AddBattleRequest()
+    public async Task<IResponse> AddBattleRequest()
     {
         try
         {
-            string res = await BattleService.HandleBattle(LoggedInUser);
+            string res = await battleService.HandleBattle(LoggedInUser);
             
             Console.WriteLine(res);
             
@@ -29,8 +29,8 @@ public class BattleController : IController
         }
     }
 
-    protected async Task<string> Foo()
-    {
-        return await BattleService.HandleBattle(LoggedInUser);
-    }
+    // protected async Task<string> Foo()
+    // {
+    //     return await BattleService.HandleBattle(LoggedInUser);
+    // }
 }

@@ -33,20 +33,34 @@ public static class ReflectionUtils
                 MapProvidedArgumentsToSignature<TValueType>(self, providedParams)); // CHANGED
         }
     }
-    public static TReturnType MapArgumentsAndInvoke<TReturnType, TValueType>(
-        this MethodBase self, object classInstance, Dictionary<string, TValueType> providedParams) where TReturnType :  IResponse
+    public static Task<TReturnType> MapArgumentsAndInvokeAsync<TReturnType, TValueType>(
+        this MethodBase self, object classInstance, Dictionary<string, TValueType> providedParams)
     {
         if (providedParams == null || providedParams.Count == 0)
         {
-            return (TReturnType)self.Invoke(classInstance, null);
+            return (Task<TReturnType>)self.Invoke(classInstance, null);
         }
         else
         {
-            return (TReturnType)self.Invoke(
+            return (Task<TReturnType>)self.Invoke(
                 classInstance,
                 MapProvidedArgumentsToSignature<TValueType>(self, providedParams)); // CHANGED
         }
     }
+    // public static TReturnType MapArgumentsAndInvoke<TReturnType, TValueType>(
+    //     this MethodBase self, object classInstance, Dictionary<string, TValueType> providedParams) where TReturnType :  IResponse
+    // {
+    //     if (providedParams == null || providedParams.Count == 0)
+    //     {
+    //         return (TReturnType)self.Invoke(classInstance, null);
+    //     }
+    //     else
+    //     {
+    //         return (TReturnType)self.Invoke(
+    //             classInstance,
+    //             MapProvidedArgumentsToSignature<TValueType>(self, providedParams)); // CHANGED
+    //     }
+    // }
 
 
     /// <summary>

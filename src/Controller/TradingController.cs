@@ -48,8 +48,8 @@ public class CardTradingController : IController
         {
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId!)!.ID;
             var cardRepo = new CardRepository();
-            var reqContent = request.PayloadAsObject<object>();
-            Guid acceptedCardId = Guid.Parse(reqContent.ToString());
+            string reqContent = request.PayloadAsObject<string>();
+            Guid acceptedCardId = Guid.Parse(reqContent!);
             Card acceptedCard = cardRepo.GetDeckCardForUser(acceptedCardId, userId);
             CardTrade? trade = repo.Get(tradeid);
 

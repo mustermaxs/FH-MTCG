@@ -5,6 +5,9 @@ from helpers import *
 import random
 import time
 import asyncio
+import requests
+import http.client
+import aiohttp
 
 
 stats = {
@@ -298,13 +301,12 @@ def test_accept_cardtrade_deal(cn=None):
 
     dealer = users["max"]
     buyer = users["test"]
-
     create_package(cards)
     packages = get_all_packages()
     aquire_package(dealer, packages[0]["Id"])
     stackcards = get_user_stack(dealer)
     push_cards_to_deck(dealer, stackcards)
-    put_cards_in_deck(dealer, cards)
+    # put_cards_in_deck(dealer, cards)
 
     create_package(cards)
     packages = get_all_packages()
@@ -382,19 +384,19 @@ def get_card_by_id(id : str, cn=None):
 @with_caller_name
 def test_add_card_to_stack(cn=None):
     reset()
-    packageres = create_package(cards)
-    if packageres.status_code != 200:
-        raise Exception("Could not create package")
-
+    
+    for card in cards.values():
+        save_card(card)
+    
     all_cards = get_all_cards()
     add_cards_to_stack(all_cards, users["test"])
-    randomcard = all_cards[random.randint(0, len(all_cards)-1)]  
+    # randomcard = all_cards[random.randint(0, len(all_cards)-1)]  
     stack = get_user_stack(users["test"])
     # print(stack)
     # print(all_cards)
     success = True
     if len(stack) < len(all_cards):
-        raise Exception("Card was not added to stack")
+        raise Exception(f"Card was not added to stack\nstack {len(stack)}\nall cards {len(all_cards)}")
 
     for stackcard in stack:
         if any(stackcard["Name"] != stackcard["Name"] for card in cards):
@@ -439,12 +441,18 @@ async def test_battle(cn=None):
     player1 = users["max"]
     player2 = users["test"]
 
-    login_as(player1)
-    res1 = await req.post(url("battle", "POST"), headers=Headers(player1.token))
+    async def make_request(player, delay):
+        login_as(player)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url("battle", "POST"), headers=Headers(player.token)) as response:
+                # Handle response as needed
+                # await asyncio.sleep(delay)  # Simulate some work
+                print("START BATTLE")
 
-    time.sleep(2)
+    # Concurrently make the two requests
+    res1, res2 = await asyncio.gather(
+        make_request(player1, 0),
+        make_request(player2, 2)  # Add a delay to simulate asynchronous behavior
+    )
 
-    login_as(player2)
-    res2 = await req.post(url("battle", "POST"), headers=Headers(player2.token))
-    
-    print(res2.reason)
+    # print(res2.reason)

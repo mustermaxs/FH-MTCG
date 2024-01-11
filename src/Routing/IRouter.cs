@@ -12,7 +12,7 @@ public interface IRouter
     /// 12.02.2023 02:24
     /// ? um request object zu instantiieren
     // public IRequest ObtainClientRequest();
-    IResponse HandleRequest(ref IRequest request);
+    Task<IResponse> HandleRequest(IRequest request);
     /// 12.02.2023 02:11
     /// ? brauch ich das
     // public void HandleResponse();

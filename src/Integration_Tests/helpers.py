@@ -51,14 +51,17 @@ def delete_package(id: str):
     res = req.delete(u, headers=Headers(admin.token))
 
 def get_user_stack(user: User):
+    # print(user.token)
+    login_as(user)
     res = req.get(url("stack", "GET"), headers=Headers(user.token))
     if res.status_code == 200:
         return res.json()
     else:
         return []
 
-def save_card(card):
+def save_card(card: Card):
     admin = login_as(users["admin"])
+    # print(card)
     res = req.post(url("cards", "POST"), json=card.to_dict(), headers=Headers(admin.token))
     assert res.status_code == 200
     
@@ -78,6 +81,7 @@ def push_cards_to_deck(user: User, cards):
     assert res.status_code == 200
 
 def add_cardtrade_deal(user: User, card: Card):
+    # print(card)
     deal = Trade(card["Id"], card["Type"], card["Damage"])
     res = req.post(url("tradings", "POST"), json=deal.to_dict(), headers=Headers(user.token))
     assert res.status_code == 201
@@ -96,7 +100,8 @@ def card_meets_deal_requirements(card, dealcard):
         return True
     else:
         return False
-    
+
+# json cards
 def add_cards_to_stack(cards, user: User):
     admin = login_as(users["admin"])
     URL = url("add_to_stack", "POST").replace(":id", user.ID)
@@ -131,14 +136,14 @@ def get_all_cards():
     else:
         assert res.status_code == 200
 
-def put_cards_in_deck(user: User, cards):
+def put_cards_in_deck(user: User, all_cards):
     admin = login_as(users["admin"])
-    for card in cards:
+    for card in all_cards:
         save_card(card)
         
-    cards = get_all_cards()
-    add_cards_to_stack(cards, user)
-    push_cards_to_deck(user, cards)
+    all_cards = get_all_cards()
+    add_cards_to_stack(all_cards, user)
+    push_cards_to_deck(user, all_cards)
 
 def delete_user(id: str):
     admin = login_as(users["admin"])

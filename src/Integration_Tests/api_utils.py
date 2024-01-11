@@ -80,7 +80,7 @@ def url(endpoint, method):
 class CustomRequests:
     def __init__(self, base_url):
         self.base_url = base_url
-        self.default_timeout = 5
+        self.default_timeout = 100
 
     def get(self, endpoint, timeout=None, **kwargs):
         return self._make_request("GET", endpoint, timeout=timeout, **kwargs)

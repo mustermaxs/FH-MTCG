@@ -84,7 +84,7 @@ namespace MTCG
                 TcpClient client = _Listener.AcceptTcpClient();
 
 
-                tasks.Add(Task.Run(() =>
+                tasks.Add(Task.Run(async () =>
                 {
                     string data = string.Empty;
                     while (client.GetStream().DataAvailable || (string.IsNullOrEmpty(data)))
@@ -96,13 +96,13 @@ namespace MTCG
                     var svrEventArgs = new HttpSvrEventArgs(client, data);
                     var request = BuildRequest(svrEventArgs);
 
-                    IResponse response = router.HandleRequest(ref request);
+                    IResponse response = await router.HandleRequest(request);
 
                     svrEventArgs.Reply(response);
                 }));
             }
-            Task t = Task.WhenAll(tasks);
 
+            Task t = Task.WhenAll(tasks);
             try
             {
                 t.Wait();
@@ -116,8 +116,8 @@ namespace MTCG
         }
 
 
-    //////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////
 
         protected IRequest BuildRequest(HttpSvrEventArgs svrEventArgs)
         {

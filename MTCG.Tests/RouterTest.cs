@@ -1,6 +1,9 @@
 using NUnit.Framework;
 using MTCG;
 using Moq;
+using System;
+using NUnit.Framework.Internal;
+using System.IO;
 
 namespace UnitTest.MTCG
 {
@@ -19,6 +22,7 @@ namespace UnitTest.MTCG
         [SetUp]
         public void Setup()
         {
+            Directory.SetCurrentDirectory("/home/mustermax/vscode_projects/MTCG/MTCG.Tests/");
             urlParser = new UrlParser();
             routeRegistry = RouteRegistry.GetInstance(urlParser);
             attributeHandler = new AttributeHandler();
@@ -31,7 +35,7 @@ namespace UnitTest.MTCG
             SessionManager.CreateSessionForUser(authToken, user);
         }
 
-        
+
         [Order(0)]
         [Test]
         public void ClientHasPermissionToRequest_ReturnsTrueForUserOnPermissionUser()

@@ -18,7 +18,7 @@ public class Router : IRouter
 {
     private IEndpointMapper routeRegistry;
     private IRouteObtainer routeObtainer;
-    // private IAuthenticator authenticator;
+    private ResponseConfig resConfig;
 
 
     //////////////////////////////////////////////////////////////////////
@@ -41,6 +41,9 @@ public class Router : IRouter
     {
         this.routeRegistry = routeRegistry;
         this.routeObtainer = routeObtainer;
+
+        ConfigService.GetInstance().Register<ResponseConfig>(null);
+        this.resConfig = ConfigService.Get<ResponseConfig>();
     }
 
 
@@ -149,7 +152,7 @@ public class Router : IRouter
                 throw new AuthenticationFailedException($"[DENIED]\tClient doesn't have access to ressource.\n{request.Payload}");
 
             var controllerType = request.Endpoint!.ControllerType;
-            var controller = (IController)Activator.CreateInstance(controllerType, request);
+            var controller = (IController?)Activator.CreateInstance(controllerType, request);
 
             if (controller == null)
                 throw new Exception("Failed to instantiate controller.");
@@ -173,21 +176,21 @@ public class Router : IRouter
         catch (RouteDoesntExistException ex)
         {
             Logger.ToConsole($"[ERROR]\n{ex}\nRoute doesn't exist: {ex.Url}", true);
-            return new Response<string>(404, $"The requested endpoint {ex.Url} doesn't seem to exist.");
+            return new Response<string>(404, $"[ {ex.Url} ] {resConfig["ROUTE_UNKOWN"]}");
         }
 
         catch (AuthenticationFailedException ex)
         {
             Logger.ToConsole($"[ERROR]\n{ex}\nAuthentication failed.", true);
 
-            return new Response<string>(404, $"Access token is missing or invalid.");
+            return new Response<string>(404, resConfig["AUTH_ERR"]);
         }
         catch (Exception ex)
         {
             
             Logger.ToConsole($"[ERROR]\n{ex}\nSomething went wrong.", true);
             
-            return new Response<string>(500, $"Something went wrong.\n{ex.Message}");
+            return new Response<string>(500, $"{resConfig["INT_SVR_ERR"]}.\n{ex.Message}");
         }
     }
 }

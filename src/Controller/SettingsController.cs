@@ -24,6 +24,7 @@ public class SettingsController : IController
             if (!resConfig.TranslationExists(lang))  return new Response<string>(403, resConfig["SETTINGS_LANG_UNKNOWN"]);
 
             resConfig.SetLanguage(lang);
+            
 
             return new Response<string>(200, resConfig["SETTINGS_LANG_CHANGE_SUCC"]);
         }

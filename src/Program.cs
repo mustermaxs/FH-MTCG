@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 
 namespace MTCG
 {
-    internal class Program
+    public class Program
     {
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // entry point                                                                                                      //
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+        public static ServiceProvider services = new ServiceProvider();
         /// <summary>Main entry point.</summary>
         /// <param name="args">Arguments.</param>
         static void Main(string[] args)
@@ -37,13 +39,21 @@ namespace MTCG
 
         protected static void LoadConfigs()
         {
-            // Directory.SetCurrentDirectory("/home/mustermax/vscode_projects/MTCG/MTCG.Tests/");
-            var configService = ConfigService.GetInstance();
+            var serverConfig = new ServerConfig();
+            var battleConfig = new BattleConfig();
+            var responseConfig = new ResponseTextTranslator();
+            var cardConfig = new CardConfig();
 
-            configService
-                .Register<ServerConfig>(null)
-                .Register<UserConfig>(null)
-                .Register<CardConfig>(null);
+            serverConfig = serverConfig.Load<ServerConfig>();
+            battleConfig = battleConfig.Load<BattleConfig>();
+            responseConfig = responseConfig.Load<ResponseTextTranslator>();
+            cardConfig = cardConfig.Load<CardConfig>();
+
+            services
+                .Register(serverConfig)
+                .Register(battleConfig)
+                .Register(responseConfig)
+                .Register(cardConfig);
         }
     }
 }

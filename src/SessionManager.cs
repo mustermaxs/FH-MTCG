@@ -79,12 +79,21 @@ public class SessionManager : BaseSessionManager
     //////////////////////////////////////////////////////////////////////
 
 
-    public static string CreateAnonymSessionReturnId(string id)
+    public static string CreateAnonymSessionReturnId()
     {
-        string sessionId = SessionManager.CreateAuthToken(id);
+        var randId = CreateAuthToken(new Random().Next(int.MaxValue).ToString());
+        string sessionId = SessionManager.CreateAuthToken(randId);
         Session session = new Session(sessionId).WithUser(new User());
+        session.IsAnonymous = true;
 
-
+        try
+        {
+            Sessions.TryAdd(sessionId, session);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error creating session: {e.Message}. Already exists.");
+        }
         return session.SessionId;
     }
 
@@ -160,6 +169,26 @@ public class SessionManager : BaseSessionManager
             Sessions.TryGetValue(sessionId, out retrievedSession);
 
             return retrievedSession;
+        }
+    }
+
+
+    public static bool TryGetSessionById(string sessionId, out Session session)
+    {
+        lock (_sessionLock)
+        {
+            Session? retrievedSession;
+
+            if (Sessions.TryGetValue(sessionId, out retrievedSession))
+            {
+                session = retrievedSession;
+
+                return true;
+            }
+
+            session = null!;
+
+            return false;
         }
     }
 

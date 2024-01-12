@@ -4,10 +4,10 @@ namespace MTCG
 {
     public class BattleLogEntry : IModel
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         public User? Player1 { get; set; }
         public User? Player2 { get; set; }
-        List<string> ActionDescriptions { get; set; }
+        public string? ActionDescriptions { get; set; }
         public Card? CardPlayedPlayer1 { get; set; }
         public Card? CardPlayedPlayer2 { get; set; }
         public User? RoundWinner { get; set; }
@@ -16,9 +16,10 @@ namespace MTCG
 
         public BattleLogEntry()
         {
+            Id = null;
             Player1 = null;
             Player2 = null;
-            ActionDescriptions = new List<string>();
+            ActionDescriptions = null;
             CardPlayedPlayer1 = null;
             CardPlayedPlayer2 = null;
             RoundWinner = null;
@@ -42,7 +43,7 @@ namespace MTCG
 
     public class Battle : IModel
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         public User? Player1 { get; set; }
         public User? Player2 { get; set; }
         public User? Winner { get; set; }
@@ -54,6 +55,7 @@ namespace MTCG
 
         public Battle()
         {
+            Id = null;
             Player1 = null;
             Player2 = null;
             Winner = null;

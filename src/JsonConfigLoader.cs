@@ -8,24 +8,24 @@ namespace MTCG;
 
 public class JsonConfigLoader : IConfigLoader
 {
-    public T? LoadConfig<T>(string filePath, string? section) where T : IConfig, new()
+    public T? LoadConfig<T>(string filePath, string? keyword) where T : IConfig, new()
     {
         dynamic completeConfig = FileHandler.ReadJsonFromFile(filePath) ?? throw new Exception("Failed to read config file");
 
-        if (TryGetRelevantSection<T>(completeConfig, section, out string config))
+        if (TryGetRelevantSection<T>(completeConfig, keyword, out string config))
             return JsonSerializer.Deserialize<T>(config) ?? default!;
         else
             throw new Exception($"Failed to get relevant section for config {typeof(T).Name}");
     }
 
-    public static T? Load<T>(string filePath, string? section) where T : IConfig, new()
+    public static T? Load<T>(string filePath, string? keyword) where T : IConfig, new()
     {
-        return new JsonConfigLoader().LoadConfig<T>(filePath, section);
+        return new JsonConfigLoader().LoadConfig<T>(filePath, keyword);
     }
 
-    private bool TryGetRelevantSection<T>(dynamic completeConfig, string? section, out string config) where T : IConfig, new()
+    private bool TryGetRelevantSection<T>(dynamic completeConfig, string? keyword, out string config) where T : IConfig, new()
     {
-        var sectionString = section ?? new T().Section;
+        var sectionString = keyword ?? new T().Section;
         var sectionKey = sectionString;
 
         if (IsSubSection(sectionString))

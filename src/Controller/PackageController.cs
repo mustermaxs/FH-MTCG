@@ -7,7 +7,7 @@ namespace MTCG;
 public class PackageController : IController
 {
     protected static PackageRepository repo = new PackageRepository();
-    protected CardConfig cardConfig = (CardConfig)ConfigService.Get<CardConfig>();
+    protected CardConfig cardConfig = Program.services.Get<CardConfig>();
     public PackageController(IRequest request) : base(request) { }
     const int MIN_COINS_NORMAL_PACKAGE = 5;
 

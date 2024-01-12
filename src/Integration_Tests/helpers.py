@@ -3,6 +3,11 @@ from utils import *
 from models import *
 import random
 
+
+settings = {
+    "translate_german": False
+}
+
 def reset():
     delete_all_cards()
     delete_all_packages()
@@ -11,10 +16,18 @@ def delete_all_cards():
     admin = login_as(users["admin"])
     res = req.delete(url("cards_all", "DELETE"), headers=Headers(admin.token))
 
+def change_language(lang: str, user: User):
+    # login_as(user)
+    URL = url("language", "PUT").replace(":lang", lang)
+    res = req.put(URL, headers=Headers(user.token))
+
+
 def login_as(user: User):
+    if settings["translate_german"]:
+        change_language("german", user)
+        settings["changedLang"] = True
     creds = {"Name": user.Name, "Password": user.Password}
     res = req.post(url("session", "POST"), json=creds)
-
     if res.status_code == 200:        
         user.token = res.json()["authToken"]
         return user
@@ -66,6 +79,7 @@ def save_card(card: Card):
     assert res.status_code == 200
     
     return res
+
 
 
 

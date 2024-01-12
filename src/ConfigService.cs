@@ -2,201 +2,115 @@ using System.Text.Json.Serialization;
 using Npgsql.Replication;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Collections.Concurrent;
 
 
 namespace MTCG
 {
-    public class ConfigService
+    public interface IService
     {
-        private static ConfigService? configService = null;
-        private static Dictionary<string, IConfig> configs = new Dictionary<string, IConfig>();
-        private IConfigLoader configLoader = new JsonConfigLoader();
-        private IConfigLoader? customConfigLoader = null;
+    }
 
-        //////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////
+    public class ServiceProvider
+    {
+        protected ConcurrentDictionary<string, IService> services = new ConcurrentDictionary<string, IService>();
 
-        [Obsolete("")]
-        public void SetConfigLoader(IConfigLoader loader) => this.customConfigLoader = loader;
-
-
-
-        private ConfigService()
+        public virtual ServiceProvider Register<T>() where T : IService, new()
         {
-        }
+            var serviceName = typeof(T).Name;
+            var service = new T();
 
-        public static ConfigService GetInstance()
-        {
-            if (configService == null)
-                configService = new ConfigService();
+            services[serviceName] = service;
+            Console.WriteLine($"[Registered Service] {serviceName}");
 
-            return configService;
-        }
-
-
-        //////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////
-
-        public ConfigService Register<T>(string? path) where T : IConfig, new()
-        {
-            var filePath = path ?? new T().FilePath;
-
-            var config = (T)configLoader.LoadConfig<T>(filePath, new T().Section);
-
-            if (config == default)
-                throw new Exception("Failed to deserialize config file");
-
-            ConfigService.configs[config.Name] = config;
-            Console.WriteLine($"[Registered Config] {config.Name}");
             return this;
-            // var filePath = path ?? new T().FilePath;
-
-            // dynamic completeConfig = FileHandler.ReadJsonFromFile(filePath) ?? throw new Exception("Failed to read config file");
-
-            // if (ConfigService.TryGetRelevantSection<T>(completeConfig, out T config))
-            //     ConfigService.configs[config.Name] = config;
-            // else
-            //     throw new Exception($"Failed to get relevant section for config {typeof(T).Name}");
-
-            // if (config == null) throw new Exception("Failed to deserialize config file");
-
-            // ConfigService.configs[config.Name] = config;
-            // Console.WriteLine($"[Registered Config] {config.Name}");
-
-            // return this;
         }
-
-
-        //////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////
-
-        private static bool TryGetRelevantSection<T>(dynamic completeConfig, out T config) where T : IConfig, new()
+        public virtual ServiceProvider Register(IService service)
         {
-            var sectionString = new T().Section;
-            var sectionKey = sectionString;
+            var serviceName = service.GetType().Name;
 
-            if (IsSubSection(sectionString))
-            {
-                var sectionKeys = GetSubsectionKeys(sectionString);
-                sectionKey = sectionKeys[sectionKeys.Length - 1];
-                completeConfig = GetSubSection(completeConfig, sectionKeys);
-            }
-
-            if (!completeConfig.ContainsKey(sectionKey))
-            {
-                config = default!;
-                return false;
-            }
-
-            var relevantSection = completeConfig[sectionKey];
-            var relevantSectionString = relevantSection.ToString();
-
-            config = JsonSerializer.Deserialize<T>(relevantSectionString) ?? default!;
-
-            return config != default;
-        }
-
-        private static bool IsSubSection(string section)
-        {
-            return section.Contains("/");
-        }
-
-        public static dynamic GetSubSection(dynamic completeConfig, string[] sections)
-        {
-            var currentSection = completeConfig[sections[0]];
-
-            for (int i = 1; i < sections.Length - 1; i++)
-            {
-                if (!currentSection.ContainsKey(sections[i])) throw new Exception($"Failed to get subsection {sections[i]}");
-
-                currentSection = currentSection[sections[i]];
-            }
-
-            return currentSection;
-        }
-
-
-        public static string[] GetSubsectionKeys(string section)
-        {
-            return section.Split("/");
-        }
-
-
-        //////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Registers a config object.
-        /// </summary>
-        /// <param name="config">IConfig object.</param>
-        /// <returns>ConfigService instance. For method chaining.</returns>
-        public ConfigService Register(IConfig config)
-        {
-            if (ConfigService.configs.ContainsKey(config.Name))
-            {
-                Console.WriteLine($"ConfigService already contains config {config.Name}.");
-
-                return this;
-            }
-
-            ConfigService.configs.Add(config.Name, config);
-            Console.WriteLine($"Registered config {config.Name}");
+            services[serviceName] = service;
+            Console.WriteLine($"[Registered Service] {serviceName}");
 
             return this;
         }
 
-
-        //////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Unregisters a config object.
-        /// </summary>
-        /// <param name="name">name of config object.</param>
-        /// <returns>Boolean. True on success, false if config object isn't registered.</returns>
-        public static bool Unregister(string name)
+        public bool Unregister<T>() where T : IService
         {
-            return ConfigService.configs.Remove(name);
+            return services.TryRemove(typeof(T).Name, out IService? _);
         }
 
-        /// <summary>
-        /// Unregisters a config object.
-        /// </summary>
-        /// <param name="name">name of config object.</param>
-        /// <returns>Boolean. True on success, false if config object isn't registered.</returns>
-        public static bool Unregister<T>() where T : IConfig
+        public virtual T Get<T>() where T : IService
         {
-            Type configType = typeof(T);
+            Type serviceType = typeof(T);
 
-            bool removedService = ConfigService.configs.Remove(configType.Name);
+            if (services.TryGetValue(serviceType.Name, out IService? config))
+                return (T)config;
 
-            if (removedService)
-                Console.WriteLine($"Unregistered config {configType.Name}");
-            else
-                Console.WriteLine($"Failed to unregister config {configType.Name}");
-
-            return removedService;
+            throw new Exception($"Failed to get config {serviceType.Name}");
         }
+        // }
+        // public class ConfigService : IServiceProvider
+        // {
+        //     private static ConfigService? configService = null;
+        //     private IConfigLoader configLoader = new JsonConfigLoader();
+        //     private IConfigLoader? customConfigLoader = null;
 
-        //////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////
+        //     //////////////////////////////////////////////////////////////////////
+        //     //////////////////////////////////////////////////////////////////////
+
+        //     [Obsolete("")]
+        //     public void SetConfigLoader(IConfigLoader loader) => this.customConfigLoader = loader;
 
 
-        /// <summary>
-        /// Returns a config object.
-        /// </summary>
-        /// <typeparam name="T">Type of config object.</typeparam>
-        /// <returns>T Config object</returns>
-        /// <exception cref="Exception">Exception. If config object isn't registered.</exception>
-        public static T Get<T>() where T : IConfig
-        {
-            Type configType = typeof(T);
 
-            if (ConfigService.configs.TryGetValue(configType.Name, out IConfig config))
-                return (T)config; // Explicit cast to T
+        //     public ConfigService()
+        //     {
+        //     }
 
-            throw new Exception($"Failed to get config {configType.Name}");
-        }
+        //     //////////////////////////////////////////////////////////////////////
+        //     //////////////////////////////////////////////////////////////////////
+
+        //     public override IServiceProvider Register<T>() where T : IConfig
+        //     {
+        //         var filePath = new T().FilePath;
+
+        //         var config = (T)configLoader.LoadConfig<T>(filePath, new T().Section);
+
+        //         if (config == default)
+        //             throw new Exception("Failed to deserialize config file");
+
+        //         services[config.Name] = config;
+        //         Console.WriteLine($"[Registered Config] {config.Name}");
+        //         return this;
+        //     }
+
+
+
+
+        //     //////////////////////////////////////////////////////////////////////
+        //     //////////////////////////////////////////////////////////////////////
+
+        //     /// <summary>
+        //     /// Registers a config object.
+        //     /// </summary>
+        //     /// <param name="config">IConfig object.</param>
+        //     /// <returns>ConfigService instance. For method chaining.</returns>
+        //     public ConfigService Register(IConfig config)
+        //     {
+        //         if (ConfigService.configs.ContainsKey(config.Name))
+        //         {
+        //             Console.WriteLine($"ConfigService already contains config {config.Name}.");
+
+        //             return this;
+        //         }
+
+        //         ConfigService.configs.Add(config.Name, config);
+        //         Console.WriteLine($"Registered config {config.Name}");
+
+        //         return this;
+        //     }
+        // }
     }
 }
 

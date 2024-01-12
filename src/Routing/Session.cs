@@ -2,20 +2,22 @@ namespace MTCG;
 
 public class Session
 {
-
-    public Session() { }
+    public Session()
+    {
+    }
     public Session(string sessionId)
     {
         SessionId = sessionId;
     }
-
+    public bool IsAnonymous { get; set;} = false;
     public string SessionId { get; private set; } = string.Empty;
     public string AuthToken { get; private set; } = string.Empty;
-    public User? User { get; set; } = null; // set used to be private, updating 
+    public User? User { get; set; } = null; // setter used to be private, updating 
                                             // is easier like this
     public bool IsLoggedIn { get => User != null && AuthToken != ""; }
-    public IEnumerable<IConfig> Configs { get; set; } = new List<IConfig>();
-    public string Language { get; set; } = "english";
+    public ResponseTextTranslator responseTxt { get; protected set; } = new ResponseTextTranslator();
+
+
 
     public Session WithAuthToken(string authToken)
     {
@@ -23,7 +25,7 @@ public class Session
         {
             throw new Exception("AuthToken already set");
         }
-        
+
         AuthToken = authToken;
 
         return this;
@@ -49,6 +51,7 @@ public class Session
         }
 
         User = user;
+        responseTxt.SetLanguage(User.Language);
 
         return this;
     }

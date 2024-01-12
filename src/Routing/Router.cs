@@ -18,7 +18,7 @@ public class Router : IRouter
 {
     private IEndpointMapper routeRegistry;
     private IRouteObtainer routeObtainer;
-    private ResponseConfig resConfig;
+    private ResponseTextTranslator languageConfig;
 
 
     //////////////////////////////////////////////////////////////////////
@@ -41,9 +41,7 @@ public class Router : IRouter
     {
         this.routeRegistry = routeRegistry;
         this.routeObtainer = routeObtainer;
-
-        ConfigService.GetInstance().Register<ResponseConfig>(null);
-        this.resConfig = ConfigService.Get<ResponseConfig>();
+        this.languageConfig = Program.services.Get<ResponseTextTranslator>();
     }
 
 
@@ -96,14 +94,6 @@ public class Router : IRouter
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-    protected bool CompareAccessLevels(Role clientAccessLevel, Role requiredAccessLevel)
-    {
-        return clientAccessLevel >= requiredAccessLevel;
-    }
-
-    //////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////
-
 
     public bool ClientHasPermissionToRequest(IRequest request)
     {
@@ -128,6 +118,15 @@ public class Router : IRouter
         return userAccessLevel == (requestAccessLevel & userAccessLevel);
     }
 
+
+    // FIXME ergibt irgendwie keinen Sinn, dass hier alles explizit gemacht werden soll
+    protected void InitUserSettings(IRequest request)
+    {
+        var user = SessionManager.GetUserBySessionId(request.SessionId);
+        languageConfig.SetLanguage(user!.Language);
+
+    }
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
@@ -144,6 +143,7 @@ public class Router : IRouter
     {
         try
         {
+            InitUserSettings(request);
             Logger.ToConsole($"[Map from]  {request.HttpMethod} {request.RawUrl}", true);
             routeRegistry.MapRequestToEndpoint(ref request);
             Logger.ToConsole($"[Map to]  {request.HttpMethod} {request.Endpoint!.RouteTemplate}\n", true);
@@ -157,18 +157,17 @@ public class Router : IRouter
             if (controller == null)
                 throw new Exception("Failed to instantiate controller.");
 
-
             MethodInfo controllerAction = request.Endpoint.ControllerMethod;
-
             IResponse? response = null;
 
             if (controllerAction.ReturnType == typeof(IResponse))
                 response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, request.Endpoint.UrlParams.NamedParams);
-            
+
             else
                 response = await controllerAction.MapArgumentsAndInvokeAsync<IResponse, string>(controller, request.Endpoint.UrlParams.NamedParams);
-            
-            Console.WriteLine($"Status: {response.StatusCode}\nResponse: {response.Description}");
+
+            Logger.ToConsole($"Status: {response.StatusCode}\nResponse: {response.Description}", true);
+
 
             return response;
         }
@@ -176,21 +175,29 @@ public class Router : IRouter
         catch (RouteDoesntExistException ex)
         {
             Logger.ToConsole($"[ERROR]\n{ex}\nRoute doesn't exist: {ex.Url}", true);
-            return new Response<string>(404, $"[ {ex.Url} ] {resConfig["ROUTE_UNKOWN"]}");
+            return new Response<string>(404, $"[ {ex.Url} ] {languageConfig["ROUTE_UNKOWN"]}");
         }
 
         catch (AuthenticationFailedException ex)
         {
             Logger.ToConsole($"[ERROR]\n{ex}\nAuthentication failed.", true);
 
-            return new Response<string>(404, resConfig["AUTH_ERR"]);
+            return new Response<string>(404, languageConfig["AUTH_ERR"]);
         }
         catch (Exception ex)
         {
-            
+
             Logger.ToConsole($"[ERROR]\n{ex}\nSomething went wrong.", true);
+
+            return new Response<string>(500, $"{languageConfig["INT_SVR_ERR"]}.\n{ex.Message}");
+        }
+        finally
+        {
+            // if anonymous session, end it
+            var session = SessionManager.GetSessionById(request.SessionId);
             
-            return new Response<string>(500, $"{resConfig["INT_SVR_ERR"]}.\n{ex.Message}");
+            if (session.IsAnonymous)
+                SessionManager.EndSessionWithSessionId(request.SessionId);
         }
     }
 }

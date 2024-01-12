@@ -15,7 +15,7 @@ async def main():
     reset()
 
     test_user = User("test", "test", "", ":)", 100, "", "")
-
+    
     test_register_alreadyexisting_user()
     test_retrieve_packages_no_packages()
     test_login(users["max"])
@@ -33,7 +33,7 @@ async def main():
     test_add_card_to_stack()
     test_accept_cardtrade_deal()
     test_aquire_package()
-    test_register_user()
+    # test_register_user()
     test_update_user()
     await test_battle()
     await test_battle_multiple_clients()

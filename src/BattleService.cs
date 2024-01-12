@@ -88,7 +88,6 @@ namespace MTCG
                         pendingUsers.TryDequeue(out User? player2))
 
                 {
-                    Console.WriteLine($"STARTING BATTLE: {player1.Name} vs {player2.Name}");
                     List<string> actions = new List<string>();
                     actions.Add($"STARTING BATTLE: {player1.Name} vs {player2.Name}");
 

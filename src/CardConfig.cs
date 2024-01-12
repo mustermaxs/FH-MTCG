@@ -8,6 +8,7 @@ namespace MTCG
         public int MinCardsInDeck { get; set; }
         public int ReqNbrCardsInPackage { get; set; }
         public int PricePerPackage { get; set; }
+        // public CardConfig(IConfigLoader configLoader) :base(configLoader) {}
     }
 }
 

@@ -31,7 +31,8 @@ api = {
     },
     "PUT": {
         "deck": "/deck",
-        "users": "/users/:id"
+        "users": "/users/:id",
+        "language": "/settings/language/:lang"
     },
     "POST": {
         "cards": "/cards",

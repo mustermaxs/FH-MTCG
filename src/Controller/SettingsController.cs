@@ -7,7 +7,7 @@ namespace MTCG;
 [Controller]
 public class SettingsController : IController
 {
-    public SettingsController(IRequest request) : base(request) {}
+    public SettingsController(IRequest request) : base(request) { }
 
 
 
@@ -21,10 +21,10 @@ public class SettingsController : IController
     {
         try
         {
-            if (!resConfig.TranslationExists(lang))  return new Response<string>(403, resConfig["SETTINGS_LANG_UNKNOWN"]);
+            if (!resConfig.TranslationExists(lang)) return new Response<string>(403, resConfig["SETTINGS_LANG_UNKNOWN"]);
 
             resConfig.SetLanguage(lang);
-            
+            LoggedInUser.Language = lang;
 
             return new Response<string>(200, resConfig["SETTINGS_LANG_CHANGE_SUCC"]);
         }

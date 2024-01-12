@@ -44,11 +44,7 @@ public class ValueTypeWrapper<T>
 }
 
 /// <summary>
-/// This is garbage. I know that. But time is really limited.
-/// And so is my motivation at this very moment.
-/// I wish I could solely work on this instead of the whole
-/// monster card tra.. monster trading car... tradi.. tradeoff.
-/// Nobody is ever going to read this.
+/// fix this ugly thing.
 /// </summary>
 public class QueryBuilder : IDisposable
 {

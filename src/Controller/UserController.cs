@@ -36,15 +36,12 @@ public class UserController : IController
 
             string username = payload.Name;
             string password = payload.Password;
-            Console.WriteLine($"USERNAME: {username}");
 
-            User? user = repo.GetByName(username);
-            var hashedPwd = CryptoHandler.Encode(password);
+            if (!TryValidateCredentials(username, password, out User? user))
+                return new Response<string>(401, resConfig["USR_CRD_INVALID"]);
 
-            if (user == null || hashedPwd != user.Password)
-                return new Response<User>(401, resConfig["USR_CRD_INVALID"]);
 
-            string authToken = SessionManager.CreateAuthToken(user.ID.ToString());
+            string authToken = SessionManager.CreateAuthToken(user!.ID.ToString());
             SessionManager.CreateSessionForUser(authToken, user);
 
             return new Response<object>(200, new { authToken }, resConfig["USR_LOGIN_SUCC"]);
@@ -55,6 +52,23 @@ public class UserController : IController
 
             return new Response<string>(500, resConfig["USR_LOGIN_ERR"]);
         }
+    }
+
+    /// <summary>
+    /// Checks if the given username and password are valid.
+    /// </summary>
+    /// <param name="username"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
+    private bool TryValidateCredentials(string username, string password, out User? user)
+    {
+        user = repo.GetByName(username);
+        var hashedPwd = CryptoHandler.Encode(password);
+
+        if (user == null || hashedPwd != user.Password)
+            return false;
+        
+        return true;
     }
 
 
@@ -148,7 +162,7 @@ public class UserController : IController
             var user = SessionManager.GetUserBySessionId(request.SessionId);
             var updatedUser = request.PayloadAsObject<User>();
             var userInDb = repo.GetByName(username);
-            
+
             if (userInDb == null)
                 return new Response<string>(404, resConfig["USR_NOT_FOUND"]);
 

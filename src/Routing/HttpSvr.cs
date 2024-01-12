@@ -24,7 +24,8 @@ namespace MTCG
 
         private IRouter router;
 
-        private ServerConfig config = (ServerConfig)ConfigService.Get<ServerConfig>();
+        private ServerConfig serverConfig = Program.services.Get<ServerConfig>();
+
 
 
         public HttpServer(IRouter router)
@@ -72,11 +73,11 @@ namespace MTCG
             if (Active) return;
 
             Active = true;
-            _Listener = new(IPAddress.Parse(config.SERVER_IP), config.SERVER_PORT);
+            _Listener = new(IPAddress.Parse(serverConfig.SERVER_IP), serverConfig.SERVER_PORT);
             _Listener.Start();
             var tasks = new List<Task>();
 
-            byte[] buf = new byte[config.BufferSize];
+            byte[] buf = new byte[serverConfig.BufferSize];
 
             while (Active)
             {
@@ -120,37 +121,29 @@ namespace MTCG
 
         protected IRequest BuildRequest(HttpSvrEventArgs svrEventArgs)
         {
-            CookieContainer cookieContainer = new CookieContainer();
             Session session;
             var clientPort = svrEventArgs.Headers.SingleOrDefault<HttpHeader>(h => h.Name == "Port")?.Value;
-            string? authToken = svrEventArgs.Headers.SingleOrDefault<HttpHeader>(header => header.Name == "Authorization")?.Value;
+            var clientIp = svrEventArgs.Headers.SingleOrDefault<HttpHeader>(h => h.Name == "IP")?.Value;
+            string? authToken = svrEventArgs.Headers.SingleOrDefault<HttpHeader>(header => header.Name == "Authorization")?.Value ?? string.Empty;
             var request = new RequestBuilder();
+            string sessionId;
 
             request
-            .WithHeaders(svrEventArgs.Headers)
-            .WithHttpMethod(svrEventArgs.Method)
-            .WithPayload(svrEventArgs.Payload)
-            .WithRoute(svrEventArgs.Path);
+                .WithHeaders(svrEventArgs.Headers)
+                .WithHttpMethod(svrEventArgs.Method)
+                .WithPayload(svrEventArgs.Payload)
+                .WithRoute(svrEventArgs.Path);
 
-            if (authToken == null)
-                return request.Build();
+            // get session if user already logged in
+            if (authToken != string.Empty && SessionManager.TryGetSessionWithToken(authToken, out session))
+                sessionId = session.SessionId;
 
-            if (SessionManager.TryGetSessionWithToken(authToken, out session))
-            {
-                var sessionId = session.SessionId;
-                request.WithSessionId(sessionId);
-            }
+            else
+                sessionId = SessionManager.CreateAnonymSessionReturnId();
+
+            request.WithSessionId(sessionId);
 
             return request.Build();
-        }
-
-
-        protected string CreateOrGetAnonymSessionId(string port)
-        {
-            if (SessionManager.TryGetSessionWithToken(port, out Session session))
-                return session.SessionId;
-
-            return SessionManager.CreateAnonymSessionReturnId(port);
         }
 
         protected void SetUpRouter()

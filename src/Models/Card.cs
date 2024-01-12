@@ -26,11 +26,20 @@ public enum CardName
     DEFAULT
 }
 
+public enum CardElement
+{
+    Water = 1,
+    Fire = 2,
+    Normal = 4
+}
+
+// realizes bitwise comparises
 public enum CardType
 {
+    Null = 0,
     Monster = 1,
     Spell = 2,
-    Null = 0
+    MonsterVsSpell = Monster | Spell,
 }
 
 
@@ -57,39 +66,22 @@ public class Card : IModel
     public bool Locked { get; set; } = false;
     public string? Type { get; set; } = string.Empty;
     // realized later that an enum would be easier to handle
-    public CardType TypeEnum
-    {
-        get
-        {
-            if (TypeEnum != CardType.Null)
-            {
-                if (Type == "monster" && TypeEnum == CardType.Monster)
-                    return TypeEnum;
-                if (Type == "spell" && TypeEnum == CardType.Spell)
-                    return TypeEnum;
-                else
-                    return CardType.Null;
-            }
-            else
-            {
-                if (Type == "monster")
-                    return CardType.Monster;
-                if (Type == "spell")
-                    return CardType.Spell;
-                else
-                    return CardType.Null;
-            }
-        }
-        set
-        {
-            if (value == CardType.Monster)
-                Type = "monster";
-            if (value == CardType.Spell)
-                Type = "spell";
-            else
-                Type = "null";
-        }
-    }
+    // public CardType TypeEnum
+    // {
+    //     get
+    //     {
+
+    //     }
+    //     set
+    //     {
+    //         if (value == CardType.Monster)
+    //             Type = "monster";
+    //         if (value == CardType.Spell)
+    //             Type = "spell";
+    //         else
+    //             Type = "null";
+    //     }
+    // }
     public object ToSerializableObj()
     {
         return new
@@ -110,6 +102,43 @@ public class Card : IModel
         Name = string.Empty;
         Element = string.Empty;
         Type = string.Empty;
-        TypeEnum = CardType.Null;
+        // TypeEnum = CardType.Null;
     }
+}
+
+public static class CardExtensions
+{
+    /// <summary>
+    /// Returns enum version of a cards type.
+    /// </summary>
+    /// <param name="card"></param>
+    /// <returns>CardType enum.</returns>
+    public static CardType Type(this Card card)
+    {
+        switch (card.Type)
+        {
+            case "monster":
+                return CardType.Monster;
+            case "spell":
+                return CardType.Spell;
+            case "monsterspell":
+
+            default:
+                return CardType.Null;
+        }
+    }
+
+    public static CardElement Element(this Card card)
+    {
+        switch (card.Element)
+        {
+            case "water":
+                return CardElement.Water;
+            case "fire":
+                return CardElement.Fire;
+            default:
+                return CardElement.Normal;
+        }
+    }
+
 }

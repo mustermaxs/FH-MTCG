@@ -31,7 +31,7 @@ public class Request : IRequest
         this.rawUrl = rawUrl;
         this.Headers = headers;
         this.Payload = payload ?? string.Empty;
-        this.sessionId = sessionId;
+        this.sessionId = sessionId ?? string.Empty;
     }
 
     public IRequest SetPayload(string payload)

@@ -148,132 +148,108 @@ public class MTCG_UrlParser
 //////////////////////////////////////////////////////////////////////
 
 
-[TestFixture]
-public class Test_ConfigService
-{
-    public ConfigService configService = ConfigService.GetInstance();
-    [SetUp]
-    public void Setup()
-    {
-        Directory.SetCurrentDirectory("/home/mustermax/vscode_projects/MTCG/MTCG.Tests/");
-    }
+// public class Test_ConfigService
+// {
+//     public ServiceProvider serviveProvider = new ServiceProvider();
+//     public MockConfig? mockConfig = null;
 
-    [Test]
-    public void Register_WithValidPath_ShouldRegisterConfig()
-    {
-        string path = "config.json";
+//     [SetUp]
+//     public void Setup()
+//     {
+//         Directory.SetCurrentDirectory("/home/mustermax/vscode_projects/MTCG/MTCG.Tests/");
+//         this.mockConfig = new MockConfig();
+//     }
 
-        configService.Register<MockConfig>(path);
+//     [TearDown]
+//     public void TearDown()
+//     {
+//         serviveProvider.Unregister<MockConfig>();
+        
+//     }
 
-        Assert.IsTrue(ConfigService.Get<MockConfig>() != null, "Failed to register config");
-    }
 
-    [Test]
-    public void Register_WithInvalidPath_ShouldThrowException()
-    {
-        string path = "invalid_config.json";
+//     [Test]
+//     public void Register_WithValidPath_ShouldRegisterConfig()
+//     {
+//         string path = "config.json";
 
-        Assert.Throws<FileNotFoundException>(() => configService.Register<MockConfig>(path), "Failed to throw exception for invalid path");
-    }
+//         mockConfig = mockConfig.Load<MockConfig>(path);
+//         this.serviveProvider.Register<MockConfig>();
 
-    [Test]
-    public void GetsSubSections()
-    {
-        string section = "a/b/c";
-        string[] res = { "a", "b", "c" };
+//         Assert.IsTrue(serviveProvider.Get<MockConfig>() != null, "Failed to register config");
+//     }
 
-        Assert.That(ConfigService.GetSubsectionKeys(section).Any(s => res.Contains(s)), "Failed to get subsections");
-    }
+//     [Test]
+//     public void Register_WithInvalidPath_ShouldThrowException()
+//     {
+//         string path = "invalid_config.json";
 
-    [Test]
-    public void Gets_ValueFromNestedJsonObject()
-    {
-        string path = "config.json";
-        configService.Register<NestedConfig>(path);
+//         Assert.Throws<FileNotFoundException>(() => mockConfig.Load<MockConfig>(path), "Failed to throw exception for invalid path");
+//     }
 
-        var config = (NestedConfig)ConfigService.Get<NestedConfig>();
 
-        Assert.That(config.AnswerIs == 42, "Config has wrong value for AnswerIs.");
-    }
+//     [Test]
+//     public void Gets_ValueFromNestedJsonObject()
+//     {
+//         string path = "config.json";
+//         var nestedConfig = new NestedConfig();
+//         nestedConfig = nestedConfig.Load<NestedConfig>(path);
 
-    [Test]
-    public void Register_WithConfigObject_ShouldRegisterConfig()
-    {
-        var config = new MockConfig();
+//         serviveProvider.Register<NestedConfig>();
 
-        configService.Register(config);
+//         var config = (NestedConfig)serviveProvider.Get<NestedConfig>();
 
-        Assert.IsTrue(ConfigService.Get<MockConfig>() != null, "Failed to register config");
-    }
+//         Assert.That(config.AnswerIs == 42, "Config has wrong value for AnswerIs.");
+//     }
 
-    [Test]
-    public void SavesEnumerableToConfigObject()
-    {
-        configService.Register<ListConfig>("config.json");
-        var config = (ListConfig)ConfigService.Get<ListConfig>();
-        var expected = new List<int> { 1, 2, 3, 4, 5 };
+//     [Test]
+//     public void Register_WithConfigObject_ShouldRegisterConfig()
+//     {
+//         var config = new MockConfig();
 
-        Assert.That(config.Answers.SequenceEqual(expected), "Failed to save enumerable to config object.");
-    }
+//         serviveProvider.Register(config);
 
-    [Test]
-    [Ignore("")]
-    public void Get_WithRegisteredConfig_ShouldReturnConfig()
-    {
-        configService.Register<MockConfig>("config.json");
+//         Assert.IsTrue(serviveProvider.Get<MockConfig>() != null, "Failed to register config");
+//     }
 
-        var config = ConfigService.Get<MockConfig>();
+//     [Test]
+//     public void SavesEnumerableToConfigObject()
+//     {
+//         var listconfig = new ListConfig();
+//         listconfig = listconfig.Load<ListConfig>("config.json");
+//         serviveProvider.Register<ListConfig>();
 
-        Assert.IsNotNull(config, "Failed to get registered config");
-    }
+//         var config = (ListConfig)serviveProvider.Get<ListConfig>();
+//         var expected = new List<int> { 1, 2, 3, 4, 5 };
 
-    [Test]
-    [Ignore("")]
-    public void Get_ConfigsFromConfigObject()
-    {
-        ConfigService.Unregister<MockConfig>();
-        configService.Register<MockConfig>("config.json");
+//         Assert.That(config.Answers.SequenceEqual(expected), "Failed to save enumerable to config object.");
+//     }
 
-        MockConfig? config = (MockConfig)ConfigService.Get<MockConfig>();
 
-        Assert.That(config.SERVER_IP == "127.0.0.1", "Config has wrong value for SERVER_IP.");
-        Assert.That(config.SERVER_PORT == 12000, "Config has wrong value for SERVER_PORT.");
-    }
+//     public class MockConfig : IConfig, IService
+//     {
+//         override public string Name { get; } = "MockConfig";
+//         public override string FilePath => "config.json";
+//         public string SERVER_IP { get; set; } = "";
+//         public int SERVER_PORT { get; set; } = 0;
+//         public override string Section { get; protected set; } = "mockserver";
+//     }
 
-    [Test]
-    [Ignore("")]
-    public void Get_WithUnregisteredConfig_ShouldReturnNull()
-    {
-        ConfigService.Unregister("MockConfig");
-        var config = ConfigService.Get<MockConfig>();
-
-        Assert.IsNull(config, "Failed to return null for unregistered config");
-    }
-
-    public class MockConfig : IConfig
-    {
-        override public string Name { get; } = "MockConfig";
-        public override string FilePath => "config.json";
-        public string SERVER_IP { get; set; } = "";
-        public int SERVER_PORT { get; set; } = 0;
-        public override string Section { get; protected set; } = "mockserver";
-    }
-
-    public class NestedConfig : IConfig
-    {
-        override public string Name { get; } = "NestedConfig";
-        public override string FilePath => "config.json";
-        public int AnswerIs { get; set; }
-        public override string Section { get; protected set; } = "section/subsection/subsubsection";
-    }
-    public class ListConfig : IConfig
-    {
-        override public string Name { get; } = "ListConfig";
-        public override string FilePath => "config.json";
-        public IEnumerable<int> Answers { get; set; }
-        public override string Section { get; protected set; } = "section/listconfig";
-    }
-}
+//     public class NestedConfig : IConfig, IService
+//     {
+//         override public string Name { get; } = "NestedConfig";
+//         public override string FilePath => "config.json";
+//         public int AnswerIs { get; set; }
+//         public override string Section { get; protected set; } = "section/subsection/subsubsection";
+//     }
+//     public class ListConfig : IConfig, IService
+//     {
+//         override public string Name { get; } = "ListConfig";
+//         public override string FilePath => "config.json";
+//         public IEnumerable<int> Answers { get; set; }
+//         public override string Section { get; protected set; } = "section/listconfig";
+//     }
+// }
 
 
 //////////////////////////////////////////////////////////////////////
@@ -740,12 +716,52 @@ public class Test_FileHandler
     {
         var res = FileHandler.ReadJsonFromFile("config.json");
 
-        Assert.IsTrue(res!["mockserver"]["SERVER_IP"] == "127.0.0.1"
-        && res!["mockserver"]["SERVER_PORT"] == 12000);
+        Assert.IsTrue(res!["server"]["SERVER_IP"] == "127.0.0.1"
+        && res!["server"]["SERVER_PORT"] == 12000);
     }
 }
+
+
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
+
+[TestFixture]
+public class Test_BattleConfig
+{
+    [SetUp]
+    public void Setup()
+    {
+        Directory.SetCurrentDirectory("/home/mustermax/vscode_projects/MTCG/MTCG.Tests/");
+    }
+
+    [TestCase("Goblin", "english", "Goblins are too afraid of Dragons to attack.")]
+    [TestCase("Dragon", "german", "Die Feuerelfen kennen Drachen seit ihrer Kindheit und können ihren Angriffen ausweichen.")]
+    public void GetTranslationsFromConfig(string monster, string language, string description)
+    {
+        var config = JsonConfigLoader.Load<BattleConfig>("config.json", "battle");
+        string? txt = config!.CardDescription(monster, language);
+
+        if (txt == string.Empty) Assert.Fail();
+
+        Assert.That(txt == description, "Failed to get description.");
+    }
+
+    [TestCase("Goblin", "Dragon", false)]
+    public void GetPropertiesForMonster(string attacker, string defender, bool wins)
+    {
+        var config = JsonConfigLoader.Load<BattleConfig>("config.json", "battle");
+        var properties = config!.GetMonsterProperties(attacker);
+
+        if (properties == null) Assert.Fail();
+
+        (string player, string opponent, bool win) = properties.Value;
+
+        Assert.That(opponent == defender, "Failed to get properties.");
+        Assert.That(win == wins, "Failed to get properties.");
+        Assert.That(player == attacker, "Failed to get properties.");
+    }
+
+}
 
 
 

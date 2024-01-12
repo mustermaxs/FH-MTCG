@@ -11,7 +11,7 @@ namespace MTCG;
 public class CardController : IController
 {
     protected static CardRepository repo = new CardRepository();
-    protected CardConfig cardConfig = (CardConfig)ConfigService.Get<CardConfig>()!;
+    protected CardConfig cardConfig = Program.services.Get<CardConfig>();
     public CardController(IRequest request) : base(request) { }
 
 

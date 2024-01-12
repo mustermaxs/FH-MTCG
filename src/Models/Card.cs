@@ -26,6 +26,13 @@ public enum CardName
     DEFAULT
 }
 
+public enum CardType
+{
+    Monster = 1,
+    Spell = 2,
+    Null = 0
+}
+
 
 public class StackCard : Card
 {
@@ -46,8 +53,43 @@ public class Card : IModel
     [JsonConverter(typeof(StringEnumConverter))]
     public string? Name { get; set; } = string.Empty;
     public string? Element { get; set; } = string.Empty;
-    public string? Type { get; set; } = string.Empty;
+
     public bool Locked { get; set; } = false;
+    public string? Type { get; set; } = string.Empty;
+    // realized later that an enum would be easier to handle
+    public CardType TypeEnum
+    {
+        get
+        {
+            if (TypeEnum != CardType.Null)
+            {
+                if (Type == "monster" && TypeEnum == CardType.Monster)
+                    return TypeEnum;
+                if (Type == "spell" && TypeEnum == CardType.Spell)
+                    return TypeEnum;
+                else
+                    return CardType.Null;
+            }
+            else
+            {
+                if (Type == "monster")
+                    return CardType.Monster;
+                if (Type == "spell")
+                    return CardType.Spell;
+                else
+                    return CardType.Null;
+            }
+        }
+        set
+        {
+            if (value == CardType.Monster)
+                Type = "monster";
+            if (value == CardType.Spell)
+                Type = "spell";
+            else
+                Type = "null";
+        }
+    }
     public object ToSerializableObj()
     {
         return new
@@ -68,5 +110,6 @@ public class Card : IModel
         Name = string.Empty;
         Element = string.Empty;
         Type = string.Empty;
+        TypeEnum = CardType.Null;
     }
 }

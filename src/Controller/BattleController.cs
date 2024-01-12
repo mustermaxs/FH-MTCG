@@ -16,10 +16,9 @@ public class BattleController : IController
         try
         {
             string res = string.Empty;
-            var battleRes = await BattleService.HandleBattle(LoggedInUser);
-            // Console.WriteLine(battleRes.ToSerializableObj);
-            
-            return new Response<Battle>(200, battleRes, "BATTLE SUCCESSFUL");
+            var battleRes = await BattleService.BattleRequest(LoggedInUser);
+
+            return new Response<BattleLogEntry>(200, battleRes, "BATTLE SUCCESSFUL");
         }
         catch (Exception ex)
         {

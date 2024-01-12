@@ -10,6 +10,10 @@
         "MinCardsInDeck": 0,
         "PricePerPackage": 5
     },
+    "battle": {
+        "StartingPoints": 100,
+        "MaxNbrRounds": 100
+    },
     "user": {
         "StartAmountCoins": 20
     },
@@ -50,7 +54,7 @@
                 "CRD_DECK_NBR_ERR": "The provided deck did not include the required amount of cards",
                 "CRD_DECK_ADD_ERR": "At least one of the provided cards does not belong to the user or is not available.",
                 "CRD_DECK_ADD_SUCC": "The deck has been successfully configured",
-                "CRD_GETBYID_SUCC":"Fetched card.",
+                "CRD_GETBYID_SUCC": "Fetched card.",
                 "CRD_GETBYID_ERR": "Failed to fetch card.",
                 "CRD_STACK_ADD_SUCC": "Cards successfully added to stack.",
                 "CRD_STACK_ADD_ERR": "No cards provided.",
@@ -70,7 +74,6 @@
                 "TRADE_DEL_SUCC": "Trading deal successfully deleted",
                 "AUTH_ERR": "Access token is missing or invalid.",
                 "ROUTE_UNKOWN": "The requested endpoint doesn't seem to exist."
-
             },
             "german": {
                 "INT_SVR_ERR": "Interner Serverfehler. Etwas ist schiefgegangen :(",
@@ -97,7 +100,7 @@
                 "CRD_DECK_NBR_ERR": "Das bereitgestellte Deck enthielt nicht die erforderliche Anzahl von Karten",
                 "CRD_DECK_ADD_ERR": "Mindestens eine der bereitgestellten Karten gehört nicht dem Benutzer oder steht nicht zur Verfügung.",
                 "CRD_DECK_ADD_SUCC": "Das Deck wurde erfolgreich konfiguriert",
-                "CRD_GETBYID_SUCC":"Karte gefetcht.",
+                "CRD_GETBYID_SUCC": "Karte gefetcht.",
                 "CRD_GETBYID_ERR": "Karte konnte nicht gefetcht werden.",
                 "CRD_STACK_ADD_SUCC": "Karte wurde zum Stack hinzugefügt.",
                 "CRD_STACK_ADD_ERR": "Keine Karten erhalten.",
@@ -117,7 +120,6 @@
                 "TRADE_DEL_SUCC": "Deal erfolgreich gelöscht.",
                 "AUTH_ERR": "Access token fehlt oder ist nicht vorhanden.",
                 "ROUTE_UNKOWN": "Die angefragte Adresse konnte nicht gefunden werden."
-
             }
         }
     }

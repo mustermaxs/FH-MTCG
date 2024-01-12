@@ -21,14 +21,13 @@ namespace MTCG
         // public event EventHandler<BattleEventArgs> StartBattle;
         private static object battleLock1 = new object();
         private static object battleLock2 = new object();
-        private static ConcurrentDictionary<User, TaskCompletionSource<Battle>> pendingBattles = new ConcurrentDictionary<User, TaskCompletionSource<Battle>>();
+        private static ConcurrentDictionary<User, TaskCompletionSource<BattleLogEntry>> pendingBattles = new ConcurrentDictionary<User, TaskCompletionSource<BattleLogEntry>>();
         private static SemaphoreSlim foundOpponent = new SemaphoreSlim(0, int.MaxValue);
 
         public static ConcurrentQueue<User> pendingUsers = new ConcurrentQueue<User>();
 
         public BattleService()
         {
-            // StartBattle += (sender, args) => { };
         }
 
         /// <summary>
@@ -37,13 +36,13 @@ namespace MTCG
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        protected static TaskCompletionSource<Battle> AddToWaitingLine(User player)
+        protected static TaskCompletionSource<BattleLogEntry> AddToWaitingLine(User player)
         {
             lock (battleLock1)
             {
-                var waitingTask = new TaskCompletionSource<Battle>();
+                var waitingTask = new TaskCompletionSource<BattleLogEntry>();
                 pendingBattles[player] = waitingTask;
-                OnFindOpponent();
+                OnFindOpponentTriggerStart();
 
                 return waitingTask;
             }
@@ -59,7 +58,7 @@ namespace MTCG
 
         }
 
-        public static void OnFindOpponent()
+        public static void OnFindOpponentTriggerStart()
         {
             if (pendingUsers.Count >= 2 && pendingUsers.Count != 1)
             {
@@ -68,18 +67,18 @@ namespace MTCG
             }
         }
 
-        public static async Task<Battle> HandleBattle(User player1)
+        public static async Task<BattleLogEntry> BattleRequest(User player1)
         {
             AddToQueue(player1);
             var res = AddToWaitingLine(player1);
-            StartBattle();
+            PerformBattle();
 
-            Battle battleResult = await res.Task;
+            BattleLogEntry battleResult = await res.Task;
 
             return battleResult;
         }
 
-        public static async void StartBattle()
+        public static async void PerformBattle()
         {
             await foundOpponent.WaitAsync();
 
@@ -93,7 +92,7 @@ namespace MTCG
                     List<string> actions = new List<string>();
                     actions.Add($"STARTING BATTLE: {player1.Name} vs {player2.Name}");
 
-                    var battle = new Battle { Player1 = player1, Player2 = player2 };
+                    var battle = new BattleLogEntry { Player1 = player1, Player2 = player2 };
 
                     pendingBattles[player1].SetResult(battle);
                     pendingBattles[player2].SetResult(battle);

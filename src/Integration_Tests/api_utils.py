@@ -45,7 +45,8 @@ api = {
         "users_settings_language": "/users/settings/language",
         "add_to_stack": "/stack/:id",
         "add_card_glob": "/cards",
-        "battle": "/battle"
+        "battle": "/battle",
+        "logout": "/session/logout"
     },
     "DELETE": {
         "tradings": "/tradings/:id",

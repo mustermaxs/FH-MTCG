@@ -147,114 +147,6 @@ public class MTCG_UrlParser
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-
-// public class Test_ConfigService
-// {
-//     public ServiceProvider serviveProvider = new ServiceProvider();
-//     public MockConfig? mockConfig = null;
-
-//     [SetUp]
-//     public void Setup()
-//     {
-//         Directory.SetCurrentDirectory("/home/mustermax/vscode_projects/MTCG/MTCG.Tests/");
-//         this.mockConfig = new MockConfig();
-//     }
-
-//     [TearDown]
-//     public void TearDown()
-//     {
-//         serviveProvider.Unregister<MockConfig>();
-        
-//     }
-
-
-//     [Test]
-//     public void Register_WithValidPath_ShouldRegisterConfig()
-//     {
-//         string path = "config.json";
-
-//         mockConfig = mockConfig.Load<MockConfig>(path);
-//         this.serviveProvider.Register<MockConfig>();
-
-//         Assert.IsTrue(serviveProvider.Get<MockConfig>() != null, "Failed to register config");
-//     }
-
-//     [Test]
-//     public void Register_WithInvalidPath_ShouldThrowException()
-//     {
-//         string path = "invalid_config.json";
-
-//         Assert.Throws<FileNotFoundException>(() => mockConfig.Load<MockConfig>(path), "Failed to throw exception for invalid path");
-//     }
-
-
-//     [Test]
-//     public void Gets_ValueFromNestedJsonObject()
-//     {
-//         string path = "config.json";
-//         var nestedConfig = new NestedConfig();
-//         nestedConfig = nestedConfig.Load<NestedConfig>(path);
-
-//         serviveProvider.Register<NestedConfig>();
-
-//         var config = (NestedConfig)serviveProvider.Get<NestedConfig>();
-
-//         Assert.That(config.AnswerIs == 42, "Config has wrong value for AnswerIs.");
-//     }
-
-//     [Test]
-//     public void Register_WithConfigObject_ShouldRegisterConfig()
-//     {
-//         var config = new MockConfig();
-
-//         serviveProvider.Register(config);
-
-//         Assert.IsTrue(serviveProvider.Get<MockConfig>() != null, "Failed to register config");
-//     }
-
-//     [Test]
-//     public void SavesEnumerableToConfigObject()
-//     {
-//         var listconfig = new ListConfig();
-//         listconfig = listconfig.Load<ListConfig>("config.json");
-//         serviveProvider.Register<ListConfig>();
-
-//         var config = (ListConfig)serviveProvider.Get<ListConfig>();
-//         var expected = new List<int> { 1, 2, 3, 4, 5 };
-
-//         Assert.That(config.Answers.SequenceEqual(expected), "Failed to save enumerable to config object.");
-//     }
-
-
-//     public class MockConfig : IConfig, IService
-//     {
-//         override public string Name { get; } = "MockConfig";
-//         public override string FilePath => "config.json";
-//         public string SERVER_IP { get; set; } = "";
-//         public int SERVER_PORT { get; set; } = 0;
-//         public override string Section { get; protected set; } = "mockserver";
-//     }
-
-//     public class NestedConfig : IConfig, IService
-//     {
-//         override public string Name { get; } = "NestedConfig";
-//         public override string FilePath => "config.json";
-//         public int AnswerIs { get; set; }
-//         public override string Section { get; protected set; } = "section/subsection/subsubsection";
-//     }
-//     public class ListConfig : IConfig, IService
-//     {
-//         override public string Name { get; } = "ListConfig";
-//         public override string FilePath => "config.json";
-//         public IEnumerable<int> Answers { get; set; }
-//         public override string Section { get; protected set; } = "section/listconfig";
-//     }
-// }
-
-
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-
 [TestFixture]
 
 public class Test_Request
@@ -366,13 +258,6 @@ public class Tests_Response
         Assert.AreEqual(200, response.StatusCode);
     }
 
-
-    [Ignore("")]
-    [Test]
-    public void PayloadAsJson_ReturnsSerializedPayload_WhenPayloadIsNotIModel()
-    {
-
-    }
 }
 
 //////////////////////////////////////////////////////////////////////

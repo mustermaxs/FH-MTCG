@@ -14,7 +14,7 @@ public class BattleManager
     public BattleConfig config;
     public User player1 { get; set; }
     public User player2 { get; set; }
-    public readonly int roundsPlayed;
+    public int roundsPlayed { get; private set; }
     public bool battleIsFinished { get; set; }
     public CardRepository cardRepo { get; set; }
     public Battle battle { get; set; }
@@ -68,7 +68,7 @@ public class BattleManager
         var cardPlayer1 = DrawCard(player1.Deck);
         var cardPlayer2 = DrawCard(player2.Deck);
 
-        if (MeetsEndConditions()) return false; // end already here if deck empty
+        if (!ShouldContinue()) return false; // end already here if deck empty
 
         var cardAndOwner1 = new CardAndOwner { card = cardPlayer1!, owner = player1 };
         var cardAndOwner2 = new CardAndOwner { card = cardPlayer2!, owner = player2 };
@@ -91,8 +91,8 @@ public class BattleManager
 
         // TODO transfer card to winner
 
-
-        return MeetsEndConditions();
+        roundsPlayed++;
+        return ShouldContinue();
     }
 
     public BattleLogEntry HandleSpellVsSpell(CardAndOwner co1, CardAndOwner co2)
@@ -240,15 +240,15 @@ public class BattleManager
         return true;
     }
 
-    public bool MeetsEndConditions()
+    public bool ShouldContinue()
     {
         int cardCountPlayer1 = player1.Deck?.Count() ?? 0;
         int cardCountPlayer2 = player2.Deck?.Count() ?? 0;
         bool reachedMaxRound = roundsPlayed >= config.MaxNbrRounds;
 
-        return cardCountPlayer1 == 0
-            || cardCountPlayer2 == 0
-            || reachedMaxRound;
+        return cardCountPlayer1 != 0
+            && cardCountPlayer2 != 0
+            && !reachedMaxRound;
     }
 
     public DeckCard? DrawCard(IEnumerable<DeckCard>? deck)

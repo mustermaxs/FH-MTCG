@@ -3,6 +3,7 @@ using System;
 using MTCG;
 using Moq;
 using System.IO;
+using System.Collections.Generic;
 
 namespace UnitTest.MTCG
 {
@@ -35,7 +36,7 @@ namespace UnitTest.MTCG
             var fireCard = new Card { Damage = 5, Element = "fire" };
             CardAndOwner cp1 = new CardAndOwner { card = waterCard, owner = mockp1!.Object };
             CardAndOwner cp2 = new CardAndOwner { card = fireCard, owner = mockp2!.Object };
-            
+
             var winner = bm!.GetStrongerSpellCardAndOwner(cp1, cp2);
             var owner = winner?.owner;
 
@@ -50,11 +51,52 @@ namespace UnitTest.MTCG
             var mockCard2 = new Card { Damage = 20, Element = "fire" };
             CardAndOwner cp1 = new CardAndOwner { card = mockCard1, owner = mockp1!.Object };
             CardAndOwner cp2 = new CardAndOwner { card = mockCard2, owner = mockp2!.Object };
-            
+
             var winner = bm!.GetStrongerSpellCardAndOwner(cp1, cp2);
             var owner = winner?.owner;
 
-            Assert.That(owner == mockp2.Object, $"Stronger owner was {owner?.Name} instead of {mockp2.Object.Name}");  
+            Assert.That(owner == mockp2.Object, $"Stronger owner was {owner?.Name} instead of {mockp2.Object.Name}");
+        }
+
+        [Test]
+        public void StrongerSpellAndCardOwner_NormalAndWater_EqualDamage_Is_Null()
+        {
+            var mockCard1 = new Card { Damage = 5, Element = "normal" };
+            var mockCard2 = new Card { Damage = 10, Element = "water" };
+            CardAndOwner cp1 = new CardAndOwner { card = mockCard1, owner = mockp1!.Object };
+            CardAndOwner cp2 = new CardAndOwner { card = mockCard2, owner = mockp2!.Object };
+
+            var winner = bm!.GetStrongerSpellCardAndOwner(cp1, cp2);
+
+            Assert.That(winner == null, "Result is not null. Cards should be equally strong.");
+        }
+
+        [Test]
+        public void NextRound_EndsAfter_1_RoundIf_1_CardInDeck()
+        {
+            var mockCard1 = new DeckCard { Damage = 5, Element = "normal" };
+            var mockCard2 = new DeckCard { Damage = 10, Element = "water" };
+            var deck1 = new List<DeckCard> { mockCard1 };
+            var deck2 = new List<DeckCard> { mockCard2 };
+            mockp1!.Object.Deck = deck1;
+            mockp2!.Object.Deck = deck2;
+
+            Assert.That(bm!.NextRound() == false, "Should have ended after 1 round.");
+        }
+
+        [Test]
+        public void Play_EndsAfter_1_RoundWith_1_Card()
+        {
+            var mockCard1 = new DeckCard { Damage = 5, Element = "normal" };
+            var mockCard2 = new DeckCard { Damage = 10, Element = "water" };
+            var deck1 = new List<DeckCard> { mockCard1 };
+            var deck2 = new List<DeckCard> { mockCard2 };
+            mockp1!.Object.Deck = deck1;
+            mockp2!.Object.Deck = deck2;
+
+            bm!.Play();
+
+            Assert.That(bm!.roundsPlayed == 1, "Battle should have ended after 1 round.");
         }
     }
 

@@ -130,7 +130,12 @@ def test_create_package(cn=None):
 
     assert_true(res.status_code == 200 and len(packages) == 1, True, res.reason)
 
+@with_caller_name
+def test_logout_user(cn=None):
+    login_as(users["max"])
+    res = req.post(url("logout", "POST"), headers=Headers(users["max"].token))
 
+    assert_true(res.status_code == 200, res.reason)
 
 
 @with_caller_name

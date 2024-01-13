@@ -5,7 +5,7 @@ import random
 
 
 settings = {
-    "translate_german": False
+    "changedLang": False
 }
 
 def reset():
@@ -23,7 +23,7 @@ def change_language(lang: str, user: User):
 
 
 def login_as(user: User):
-    if settings["translate_german"]:
+    if user.Name == "max" and not settings["changedLang"]:
         change_language("german", user)
         settings["changedLang"] = True
     creds = {"Name": user.Name, "Password": user.Password}

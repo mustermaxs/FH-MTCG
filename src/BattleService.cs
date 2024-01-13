@@ -21,7 +21,7 @@ namespace MTCG
         // public event EventHandler<BattleEventArgs> StartBattle;
         private static object battleLock1 = new object();
         private static object battleLock2 = new object();
-        private static ConcurrentDictionary<User, TaskCompletionSource<BattleLogEntry>> pendingBattles = new ConcurrentDictionary<User, TaskCompletionSource<BattleLogEntry>>();
+        private static ConcurrentDictionary<User, TaskCompletionSource<Battle>> pendingBattles = new ConcurrentDictionary<User, TaskCompletionSource<Battle>>();
         private static SemaphoreSlim foundOpponent = new SemaphoreSlim(0, int.MaxValue);
 
         public static ConcurrentQueue<User> pendingUsers = new ConcurrentQueue<User>();
@@ -36,11 +36,11 @@ namespace MTCG
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        protected static TaskCompletionSource<BattleLogEntry> AddToWaitingLine(User player)
+        protected static TaskCompletionSource<Battle> AddToWaitingLine(User player)
         {
             lock (battleLock1)
             {
-                var waitingTask = new TaskCompletionSource<BattleLogEntry>();
+                var waitingTask = new TaskCompletionSource<Battle>();
                 pendingBattles[player] = waitingTask;
                 OnFindOpponentTriggerStart();
 
@@ -67,13 +67,13 @@ namespace MTCG
             }
         }
 
-        public static async Task<BattleLogEntry> BattleRequest(User player1)
+        public static async Task<Battle> BattleRequest(User player1)
         {
             AddToQueue(player1);
             var res = AddToWaitingLine(player1);
             PerformBattle();
 
-            BattleLogEntry battleResult = await res.Task;
+            Battle battleResult = await res.Task;
 
             return battleResult;
         }
@@ -89,10 +89,10 @@ namespace MTCG
 
                 {
                     List<string> actions = new List<string>();
-                    actions.Add($"STARTING BATTLE: {player1.Name} vs {player2.Name}");
-
-                    var battle = new BattleLogEntry { Player1 = player1, Player2 = player2 };
-
+                    
+                    var battleManager = new BattleManager(player1, player2, Program.services.Get<BattleConfig>());
+                    var battle = battleManager.Play();
+                    
                     pendingBattles[player1].SetResult(battle);
                     pendingBattles[player2].SetResult(battle);
 

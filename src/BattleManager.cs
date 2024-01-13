@@ -29,18 +29,18 @@ public class BattleManager
         this.battleIsFinished = false;
         this.config = config;
         this.cardRepo = new CardRepository();
-
-        // Setup();
     }
 
     public void Setup()
     {
         // TODO resConfig für exception msg
-        if (player1.Deck.Count() == 0 || player2.Deck.Count() == 0)
-            throw new Exception("Deck is empty");
+
 
         if (!LoadUserDeck(player1) || !LoadUserDeck(player2))
             throw new Exception("Failed to load users deck");
+
+            battle.Player1 = player1;
+            battle.Player2 = player2;
     }
 
 
@@ -73,7 +73,15 @@ public class BattleManager
     /// <returns>Battle result.</returns>
     public Battle Play()
     {
+        Setup();
+
         while (NextRound()) ;
+
+        if (roundsPlayed == config.MaxNbrRounds)
+            battle.Winner = null;
+        
+        battle.CountRounds = roundsPlayed;
+        battle.EndDateTime = DateTime.Now;
 
         return battle;
     }
@@ -306,6 +314,7 @@ public class BattleManager
         if (waterAndFire)
         {
             var waterCard = CardElement.Water == cardPlayer1.Element() ? cardPlayer1 : cardPlayer2;
+            
             return HigherCalcDamage(cp1, cp2, 2, waterCard);
         }
         else if (fireAndNormal)

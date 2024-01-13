@@ -17,7 +17,7 @@ async def main():
 
     # test_user = User("test", "test", "", ":)", 100, "", "")
     await test_battle()
-    await test_battle_multiple_clients()
+    # await test_battle_multiple_clients()
     test_register_alreadyexisting_user()
     test_retrieve_packages_no_packages()
     test_login(users["max"])

@@ -18,7 +18,7 @@ public class BattleController : IController
             string res = string.Empty;
             var battleRes = await BattleService.BattleRequest(LoggedInUser);
 
-            return new Response<BattleLogEntry>(200, battleRes, "BATTLE SUCCESSFUL");
+            return new Response<Battle>(200, battleRes, "BATTLE SUCCESSFUL");
         }
         catch (Exception ex)
         {

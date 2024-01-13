@@ -43,11 +43,11 @@ class Trade:
 
 trade = Trade("firekraken", "fire", 10.0)
 
-firekraken = Card("", 10.0, "FireKraken", "fire", "monster")
-firetroll = Card("", 10.0, "FireTroll", "fire", "monster")
+firekraken = Card("", 10.0, "Ork", "fire", "monster")
+firetroll = Card("", 10.0, "Wizard", "fire", "monster")
 firespell = Card("", 10.0, "FireSpell", "fire", "monster")
 waterspell = Card("", 10.0, "WaterSpell", "water", "spell")
-regularspell = Card("", 10.0, "RegularSpell", "normal", "spell")
+regularspell = Card("", 10.0, "Knight", "normal", "spell")
 
 cards = {
     "firekraken": firekraken,

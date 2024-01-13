@@ -14,6 +14,8 @@ public class BattleManager
     public BattleConfig config;
     public User player1 { get; set; }
     public User player2 { get; set; }
+    public List<DeckCard> playedCardsPlayer1 { get; set; } = new List<DeckCard>();
+    public List<DeckCard> playedCardsPlayer2 { get; set; } = new List<DeckCard>();
     public int roundsPlayed { get; private set; }
     public bool battleIsFinished { get; set; }
     public CardRepository cardRepo { get; set; }
@@ -41,6 +43,11 @@ public class BattleManager
             throw new Exception("Failed to load users deck");
     }
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
     public BattleLogEntry NewEntry(Card cardPlayer1, Card cardPlayer2, User? roundWinner = null, string description = "")
     {
         return new BattleLogEntry
@@ -55,20 +62,35 @@ public class BattleManager
         };
     }
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    /// <summary>
+    /// Entry point for battle.
+    /// </summary>
+    /// <returns>Battle result.</returns>
     public Battle Play()
     {
-        while (NextRound())
-            NextRound();
+        while (NextRound()) ;
 
         return battle;
-
     }
+
+
+
+    /// <summary>
+    /// Starts next round.
+    /// </summary>
+    /// <returns>Bool. Inidicates if battle meets ending criiteria or not.</returns>
+    /// <exception cref="Exception">When card played that isnt registered as an allowed type.</exception>
     public bool NextRound()
     {
-        var cardPlayer1 = DrawCard(player1.Deck);
-        var cardPlayer2 = DrawCard(player2.Deck);
+        if (!ShouldContinue()) return false;
 
-        if (!ShouldContinue()) return false; // end already here if deck empty
+        var cardPlayer1 = DrawCard(player1);
+        var cardPlayer2 = DrawCard(player2);
 
         var cardAndOwner1 = new CardAndOwner { card = cardPlayer1!, owner = player1 };
         var cardAndOwner2 = new CardAndOwner { card = cardPlayer2!, owner = player2 };
@@ -76,24 +98,30 @@ public class BattleManager
         BattleLogEntry battleLogEntry;
 
         if (CardType.Monster == (cardPlayer1!.Type() & cardPlayer2!.Type()))
-            battleLogEntry = HandleMonsterVsMonster(cardPlayer1, cardPlayer2);
+            battleLogEntry = HandleMonsterVsMonster(cardAndOwner1, cardAndOwner2);
 
         else if (CardType.Spell == (cardPlayer1!.Type() & cardPlayer2!.Type()))
             battleLogEntry = HandleSpellVsSpell(cardAndOwner1, cardAndOwner2);
 
-        // player 1 plays monster card, player 2 plays spell card or vice versa
         else if ((CardType.Monster | CardType.Spell) == (cardPlayer1!.Type() | cardPlayer2!.Type()))
-            battleLogEntry = HandleSpellVsMonster(cardPlayer1, cardPlayer2);
+            battleLogEntry = HandleSpellVsMonster(cardAndOwner1, cardAndOwner2);
         else
             throw new Exception("Unhandled card type");
 
         battle.BattleLog.Add(battleLogEntry);
 
         // TODO transfer card to winner
-
+        playedCardsPlayer1.Add(cardPlayer1!);
+        playedCardsPlayer2.Add(cardPlayer2!);
         roundsPlayed++;
+
         return ShouldContinue();
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
 
     public BattleLogEntry HandleSpellVsSpell(CardAndOwner co1, CardAndOwner co2)
     {
@@ -102,7 +130,7 @@ public class BattleManager
         var cardPlayer2 = co2.card;
 
         string description = string.Empty;
-
+        // REMOVE
         if (cardPlayer1.Element() == cardPlayer2.Element())
         {
             if (result == null)
@@ -114,11 +142,17 @@ public class BattleManager
                 return NewEntry(cardPlayer1, cardPlayer2, result?.owner);
             }
         }
-        
-        result = GetStrongerSpellCardAndOwner(co1, co2);
+
+        result = GetStrongerElementCard(co1, co2);
 
         return NewEntry(cardPlayer1, cardPlayer2, result?.owner);
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
 
     public string ActionMsg(Card cardPlayer1, Card cardPlayer2)
     {
@@ -130,15 +164,62 @@ public class BattleManager
         throw new NotImplementedException();
     }
 
-    public BattleLogEntry HandleSpellVsMonster(DeckCard cardPlayer1, DeckCard cardPlayer2)
+    public BattleLogEntry HandleSpellVsMonster(CardAndOwner co1, CardAndOwner co2)
     {
-        throw new NotImplementedException();
+        CardAndOwner? winner = HigherCalcDamage(co1, co2);
+
+        return NewEntry(co1.card, co2.card, winner?.owner);
     }
 
-    public BattleLogEntry HandleMonsterVsMonster(DeckCard cardPlayer1, DeckCard cardPlayer2)
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
+    public BattleLogEntry HandleMonsterVsMonster(CardAndOwner co1, CardAndOwner co2)
     {
-        throw new NotImplementedException();
+        // throw new NotImplementedException();
+        var cardPlayer1 = co1.card;
+        var cardPlayer2 = co2.card;
+        CardAndOwner? winner = null;
+
+        if (cardPlayer1.ToCardName() == cardPlayer2.ToCardName())
+            winner = HigherCalcDamage(co1, co2, 1.0, null);
+        else
+            winner = GetStrongerMonsterCard(co1, co2);
+
+        return NewEntry(cardPlayer1, cardPlayer2, winner?.owner);
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    public CardAndOwner? GetStrongerMonsterCard(CardAndOwner co1, CardAndOwner co2)
+    {
+        var cardPlayer1 = co1.card;
+        var cardPlayer2 = co2.card;
+
+        var goblinVsDragon = (CardName.Goblin | CardName.Dragon) == (cardPlayer1.ToCardName() | cardPlayer2.ToCardName());
+        var wizardVsOrk = (CardName.Wizard | CardName.Ork) == (cardPlayer1.ToCardName() | cardPlayer2.ToCardName());
+        var fireelfVsDragon = (CardName.FireElf | CardName.Dragon) == (cardPlayer1.ToCardName() | cardPlayer2.ToCardName());
+
+        if (goblinVsDragon)
+            return HigherCalcDamage(co1, co2, 0, cardPlayer1.ToCardName() == CardName.Goblin ? cardPlayer1 : cardPlayer2);
+        else if (wizardVsOrk)
+            return HigherCalcDamage(co1, co2, 0, cardPlayer1.ToCardName() == CardName.Ork ? cardPlayer1 : cardPlayer2);
+        else if (fireelfVsDragon)
+            return HigherCalcDamage(co1, co2, 0, cardPlayer1.ToCardName() == CardName.Dragon ? cardPlayer1 : cardPlayer2);
+        else
+            return HigherCalcDamage(co1, co2);
+    }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
 
 
     /// <summary>
@@ -158,56 +239,70 @@ public class BattleManager
     }
 
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
     /// <summary>
-    /// Returns the card with the higher damage and its owner.
-    /// Applies a multiplier (factor) to player1 damage. E.g. fire vs. water:
-    /// according to the rules, wateer should have its damage doubled - if the
-    /// second card has element water, the first card will be multiplied with
-    /// the inverse of the factor (0.5).
-    /// T is either Enum CardElement, or CardType. Used to determine the beneficial card.
+    /// Returns the card with the higher calculated damage and its owner.
+    /// Based on the effectedByFactor param, it determines the card
+    /// to which it should apply the multiplier to.
     /// </summary>
-    /// <param name="c1"></param>
-    /// <param name="c2"></param>
-    /// <param name="factor"></param>
+    /// <param name="c1">
+    /// CardAndOwner Player1.
+    /// </param>
+    /// <param name="c2">
+    /// CardAndOwner Player2.
+    /// </param>
+    /// <param name="factor">
+    /// Factor by which damage should be multiplied with.
+    /// </param>
     /// <returns>Stronger CardAndOwner. Null if they are equally strong,
     /// even after applying a damage factor.</returns>
-    public CardAndOwner? HigherCalcDamage(CardAndOwner c1, CardAndOwner c2, double factor = 1.0, Card? beneficialCard = null)
+    public CardAndOwner? HigherCalcDamage(CardAndOwner c1, CardAndOwner c2, double factor = 1.0, Card? effectedByFactor = null)
     {
         var card1 = c1.card;
         var card2 = c2.card;
-        
-        if (beneficialCard != null)
+        double factor1 = 1;
+        double factor2 = 1;
+
+        if (effectedByFactor != null)
         {
-            bool player1OwnsBeneficialCard = beneficialCard == card1 ? true : false;
-            factor = player1OwnsBeneficialCard ? factor : (1/factor);
+            bool card1IsEffectedCard = effectedByFactor == card1 ? true : false;
+            if (card1IsEffectedCard) factor1 = factor;
+            if (!card1IsEffectedCard) factor2 = factor;
         }
 
-        if (card1.Damage * factor == card2.Damage)
+        if (card1.Damage * factor1 == card2.Damage * factor2)
             return null;
 
-        bool card1Stronger = card1.Damage * factor > card2.Damage;
+        bool card1Stronger = card1.Damage * factor1 > card2.Damage * factor2;
 
         return card1Stronger ? c1 : c2;
     }
 
 
 
-    public CardAndOwner? GetStrongerSpellCardAndOwner(CardAndOwner cp1, CardAndOwner cp2)
-    {
-        // CardAndOwner cardAndOwner = default;
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
+
+    public CardAndOwner? GetStrongerElementCard(CardAndOwner cp1, CardAndOwner cp2)
+    {
         var cardPlayer1 = cp1.card;
         var cardPlayer2 = cp2.card;
 
         var damage1 = cardPlayer1.Damage;
         var damage2 = cardPlayer2.Damage;
 
+        // check card combination
         bool waterAndFire = (CardElement.Water | CardElement.Fire) == (cardPlayer1.Element() | cardPlayer2.Element());
         bool fireAndNormal = (CardElement.Normal | CardElement.Fire) == (cardPlayer1.Element() | cardPlayer2.Element());
         bool normalAndWater = (CardElement.Normal | CardElement.Water) == (cardPlayer1.Element() | cardPlayer2.Element());
         bool normalAndNormal = (CardElement.Normal | CardElement.Normal) == (cardPlayer1.Element() | cardPlayer2.Element());
 
-
+        // handle individual cases with their special rules
         if (waterAndFire)
         {
             var waterCard = CardElement.Water == cardPlayer1.Element() ? cardPlayer1 : cardPlayer2;
@@ -228,6 +323,10 @@ public class BattleManager
     }
 
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
     public bool LoadUserDeck(User user)
     {
         var deck = user.Deck;
@@ -240,6 +339,11 @@ public class BattleManager
         return true;
     }
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
     public bool ShouldContinue()
     {
         int cardCountPlayer1 = player1.Deck?.Count() ?? 0;
@@ -251,17 +355,28 @@ public class BattleManager
             && !reachedMaxRound;
     }
 
-    public DeckCard? DrawCard(IEnumerable<DeckCard>? deck)
-    {
-        int cardCount = deck?.Count() ?? 0;
 
-        if (deck == null || cardCount == 0) return null;
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    public DeckCard? DrawCard(User player)
+    {
+        List<DeckCard> deck = player.Deck.ToList();
+
+        int cardCount = deck.Count;
+
+        if (cardCount == 0) return null;
 
         Random random = new Random();
         var randIndex = random.Next(0, cardCount);
 
-        // TODO remove card from deck after played? or after lost round
-        return deck.ElementAt(randIndex);
+        var card = deck[randIndex];
+        deck.RemoveAt(randIndex);
+
+        player.Deck = deck;
+
+        return card;
     }
 
 }

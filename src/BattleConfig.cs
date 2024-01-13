@@ -10,7 +10,7 @@ namespace MTCG
         public override string Section { get; protected set; }
         public JsonElement SpecialRules { get; set; } = default!;
         public JsonElement BattleResultMsgs { get; set; } = default!;
-        public int MaxNbrRounds { get; set; }
+        public virtual int MaxNbrRounds { get; set; }
         public string DefaultLanguage
         {
             get

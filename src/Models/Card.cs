@@ -4,27 +4,29 @@ using Newtonsoft.Json.Converters;
 
 namespace MTCG;
 
+[Flags]
 public enum CardName
 {
-    WaterGoblin,
-    FireGoblin,
-    RegularGoblin,
-    WaterTroll,
-    FireTroll,
-    RegularTroll,
-    WaterElf,
-    FireElf,
-    RegularElf,
-    WaterSpell,
-    FireSpell,
-    RegularSpell,
-    Knight,
-    Dragon,
-    Ork,
-    Kraken,
-    FireKraken,
-    DEFAULT
+    WaterGoblin = 1,
+    FireGoblin = 2,
+    Goblin = 4,
+    WaterTroll = 8,
+    FireTroll = 16,
+    RegularTroll = 32,
+    WaterElf = 64,
+    FireElf = 128,
+    RegularElf = 256,
+    WaterSpell = 512,
+    FireSpell = 1024,
+    RegularSpell = 2048,
+    Knight = 4096,
+    Dragon = 8192,
+    Ork = 16384,
+    Kraken = 32768,
+    Wizard = 65536,
+    DEFAULT = 131072
 }
+
 
 public enum CardElement
 {
@@ -122,7 +124,7 @@ public static class CardExtensions
             case "spell":
                 return CardType.Spell;
             case "monsterspell":
-
+                return CardType.MonsterVsSpell;
             default:
                 return CardType.Null;
         }
@@ -139,6 +141,15 @@ public static class CardExtensions
             default:
                 return CardElement.Normal;
         }
+    }
+
+    public static CardName ToCardName(this Card card)
+    {
+        if (Enum.TryParse(card.Name, true, out CardName result) && Enum.IsDefined(typeof(CardName), result))
+        {
+            return result;
+        }
+        throw new Exception($"Could not parse {card.Name} to CardName enum.");
     }
 
 }

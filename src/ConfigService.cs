@@ -13,14 +13,17 @@ namespace MTCG
 
     public class ServiceProvider
     {
-        protected ConcurrentDictionary<string, IService> services = new ConcurrentDictionary<string, IService>();
+        protected ConcurrentDictionary<string, IService> localServices = new ConcurrentDictionary<string, IService>();
+        protected static ConcurrentDictionary<string, IService> staticServices = new ConcurrentDictionary<string, IService>();
+        protected static ConcurrentDictionary<string, Type> disposableServices = new ConcurrentDictionary<string, Type>();
+
 
         public virtual ServiceProvider Register<T>() where T : IService, new()
         {
             var serviceName = typeof(T).Name;
             var service = new T();
 
-            services[serviceName] = service;
+            localServices[serviceName] = service;
             Console.WriteLine($"[Registered Service] {serviceName}");
 
             return this;
@@ -29,26 +32,120 @@ namespace MTCG
         {
             var serviceName = service.GetType().Name;
 
-            services[serviceName] = service;
+            localServices[serviceName] = service;
             Console.WriteLine($"[Registered Service] {serviceName}");
 
             return this;
         }
 
+
+        public ServiceProvider RegisterStatic(IService service)
+        {
+            var serviceName = service.GetType().Name;
+
+            staticServices[serviceName] = service;
+            Console.WriteLine($"[Registered Service] {serviceName}");
+
+            return this;
+        }
+
+
+        public ServiceProvider RegisterDisposable<T>() where T : IService, new()
+        {
+            var serviceName = typeof(T).Name;
+
+            disposableServices[serviceName] = typeof(T);
+            Console.WriteLine($"[Registered Service] {serviceName}");
+
+            return this;
+        }
+
+
+
+        // public virtual ServiceProvider RegisterLocalService<T>() where T : IService
+        // {
+        //     var serviceName = typeof(T).Name;
+
+        //     localServices[serviceName] = typeof(T);
+        //     Console.WriteLine($"[Registered Service] {serviceName}");
+
+        //     return this;
+        // }
+
+        // public virtual ServiceProvider RegisterLocalService(IService service)
+        // {
+        //     var serviceName = service.GetType().Name;
+
+        //     localServices[serviceName] = service.GetType();
+        //     Console.WriteLine($"[Registered Service] {serviceName}");
+
+        //     return this;
+        // }
+
+        public ServiceProvider RegisterStatic<T>() where T : IService, new()
+        {
+            var serviceName = typeof(T).Name;
+            var service = new T();
+
+            staticServices[serviceName] = service;
+            Console.WriteLine($"[Registered Service] {serviceName}");
+
+            return this;
+        }
+
+
+
         public bool Unregister<T>() where T : IService
         {
-            return services.TryRemove(typeof(T).Name, out IService? _);
+            return localServices.TryRemove(typeof(T).Name, out IService? _);
         }
 
         public virtual T Get<T>() where T : IService
         {
             Type serviceType = typeof(T);
 
-            if (services.TryGetValue(serviceType.Name, out IService? config))
+            if (localServices.TryGetValue(serviceType.Name, out IService? config))
                 return (T)config;
 
             throw new Exception($"Failed to get config {serviceType.Name}");
         }
+
+        public static T GetDisposable<T>() where T : IService
+        {
+            Type serviceType = typeof(T);
+
+            if (disposableServices.TryGetValue(serviceType.Name, out Type? service))
+            {
+                try
+                {
+                    T? serviceInstance = (T)Activator.CreateInstance(service);
+
+                    if (serviceInstance == null)
+                        throw new Exception($"Failed to create disposable service of type {serviceType.Name}");
+                    
+                    return serviceInstance;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Failed to create disposable service of type {serviceType.Name}. Error: {ex.Message}", ex);
+                }
+            }
+
+            throw new Exception($"Failed to get disposable service of type {serviceType.Name}");
+        }
+
+
+
+        public static T GetStatic<T>() where T : IService
+        {
+            Type serviceType = typeof(T);
+
+            if (staticServices.TryGetValue(serviceType.Name, out IService? config))
+                return (T)config;
+
+            throw new Exception($"Failed to get config {serviceType.Name}");
+        }
+
         // }
         // public class ConfigService : IServiceProvider
         // {

@@ -9,7 +9,7 @@ namespace MTCG;
 
 
 // TODO
-public class CardTradeRepository : BaseRepository<CardTrade>, IRepository<CardTrade>
+public class CardTradeRepository : BaseRepository<CardTrade>, IRepository<CardTrade>, IService
 {
     public CardTradeRepository()
 : base()
@@ -42,7 +42,7 @@ public class CardTradeRepository : BaseRepository<CardTrade>, IRepository<CardTr
 
     protected override void Fill(CardTrade trade, IDataReader re)
     {
-        var cardRepo = new CardRepository();
+        var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
         Guid offeredCardId = re.GetGuid(re.GetOrdinal("offeredcardid"));
         var offeredCard = cardRepo.Get(offeredCardId);
 

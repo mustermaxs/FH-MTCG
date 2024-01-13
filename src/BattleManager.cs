@@ -18,7 +18,7 @@ public class BattleManager
     public List<DeckCard> playedCardsPlayer2 { get; set; } = new List<DeckCard>();
     public int roundsPlayed { get; private set; }
     public bool battleIsFinished { get; set; }
-    public CardRepository cardRepo { get; set; }
+    public CardRepository? cardRepo { get; set; }
     public Battle battle { get; set; }
     public BattleManager(User player1, User player2, BattleConfig config)
     {
@@ -28,7 +28,7 @@ public class BattleManager
         this.roundsPlayed = 0;
         this.battleIsFinished = false;
         this.config = config;
-        this.cardRepo = new CardRepository();
+        // this.cardRepo = ServiceProvider.GetDisposable<CardRepository>();
     }
 
     public void Setup()
@@ -41,6 +41,12 @@ public class BattleManager
 
             battle.Player1 = player1;
             battle.Player2 = player2;
+    }
+
+
+    public void UseCardRepo(IService cardRepo)
+    {
+        this.cardRepo = (CardRepository)cardRepo;
     }
 
 
@@ -73,7 +79,7 @@ public class BattleManager
     /// <returns>Battle result.</returns>
     public Battle Play()
     {
-        Setup();
+        // Setup(); // CHANGE
 
         while (NextRound()) ;
 

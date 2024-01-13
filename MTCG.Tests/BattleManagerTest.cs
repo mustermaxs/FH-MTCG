@@ -16,6 +16,7 @@ namespace UnitTest.MTCG
         public MockProgram Program = new();
         public Mock<ServiceProvider>? servicesMock;
         public ServiceProvider? services;
+        public Mock<CardRepository>? mockCardRepo;
 
         [SetUp]
         public void Setup()
@@ -25,13 +26,15 @@ namespace UnitTest.MTCG
             mockp1.Setup(m => m.Name).Returns("PLAYER 1");
             mockp2.Setup(m => m.Name).Returns("PLAYER 2");
             servicesMock = new Mock<ServiceProvider>();
-
+            var mockCardRepo = new Mock<CardRepository>();
+            // mockCardRepo.Setup(m => m.GetDeckByUserId(It.IsAny<Guid>())).Returns(new List<DeckCard>());
             var mockBattleConfig = new Mock<BattleConfig>();
             mockBattleConfig.Setup(b => b.MaxNbrRounds).Returns(10);
             services = servicesMock.Object;
 
 
             bm = new BattleManager(mockp1.Object, mockp2.Object, mockBattleConfig.Object);
+            // bm.
         }
 
 

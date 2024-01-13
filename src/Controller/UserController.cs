@@ -17,7 +17,7 @@ namespace MTCG;
 public class UserController : IController
 {
 
-    protected static UserRepository repo = new UserRepository();
+    protected static UserRepository repo = ServiceProvider.GetDisposable<UserRepository>();
     public UserController(IRequest request) : base(request) { }
 
 

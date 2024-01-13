@@ -3,7 +3,7 @@ using System.Data;
 
 namespace MTCG;
 
-public class PackageRepository : BaseRepository<Package>, IRepository<Package>
+public class PackageRepository : BaseRepository<Package>, IRepository<Package>, IService
 {
     public PackageRepository()
         : base()
@@ -15,7 +15,7 @@ public class PackageRepository : BaseRepository<Package>, IRepository<Package>
 
     public override IEnumerable<Package> GetAll()
     {
-        var cardRepo = new CardRepository();
+        var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
         List<Package> packages = new List<Package>();
         List<Guid> packageIds = GetAllPackageIds().ToList();
         List<Card> packageCards = new List<Card>();
@@ -52,7 +52,7 @@ public class PackageRepository : BaseRepository<Package>, IRepository<Package>
     /// </exception>
     private List<Card> GetCardsForPackage(List<Guid> packageCardIds)
     {
-        var cardRepo = new CardRepository();
+        var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
         List<Card> cards = new List<Card>();
 
         foreach (Guid cardId in packageCardIds)
@@ -124,7 +124,7 @@ public class PackageRepository : BaseRepository<Package>, IRepository<Package>
 
         if (packageId == Guid.Empty) return null;
 
-        var cardRepo = new CardRepository();
+        var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
         var package = new Package();
         var packageCardIds = GetPackageCardIds(packageId).ToList();
         var cards = cardRepo.GetCardsByIds(packageCardIds);

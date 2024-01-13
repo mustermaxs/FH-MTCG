@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace MTCG;
 
-public class UserRepository : BaseRepository<User>, IRepository<User>
+public class UserRepository : BaseRepository<User>, IRepository<User>, IService
 {
 
   protected CardRepository cardRepo = new CardRepository();

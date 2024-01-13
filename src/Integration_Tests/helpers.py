@@ -28,9 +28,12 @@ def login_as(user: User):
         settings["changedLang"] = True
     creds = {"Name": user.Name, "Password": user.Password}
     res = req.post(url("session", "POST"), json=creds)
+    return user
     if res.status_code == 200:        
         user.token = res.json()["authToken"]
         return user
+    else:
+        assert res.status_code == 200
 
 # returns response
 def create_package(cards):

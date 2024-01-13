@@ -91,6 +91,7 @@ namespace MTCG
                     List<string> actions = new List<string>();
                     
                     var battleManager = new BattleManager(player1, player2, Program.services.Get<BattleConfig>());
+                    battleManager.UseCardRepo(ServiceProvider.GetDisposable<CardRepository>());
                     var battle = battleManager.Play();
                     
                     pendingBattles[player1].SetResult(battle);
@@ -98,6 +99,8 @@ namespace MTCG
 
                     pendingBattles.TryRemove(player1, out _);
                     pendingBattles.TryRemove(player2, out _);
+
+                    return;
                 }
             }
 

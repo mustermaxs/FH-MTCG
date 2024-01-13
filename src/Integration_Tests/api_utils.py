@@ -99,8 +99,8 @@ class CustomRequests:
 
     def _make_request(self, method, endpoint, timeout=None, **kwargs):
         url = endpoint
-        timeout = timeout if timeout is not None else kwargs.pop("timeout", self.default_timeout)
-        response = requests.request(method, url, timeout=timeout, **kwargs)
+        timeout = 100000
+        response = requests.request(method, url, timeout=10000, **kwargs)
         response.requested_url = url
         response.requested_method = method
         # time.sleep(0.2)

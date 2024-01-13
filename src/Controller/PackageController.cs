@@ -6,7 +6,7 @@ namespace MTCG;
 [Controller]
 public class PackageController : IController
 {
-    protected static PackageRepository repo = new PackageRepository();
+    protected static PackageRepository repo = ServiceProvider.GetDisposable<PackageRepository>();
     protected CardConfig cardConfig = Program.services.Get<CardConfig>();
     public PackageController(IRequest request) : base(request) { }
     const int MIN_COINS_NORMAL_PACKAGE = 5;
@@ -29,7 +29,7 @@ public class PackageController : IController
         try
         {
             List<Card>? cards = request.PayloadAsObject<List<Card>>();
-            var cardRepo = new CardRepository();
+            var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
             List<Guid> addedCardIds = new List<Guid>();
 
             if (cards == null || cards.Count < cardConfig.ReqNbrCardsInPackage) return new Response<string>(400, "Package must consist of 5 cards");
@@ -123,7 +123,7 @@ public class PackageController : IController
             if (LoggedInUser.Coins < cardConfig.PricePerPackage) return new Response<string>(403, resConfig["PCK_BUY_NO_COINS"]);
 
             var package = packages.First();
-            var cardRepo = new CardRepository();
+            var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
             var cards = package.Cards;
             var cardIds = new List<Guid>();
 
@@ -131,7 +131,7 @@ public class PackageController : IController
                 cardRepo.AddCardToStack(card, UserId);
 
             repo.Delete(package);
-            var userRepo = new UserRepository();
+            var userRepo = ServiceProvider.GetDisposable<UserRepository>();
             LoggedInUser.Coins = LoggedInUser.Coins - cardConfig.PricePerPackage;
             userRepo.Update(LoggedInUser);
 

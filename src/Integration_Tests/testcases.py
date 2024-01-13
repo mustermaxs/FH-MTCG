@@ -459,7 +459,9 @@ async def test_battle(cn=None):
     async def make_request(player, delay):
         login_as(player)
         async with aiohttp.ClientSession() as session:
-            async with session.post(url("battle", "POST"), headers=Headers(player.token)) as res:
+            async with session.post(url("battle", "POST"), timeout=30, headers=Headers(player.token)) as res:
+                # await session.close()
+                
                 return res
 
 

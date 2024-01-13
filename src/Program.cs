@@ -26,7 +26,7 @@ namespace MTCG
             /// to register endpoints and the responsible controllers
             /// to handle requests.
             /// </summary>
-            LoadConfigs();
+            LoadServices();
             IUrlParser urlParser = new UrlParser();
             IEndpointMapper routeRegistry = RouteRegistry.GetInstance(urlParser);
             IAttributeHandler attributeHandler = new AttributeHandler();
@@ -37,7 +37,7 @@ namespace MTCG
             svr.Run();
         }
 
-        protected static void LoadConfigs()
+        protected static void LoadServices()
         {
             var serverConfig = new ServerConfig();
             var battleConfig = new BattleConfig();
@@ -51,8 +51,12 @@ namespace MTCG
 
             services
                 .Register(serverConfig)
-                .Register(battleConfig)
                 .Register(responseConfig)
+                .Register(battleConfig)
+                .RegisterDisposable<CardRepository>()
+                .RegisterDisposable<UserRepository>()
+                .RegisterDisposable<PackageRepository>()
+                .RegisterDisposable<CardTradeRepository>()
                 .Register(cardConfig);
         }
     }

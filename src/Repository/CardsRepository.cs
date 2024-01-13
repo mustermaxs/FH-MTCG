@@ -4,7 +4,7 @@ using Npgsql;
 
 namespace MTCG;
 
-public class CardRepository : BaseRepository<Card>, IRepository<Card>
+public class CardRepository : BaseRepository<Card>, IRepository<Card>, IService
 {
     public CardRepository()
         : base()

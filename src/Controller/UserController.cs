@@ -67,7 +67,7 @@ public class UserController : IController
 
         if (user == null || hashedPwd != user.Password)
             return false;
-        
+
         return true;
     }
 
@@ -85,8 +85,7 @@ public class UserController : IController
         {
             bool endedSession = false;
 
-            if (request.TryGetHeader("authToken", out string token))
-                endedSession = SessionManager.EndSessionWithSessionId(token);
+            endedSession = SessionManager.EndSessionWithSessionId(request.SessionId);
 
             if (!endedSession) return new Response<string>(403, resConfig["LOGOUT_ERR"]);
 

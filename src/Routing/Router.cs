@@ -3,6 +3,7 @@ using System.Security;
 using System.Reflection;
 using System.Threading.Tasks;
 using Npgsql;
+using System.Runtime.CompilerServices;
 
 
 namespace MTCG;
@@ -95,9 +96,8 @@ public class Router : IRouter
     //////////////////////////////////////////////////////////////////////
 
 
-    public bool ClientHasPermissionToRequest(IRequest request)
+    public bool ClientHasPermission(IRequest request)
     {
-        // Logger.ToConsole($"[Request]\t{request.HttpMethod} {request.RawUrl}", true);
         Role requestAccessLevel = request.Endpoint!.AccessLevel;
         Session session = null;
 
@@ -127,6 +127,43 @@ public class Router : IRouter
 
     }
 
+
+    private IController CreateControllerInstance(IRequest request)
+    {
+        var controllerType = request.Endpoint!.ControllerType;
+        var controller = (IController?)Activator.CreateInstance(controllerType, request);
+
+        if (controller == null)
+            throw new Exception("Failed to instantiate controller.");
+
+        return controller;
+    }
+
+
+    private async Task<IResponse> InvokeControllerMethod(IController controller, IRequest request)
+    {
+        IResponse response;
+        MethodInfo controllerAction = request.Endpoint!.ControllerMethod;
+
+        if (controllerAction.ReturnType == typeof(IResponse))
+            response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, request.Endpoint.UrlParams.NamedParams);
+
+        else
+            response = await controllerAction.MapArgumentsAndInvokeAsync<IResponse, string>(controller, request.Endpoint.UrlParams.NamedParams);
+
+        return response;
+    }
+
+
+    private void HandleAnonymousSession(IRequest request)
+    {
+        // if anonymous session, end it
+        bool sessionExists = SessionManager.TryGetSessionById(request.SessionId, out Session? session);
+
+        if (sessionExists && session.IsAnonymous)
+            SessionManager.EndSessionWithSessionId(request.SessionId);
+    }
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
@@ -144,33 +181,22 @@ public class Router : IRouter
         try
         {
             InitUserSettings(request);
-            Logger.ToConsole($"[Map from]  {request.HttpMethod} {request.RawUrl}", true);
             routeRegistry.MapRequestToEndpoint(ref request);
-            Logger.ToConsole($"[Map to]  {request.HttpMethod} {request.Endpoint!.RouteTemplate}\n", true);
+            Logger.ToConsole($"[Map Request] {request.HttpMethod} {request.RawUrl} -> {request.Endpoint!.RouteTemplate}\n", true);
 
-            if (!ClientHasPermissionToRequest(request))
-                throw new AuthenticationFailedException($"[DENIED]\tClient doesn't have access to ressource.\n{request.Payload}");
+            if (!ClientHasPermission(request)) 
+                throw new AuthenticationFailedException(request.Payload);
 
-            var controllerType = request.Endpoint!.ControllerType;
-            var controller = (IController?)Activator.CreateInstance(controllerType, request);
-
-            if (controller == null)
-                throw new Exception("Failed to instantiate controller.");
-
-            MethodInfo controllerAction = request.Endpoint.ControllerMethod;
-            IResponse? response = null;
-
-            if (controllerAction.ReturnType == typeof(IResponse))
-                response = controllerAction.MapArgumentsAndInvoke<IResponse, string>(controller, request.Endpoint.UrlParams.NamedParams);
-
-            else
-                response = await controllerAction.MapArgumentsAndInvokeAsync<IResponse, string>(controller, request.Endpoint.UrlParams.NamedParams);
+            var controller = CreateControllerInstance(request);
+            var response = await InvokeControllerMethod(controller, request);
 
             Logger.ToConsole($"Status: {response.StatusCode}\nResponse: {response.Description}", true);
-
+            HandleAnonymousSession(request);
 
             return response;
         }
+
+
 
         catch (RouteDoesntExistException ex)
         {
@@ -181,23 +207,17 @@ public class Router : IRouter
         catch (AuthenticationFailedException ex)
         {
             Logger.ToConsole($"[ERROR]\n{ex}\nAuthentication failed.", true);
-
             return new Response<string>(404, languageConfig["AUTH_ERR"]);
         }
         catch (Exception ex)
         {
 
             Logger.ToConsole($"[ERROR]\n{ex}\nSomething went wrong.", true);
-
             return new Response<string>(500, $"{languageConfig["INT_SVR_ERR"]}.\n{ex.Message}");
         }
         finally
         {
-            // if anonymous session, end it
-            var session = SessionManager.GetSessionById(request.SessionId);
-            
-            if (session.IsAnonymous)
-                SessionManager.EndSessionWithSessionId(request.SessionId);
+            // HandleAnonymousSession(request);
         }
     }
 }

@@ -122,9 +122,9 @@ namespace MTCG
         protected IRequest BuildRequest(HttpSvrEventArgs svrEventArgs)
         {
             Session session;
-            var clientPort = svrEventArgs.Headers.SingleOrDefault<HttpHeader>(h => h.Name == "Port")?.Value;
-            var clientIp = svrEventArgs.Headers.SingleOrDefault<HttpHeader>(h => h.Name == "IP")?.Value;
-            string? authToken = svrEventArgs.Headers.SingleOrDefault<HttpHeader>(header => header.Name == "Authorization")?.Value ?? string.Empty;
+            var clientPort = svrEventArgs.GetHeader("Port");
+            var clientIp = svrEventArgs.GetHeader("IP");
+            string? authToken = svrEventArgs.GetHeader("Authorization") ?? string.Empty;
             var request = new RequestBuilder();
             string sessionId;
 

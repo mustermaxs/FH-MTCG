@@ -92,6 +92,13 @@ namespace MTCG
         // public properties                                                                                                //
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        public string? GetHeader(string name)
+        {
+            return Headers.SingleOrDefault<HttpHeader>(h => h.Name == name)?.Value ?? string.Empty;
+        }
+
+
+
         /// <summary>Gets the plain HTTP message.</summary>
         public string PlainMessage
         {

@@ -34,6 +34,8 @@ public class SessionManager : BaseSessionManager
     {
         string sessionId = SessionManager.CreateSessionIdFromAuthToken(authToken);
         Session session = new Session(sessionId).WithAuthToken(authToken).WithUser(user);
+        session.IsAnonymous = false;
+
         try
         {
             user.Token = authToken;
@@ -69,6 +71,7 @@ public class SessionManager : BaseSessionManager
             if (Sessions.TryGetValue(id, out session))
             {
                 session.User = user;
+                session.IsAnonymous = false;
                 Sessions[id] = session;
             }
         }

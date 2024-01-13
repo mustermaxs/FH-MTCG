@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MTCG
 {
-    public class Program
+    internal class Program
     {
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // entry point                                                                                                      //

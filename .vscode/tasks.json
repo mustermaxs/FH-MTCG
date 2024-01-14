@@ -9,6 +9,14 @@
 			],
 			"group": "build",
 			"label": "dotnet: build"
+		},
+		{
+			"type": "dotnet",
+			"task": "build /home/mustermax/vscode_projects/MTCG/src/MTCG.csproj",
+			"file": "/home/mustermax/vscode_projects/MTCG/src/MTCG.csproj",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "dotnet: build /home/mustermax/vscode_projects/MTCG/src/MTCG.csproj"
 		}
 	]
 }

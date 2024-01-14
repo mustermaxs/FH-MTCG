@@ -53,9 +53,9 @@ public class BattleManager
     }
 
 
-    public void UseCardRepo(IService cardRepo)
+    public void UseCardRepo(CardRepository cardRepo)
     {
-        this.cardRepo = (CardRepository)cardRepo;
+        this.cardRepo = cardRepo;
     }
 
 

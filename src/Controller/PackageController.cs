@@ -131,7 +131,7 @@ public class PackageController : IController
                 cardRepo.AddCardToStack(card, UserId);
 
             repo.Delete(package);
-            var userRepo = ServiceProvider.GetDisposable<BattleRepository>();
+            var userRepo = ServiceProvider.GetDisposable<UserRepository>();
             LoggedInUser.Coins = LoggedInUser.Coins - cardConfig.PricePerPackage;
             userRepo.Update(LoggedInUser);
 

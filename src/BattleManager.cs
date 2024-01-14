@@ -5,7 +5,7 @@ namespace MTCG;
 
 public struct CardAndOwner
 {
-    public Card card;
+    public DeckCard card;
     public User owner;
 }
 
@@ -18,7 +18,7 @@ public class BattleManager
     public List<DeckCard> playedCardsPlayer2 { get; set; } = new List<DeckCard>();
     public int roundsPlayed { get; private set; }
     public bool battleIsFinished { get; set; }
-    public CardRepository? cardRepo { get; set; } 
+    public CardRepository? cardRepo { get; set; }
     public Battle battle { get; set; }
     public string? battleToken { get; private set; } = null;
 
@@ -37,7 +37,10 @@ public class BattleManager
     public void SetBattleToken(string token)
     {
         if (battleToken == string.Empty || battleToken == null)
+        {
             battleToken = token;
+            battle.BattleToken = token;
+        }
     }
 
     public void Setup()
@@ -48,8 +51,8 @@ public class BattleManager
         if (!LoadUserDeck(player1) || !LoadUserDeck(player2))
             throw new Exception("Failed to load users deck");
 
-            battle.Player1 = player1;
-            battle.Player2 = player2;
+        battle.Player1 = player1;
+        battle.Player2 = player2;
     }
 
 
@@ -63,7 +66,7 @@ public class BattleManager
     //////////////////////////////////////////////////////////////////////
 
 
-    public BattleLogEntry NewEntry(Card cardPlayer1, Card cardPlayer2, User? roundWinner = null, string description = "")
+    public BattleLogEntry NewEntry(DeckCard cardPlayer1, DeckCard cardPlayer2, User? roundWinner = null, string description = "")
     {
         return new BattleLogEntry
         {
@@ -73,7 +76,8 @@ public class BattleManager
             CardPlayedPlayer2 = cardPlayer2,
             RoundWinner = roundWinner,
             ActionDescriptions = ActionMsg(cardPlayer1, cardPlayer2) + $"\n{description}",
-            TimeStamp = DateTime.Now
+            TimeStamp = DateTime.Now,
+            IsDraw = roundWinner == null
         };
     }
 
@@ -94,9 +98,23 @@ public class BattleManager
 
         if (roundsPlayed == config.MaxNbrRounds)
             battle.Winner = null;
-        
+
         battle.CountRounds = roundsPlayed;
         battle.EndDateTime = DateTime.Now;
+
+        if (player1.Deck.Count() == 0 && player2.Deck.Count() == 0)
+        {
+            battle.IsDraw = true;
+            battle.Winner = null;
+        }
+        else if (player1.Deck.Count() == 0)
+        {
+            battle.Winner = player2;
+        }
+        else if (player2.Deck.Count() == 0)
+        {
+            battle.Winner = player1;
+        }
 
         return battle;
     }
@@ -133,12 +151,43 @@ public class BattleManager
 
         battle.BattleLog.Add(battleLogEntry);
 
+
         // TODO transfer card to winner
         playedCardsPlayer1.Add(cardPlayer1!);
         playedCardsPlayer2.Add(cardPlayer2!);
+        
+        TransferCardToWinner(battleLogEntry.RoundWinner, cardPlayer1!, cardPlayer2!);
         roundsPlayed++;
 
         return ShouldContinue();
+    }
+
+
+    protected void TransferCardToWinner(User? winner, DeckCard card1, DeckCard card2)
+    {
+        List<DeckCard>? winnerDeck = winner?.Deck.ToList();
+        List<DeckCard>? loserDeck = null;
+
+        if (winner == null) return;
+
+        if (winner == player1)
+        {
+            var losersCard = card2;
+            loserDeck = player2.Deck.ToList();
+            winnerDeck!.Add(losersCard);
+            loserDeck.Remove(losersCard);
+            cardRepo!.AddCardsToDeck(new List<DeckCard> { losersCard }, winner.ID);
+            cardRepo!.RemoveDeckCard(losersCard);
+        }
+        else
+        {
+            var losersCard = card1;
+            loserDeck = player1.Deck.ToList();
+            winnerDeck!.Add(losersCard);
+            loserDeck.Remove(losersCard);
+            cardRepo!.AddCardsToDeck(new List<DeckCard> { losersCard }, winner.ID);
+            cardRepo!.RemoveDeckCard(losersCard);
+        }
     }
 
 
@@ -177,7 +226,7 @@ public class BattleManager
 
 
 
-    public string ActionMsg(Card cardPlayer1, Card cardPlayer2)
+    public string ActionMsg(DeckCard cardPlayer1, DeckCard cardPlayer2)
     {
         return $"{player1.Name} plays {cardPlayer1.Name}\n{player2.Name} plays {cardPlayer2.Name}\n";
     }
@@ -329,7 +378,7 @@ public class BattleManager
         if (waterAndFire)
         {
             var waterCard = CardElement.Water == cardPlayer1.Element() ? cardPlayer1 : cardPlayer2;
-            
+
             return HigherCalcDamage(cp1, cp2, 2, waterCard);
         }
         else if (fireAndNormal)
@@ -396,7 +445,7 @@ public class BattleManager
         var randIndex = random.Next(0, cardCount);
 
         var card = deck[randIndex];
-        deck.RemoveAt(randIndex);
+        // deck.RemoveAt(randIndex);
 
         player.Deck = deck;
 

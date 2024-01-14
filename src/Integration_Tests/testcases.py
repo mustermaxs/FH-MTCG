@@ -454,7 +454,9 @@ async def test_battle(cn=None):
     player1 = users["max"]
     player2 = users["test"]
     put_cards_in_deck(player1, cards.values())
-    put_cards_in_deck(player2, cards.values())
+    c = list(cards.values())[0:5]
+    # print(c)
+    put_cards_in_deck(player2, c)
 
     async def make_request(player, delay):
         login_as(player)

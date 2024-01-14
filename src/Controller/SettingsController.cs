@@ -35,4 +35,28 @@ public class SettingsController : IController
             return new Response<string>(403, resConfig["INT_SVR_ERR"]);
         }
     }
+
+
+    [Route("settings/reset", HTTPMethod.POST, Role.ADMIN)]
+    public IResponse Reset()
+    {
+        try
+        {
+            var userRepo = ServiceProvider.GetDisposable<UserRepository>();
+            var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
+            var battleRepo = ServiceProvider.GetDisposable<BattleRepository>();
+            var battleLogRepo = ServiceProvider.GetDisposable<BattleLogRepository>();
+
+            cardRepo.DeleteAll();
+            battleRepo.DeleteAll();
+
+            return new Response<string>(200, "Reset successfull.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            return new Response<string>(403, resConfig["INT_SVR_ERR"]);
+        }
+    }
 }

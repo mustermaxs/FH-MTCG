@@ -41,21 +41,57 @@ class Trade:
             "MinimumDamage": self.MinimumDamage
         }
 
+json_data = [
+    {
+        "Description": "",
+        "Damage": 10.0,
+        "Name": "FireTroll",
+        "Element": "fire",
+        "Type": "monster"
+    },
+    {
+        "Description": "",
+        "Damage": 15.0,
+        "Name": "FireSpell",
+        "Element": "fire",
+        "Type": "spell"
+    },
+    {
+        "Description": "",
+        "Damage": 10.0,
+        "Name": "WaterSpell",
+        "Element": "water",
+        "Type": "spell"
+    },
+    {
+        "Description": "",
+        "Damage": 20.0,
+        "Name": "Ork",
+        "Element": "normal",
+        "Type": "monster"
+    },
+    {
+        "Description": "",
+        "Damage": 20.0,
+        "Name": "Kraken",
+        "Element": "fire",
+        "Type": "monster"
+    }
+]
+
+cards = {}
+for data in json_data:
+    card_instance = Card(
+        description=data["Description"],
+        damage=data["Damage"],
+        name=data["Name"],
+        element=data["Element"],
+        type=data["Type"]
+    )
+    cards[data["Name"].lower()] = card_instance
+
 trade = Trade("firekraken", "fire", 10.0)
 
-firekraken = Card("", 10.0, "Ork", "fire", "monster")
-firetroll = Card("", 10.0, "Wizard", "fire", "monster")
-firespell = Card("", 10.0, "FireSpell", "fire", "monster")
-waterspell = Card("", 10.0, "WaterSpell", "water", "spell")
-regularspell = Card("", 10.0, "Knight", "normal", "spell")
-
-cards = {
-    "firekraken": firekraken,
-    "firetroll": firetroll,
-    "firespell": firespell,
-    "waterspell": waterspell,
-    "regularspell": regularspell
-}
 
 
 

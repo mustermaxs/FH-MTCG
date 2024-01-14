@@ -9,8 +9,11 @@ settings = {
 }
 
 def reset():
-    delete_all_cards()
-    delete_all_packages()
+    # delete_all_cards()
+    # delete_all_packages()
+    login_as(users["admin"])
+    res = req.post(url("reset", "POST"), headers=Headers(admin.token))
+    assert res.status_code == 200
 
 def delete_all_cards():
     admin = login_as(users["admin"])
@@ -155,6 +158,7 @@ def get_all_cards():
 
 def put_cards_in_deck(user: User, all_cards):
     admin = login_as(users["admin"])
+    # print(all_cards)
     for card in all_cards:
         save_card(card)
         

@@ -46,7 +46,8 @@ api = {
         "add_to_stack": "/stack/:id",
         "add_card_glob": "/cards",
         "battle": "/battle",
-        "logout": "/session/logout"
+        "logout": "/session/logout",
+        "reset": "/settings/reset"
     },
     "DELETE": {
         "tradings": "/tradings/:id",

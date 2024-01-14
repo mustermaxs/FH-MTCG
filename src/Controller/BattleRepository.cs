@@ -7,16 +7,31 @@ namespace MTCG;
 
 public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, IService
 {
+    protected static object battleLock = new object();
     public BattleRepository()
     : base()
     {
         _Table = "battles";
-        _Fields = "id,player1,player2,winner,isdraw,enddatetime,countrounds,gainedpoints, battletoken";
+        _Fields = "id,player1,player2,winner,isdraw,enddatetime,countrounds,gainedpoints,battletoken";
     }
 
     public override Battle? Get(Guid id)
     {
         return base.Get(id);
+    }
+
+    public override IEnumerable<Battle> GetAll()
+    {
+        ObjectBuilder<Battle> fill = Fill;
+        using var builder = new QueryBuilder(Connect());
+        builder
+            .Select("*")
+            .From(_Table)
+            .Build();
+
+        IEnumerable<Battle>? battles = builder.ReadMultiple<Battle>(fill);
+
+        return battles;
     }
 
     public Battle? GetBattleForUser(Guid userId)
@@ -36,33 +51,55 @@ public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, ISe
 
     public override void Save(Battle obj)
     {
-        var battleLogRepo = ServiceProvider.GetDisposable<BattleLogRepository>();
-
-        var fields = _Fields.Split(",");
-        using var builder = new QueryBuilder(Connect());
-        builder
-            .InsertInto(_Table, fields)
-            .InsertValues(fields.Select(f => "@" + f).ToArray())
-            .AddParam("@id", obj.Id!)
-            .AddParam("@player1", obj.Player1!.ID)
-            .AddParam("@player2", obj.Player2!.ID)
-            .AddParam("@winner", obj.Winner?.ID)
-            .AddParam("@isdraw", obj.IsDraw)
-            .AddParam("@enddatetime", obj.EndDateTime)
-            .AddParam("@countrounds", obj.CountRounds)
-            .AddParam("@gainedpoints", obj.GainedPoints)
-            .AddParam("@battletoken", obj.BattleToken)
-            .GetInsertedIds(true)
-            .Build();
-
-        Guid? insertedId = builder.ReadSingle<Guid>("id");
-
-        if (insertedId == null) throw new Exception("Could not insert Battle");
-
-        foreach (var entry in obj.BattleLog)
+        lock (battleLock)
         {
-            entry.BattleId = insertedId;
-            battleLogRepo.Save(entry);
+            try
+            {
+                var battleLogRepo = ServiceProvider.GetDisposable<BattleLogRepository>();
+                var winnerIsNull = obj.Winner == null;
+
+                dynamic winner = winnerIsNull ? DBNull.Value : obj.Winner!.ID;
+                var fields = _Fields.Split(",").Where(field => field.Trim() != "id").ToArray();
+
+                using var builder = new QueryBuilder(Connect());
+                builder
+                    .InsertInto(_Table, fields)
+                    .InsertValues(fields.Select(f => "@" + f).ToArray())
+                    .AddParam("@player1", obj.Player1!.ID)
+                    .AddParam("@player2", obj.Player2!.ID);
+
+                if (winnerIsNull)
+                    builder.AddParam("@winner", DBNull.Value);
+                else
+                    builder.AddParam("@winner", obj.Winner!.ID);
+
+                builder
+                    .AddParam("@isdraw", obj.IsDraw)
+                    .AddParam("@enddatetime", obj.EndDateTime)
+                    .AddParam("@countrounds", obj.CountRounds)
+                    .AddParam("@gainedpoints", obj.GainedPoints)
+                    .AddParam("@battletoken", obj.BattleToken)
+                    .GetInsertedIds(true)
+                    .Build();
+
+                Guid? insertedId = builder.ReadSingle<Guid>("id");
+
+                if (insertedId == null) throw new Exception("Could not insert Battle");
+
+                foreach (var entry in obj.BattleLog)
+                {
+                    entry.BattleId = insertedId;
+                    battleLogRepo.Save(entry);
+                }
+            }
+
+            catch (PostgresException pex)
+            {
+                if (pex.SqlState == "23505")
+                    Console.WriteLine("Battle entry already saved.");
+                else
+                    throw pex;
+            }
         }
     }
 
@@ -74,6 +111,17 @@ public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, ISe
             .Where("id=@id")
             .AddParam("@id", obj.Id!)
             .Build();
+    }
+
+
+    public void DeleteAll()
+    {
+        using var builder = new QueryBuilder(Connect());
+        builder
+            .DeleteFrom(_Table)
+            .Build();
+
+        builder.ExecuteNonQuery();
     }
 
     protected override void Fill(Battle obj, IDataReader re)

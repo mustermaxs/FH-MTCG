@@ -14,6 +14,7 @@ namespace MTCG
         public DateTime? TimeStamp { get; set; }
         public Guid? BattleId { get; set; }
         public int RoundNumber { get; set; }
+        public bool IsDraw { get; set; }
 
         public BattleLogEntry()
         {
@@ -27,6 +28,7 @@ namespace MTCG
             TimeStamp = null;
             BattleId = null;
             RoundNumber = 0;
+            IsDraw = false;
         }
 
         public object ToSerializableObj()
@@ -35,7 +37,11 @@ namespace MTCG
             {
                 Player1 = Player1?.Name,
                 Player2 = Player2?.Name,
-                ActionDescriptions
+                ActionDescriptions,
+                CardPlayedPlayer1 = CardPlayedPlayer1?.ToSerializableObj(),
+                CardPlayedPlayer2 = CardPlayedPlayer2?.ToSerializableObj(),
+                RoundWinner = RoundWinner?.Name,
+                TimeStamp
             };
         }
     }

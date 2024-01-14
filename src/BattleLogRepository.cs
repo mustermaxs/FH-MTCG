@@ -7,31 +7,57 @@ namespace MTCG;
 
 public class BattleLogRepository : BaseRepository<BattleLogEntry>, IRepository<BattleLogEntry>, IService
 {
+    protected static object battleLogLock = new object();
+
     public BattleLogRepository()
     : base()
     {
         _Table = "battlelogs";
-        _Fields = "id,cardidplayer1,cardidplayer2,player1,player2,roundwinner,battleid,roundnumber";
+        _Fields = "id,player1,player2,cardidplayer1,cardidplayer2,roundwinner,battleid,roundnumber,isdraw";
     }
 
     public override void Save(BattleLogEntry obj)
     {
-        using var builder = new QueryBuilder(Connect());
-        builder
-            .InsertInto(_Table, _Fields.Split(","))
-            .InsertValues(_Fields.Split(",").Select(f => "@" + f).ToArray())
-            .AddParam("@id", obj.Id!)
-            .AddParam("@player1", obj.Player1!.ID)
-            .AddParam("@player2", obj.Player2!.ID)
-            .AddParam("@cardidplayer1", obj.CardPlayedPlayer1!.Id)
-            .AddParam("@cardidplayer2", obj.CardPlayedPlayer2!.Id)
-            .AddParam("@roundwinner", obj.RoundWinner!.ID)
-            .AddParam("@battleid", obj.BattleId)
-            .AddParam("@roundnumber", obj.RoundNumber)
-            .GetInsertedIds(true)
-            .Build();
-        
-        builder.ExecuteNonQuery();
+        lock (battleLogLock)
+        {
+            try
+            {
+                using var builder = new QueryBuilder(Connect());
+                var fields = _Fields.Split(",").Where(field => field.Trim() != "id").ToArray();
+                var winnerIsNull = obj.RoundWinner == null;
+                dynamic winner = winnerIsNull ? DBNull.Value : obj.RoundWinner!.ID;
+
+                builder
+                    .InsertInto(_Table, fields)
+                    .InsertValues(fields.Select(f => "@" + f).ToArray())
+                    .AddParam("@player1", obj.Player1!.ID)
+                    .AddParam("@player2", obj.Player2!.ID)
+                    .AddParam("@cardidplayer1", obj.CardPlayedPlayer1!.Id)
+                    .AddParam("@cardidplayer2", obj.CardPlayedPlayer2!.Id);
+
+                if (winnerIsNull)
+                    builder.AddParam("@roundwinner", DBNull.Value);
+                else
+                    builder.AddParam("@roundwinner", obj.RoundWinner!.ID);
+
+                builder
+                    .AddParam("@battleid", obj.BattleId!)
+                    .AddParam("@roundnumber", obj.RoundNumber)
+                    .AddParam("@isdraw", obj.IsDraw)
+                    .GetInsertedIds(true)
+                    .Build();
+
+                builder.ExecuteNonQuery();
+            }
+            catch (PostgresException pex)
+            {
+                if (pex.SqlState == "23505")
+                    Console.WriteLine("Battlelog entry already saved.");
+                else
+                    throw pex;
+            }
+
+        }
     }
 
 
@@ -40,17 +66,17 @@ public class BattleLogRepository : BaseRepository<BattleLogEntry>, IRepository<B
         return base.Get(id);
     }
 
-  public override void Delete(BattleLogEntry obj)
-  {
-    using var builder = new QueryBuilder(Connect());
-    builder
-        .DeleteFrom(_Table)
-        .Where("id=@id")
-        .AddParam("@id", obj.Id!)
-        .Build();
-  }
+    public override void Delete(BattleLogEntry obj)
+    {
+        using var builder = new QueryBuilder(Connect());
+        builder
+            .DeleteFrom(_Table)
+            .Where("id=@id")
+            .AddParam("@id", obj.Id!)
+            .Build();
+    }
 
-  public override IEnumerable<BattleLogEntry> GetAll()
+    public override IEnumerable<BattleLogEntry> GetAll()
     {
         throw new NotImplementedException();
     }
@@ -65,7 +91,7 @@ public class BattleLogRepository : BaseRepository<BattleLogEntry>, IRepository<B
             .Where("battleid=@battleId")
             .AddParam("@battleId", battleId)
             .Build();
-        
+
         return builder.ReadMultiple<BattleLogEntry>(fill) ?? null;
     }
 
@@ -83,6 +109,7 @@ public class BattleLogRepository : BaseRepository<BattleLogEntry>, IRepository<B
         obj.TimeStamp = re.GetDateTime(re.GetOrdinal("timestamp"));
         obj.RoundNumber = re.GetInt32(re.GetOrdinal("roundnumber"));
         obj.BattleId = re.GetGuid(re.GetOrdinal("battleid"));
+        obj.IsDraw = re.GetBoolean(re.GetOrdinal("isdraw"));
     }
 
     protected override void _Fill(BattleLogEntry obj, IDataReader re)

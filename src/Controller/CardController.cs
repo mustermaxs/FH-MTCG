@@ -1,5 +1,6 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
+using Npgsql;
 
 namespace MTCG;
 
@@ -108,7 +109,7 @@ public class CardController : IController
             List<Card> providedCards = new();
             var providedCardIds = request.PayloadAsObject<List<Guid>>();
 
-            if (providedCardIds == null || providedCardIds.Count() < cardConfig.MaxCardsInDeck)
+            if (providedCardIds == null || providedCardIds.Count() != cardConfig.MaxCardsInDeck)
                 return new Response<string>(400, resConfig["CRD_DECK_NBR_ERR"]);
 
             // create cards from ids, bc for whatever reason, the requestbody
@@ -254,15 +255,29 @@ public class CardController : IController
     [Route("/cards", HTTPMethod.POST, Role.ADMIN)]
     public IResponse AddCard()
     {
+        Card? card = null;
         try
         {
-            var card = request.PayloadAsObject<Card>();
+            card = request.PayloadAsObject<Card>();
 
             if (card == null) return new Response<string>(400, "No card provided.");
 
             repo.Save(card);
 
             return new Response<string>(200, "Created card.");
+        }
+        catch (PostgresException pex)
+        {
+            if (pex.SqlState == "23505")
+            {
+                Console.WriteLine($"Card {card!.Name} already in DB.");
+
+                return new Response<string>(200, "Created card.");
+            }
+            else
+                throw pex;
+
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
         catch (Exception ex)
         {

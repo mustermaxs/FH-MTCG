@@ -153,6 +153,19 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>, IService
     }
 
 
+    public void RemoveDeckCard(DeckCard card)
+    {
+        using var builder = new QueryBuilder(Connect());
+        builder
+            .DeleteFrom("deck")
+            .Where("id=@deckcardid")
+            .AddParam("@deckcardid", card.DeckId)
+            .Build();
+
+        builder.ExecuteNonQuery();
+    }
+
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
@@ -426,7 +439,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>, IService
 
         builder.ExecuteNonQuery();
     }
-
+    
 
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////

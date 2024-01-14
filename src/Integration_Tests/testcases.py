@@ -142,6 +142,7 @@ def test_logout_user(cn=None):
 def test_aquire_package(cn=None):
     reset()
     # delete preexisting packages
+    create_package(cards)
     all_packages = get_all_packages()
     if all_packages is not None:
         for package in all_packages:
@@ -451,6 +452,7 @@ def test_update_user(cn=None):
 
 @with_caller_name
 async def test_battle(cn=None):
+    reset()
     player1 = users["max"]
     player2 = users["test"]
     put_cards_in_deck(player1, cards.values())
@@ -472,6 +474,7 @@ async def test_battle(cn=None):
         make_request(player2, 2)
     )
 
+    
     assert_true(res1.status == 200 and res2.status == 200, True)
 
     

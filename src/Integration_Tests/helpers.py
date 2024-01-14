@@ -10,8 +10,8 @@ settings = {
 
 def reset():
     # delete_all_cards()
-    # delete_all_packages()
     login_as(users["admin"])
+    delete_all_packages()
     res = req.post(url("reset", "POST"), headers=Headers(admin.token))
     assert res.status_code == 200
 
@@ -81,7 +81,8 @@ def get_user_stack(user: User):
 def save_card(card: Card):
     admin = login_as(users["admin"])
     # print(card)
-    res = req.post(url("cards", "POST"), json=card.to_dict(), headers=Headers(admin.token))
+    cardJson = card.to_dict()
+    res = req.post(url("cards", "POST"), json=cardJson, headers=Headers(admin.token))
     assert res.status_code == 200
     
     return res

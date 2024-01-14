@@ -104,7 +104,7 @@ class CustomRequests:
         response = requests.request(method, url, timeout=10000, **kwargs)
         response.requested_url = url
         response.requested_method = method
-        # time.sleep(0.2)
+        # time.sleep(0.1)
         return response
 
 def check_connection(host, port):

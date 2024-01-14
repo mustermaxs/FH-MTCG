@@ -25,21 +25,25 @@ namespace UnitTest.MTCG
             mockp2 = new Mock<User>();
             mockp1.Setup(m => m.Name).Returns("PLAYER 1");
             mockp2.Setup(m => m.Name).Returns("PLAYER 2");
+            mockp1.Setup(u => u.ID).Returns(Guid.NewGuid());
+            mockp2.Setup(u => u.ID).Returns(Guid.NewGuid());
             servicesMock = new Mock<ServiceProvider>();
-            var mockCardRepo = new Mock<CardRepository>();
-            // mockCardRepo.Setup(m => m.GetDeckByUserId(It.IsAny<Guid>())).Returns(new List<DeckCard>());
+            mockCardRepo = new Mock<CardRepository>();
+
             var mockBattleConfig = new Mock<BattleConfig>();
             mockBattleConfig.Setup(b => b.MaxNbrRounds).Returns(10);
             services = servicesMock.Object;
 
 
             bm = new BattleManager(mockp1.Object, mockp2.Object, mockBattleConfig.Object);
-            // bm.
+            bm.UseCardRepo(mockCardRepo.Object);
         }
 
-
-
-
+        public void SetupDeck(Guid userId, List<DeckCard> deck)
+        {
+            mockCardRepo!.Setup(m => m.GetDeckByUserId(It.IsAny<Guid>()))
+                .Returns(deck);
+        }
 
         [Test]
         public void StrongerSpellAndCardOwner_WaterFire_Water_Is_Stronger()
@@ -48,7 +52,6 @@ namespace UnitTest.MTCG
             var fireCard = new Card { Damage = 5, Element = "fire", Type = "spell" };
             CardAndOwner cp1 = new CardAndOwner { card = waterCard, owner = mockp1!.Object };
             CardAndOwner cp2 = new CardAndOwner { card = fireCard, owner = mockp2!.Object };
-
             var winner = bm!.GetStrongerElementCard(cp1, cp2);
             var owner = winner?.owner;
 
@@ -115,8 +118,8 @@ namespace UnitTest.MTCG
             var mockCard2 = new DeckCard { Damage = 10, Element = "water", Type = "spell" };
             var deck1 = new List<DeckCard> { mockCard1 };
             var deck2 = new List<DeckCard> { mockCard2 };
-            mockp1!.Object.Deck = deck1;
-            mockp2!.Object.Deck = deck2;
+            SetupDeck(mockp1!.Object.ID, deck1);
+            SetupDeck(mockp2!.Object.ID, deck2);
 
             bm!.Play();
 

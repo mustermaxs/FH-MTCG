@@ -234,7 +234,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>, IService
     //////////////////////////////////////////////////////////////////////
 
 
-    public IEnumerable<DeckCard> GetDeckByUserId(Guid userId)
+    public virtual IEnumerable<DeckCard> GetDeckByUserId(Guid userId)
     {
         ObjectBuilder<DeckCard> objectBuilder = Fill;
         using var builder = new QueryBuilder(Connect());

@@ -1,6 +1,7 @@
 {
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": ".NET NUnit Tests",
             "type": "coreclr",
@@ -27,7 +28,9 @@
                 "programOutput": true,
                 "trace": true
             },
-
+            "env": {
+                "UNIT_TESTS": "true"
+            }
         }
     ]
 }

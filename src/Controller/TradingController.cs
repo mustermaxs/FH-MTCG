@@ -51,13 +51,13 @@ public class CardTradingController : IController
             var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
             string reqContent = request.PayloadAsObject<string>();
             Guid acceptedCardId = Guid.Parse(reqContent!);
-            Card acceptedCard = cardRepo.GetDeckCardForUser(acceptedCardId, userId);
+            DeckCard acceptedCard = cardRepo.GetDeckCardForUser(acceptedCardId, userId);
             CardTrade? trade = repo.Get(tradeid);
 
             if (trade == null || trade.Settled)
                 return new Response<string>(404, resConfig["TRADE_ID_NOT_FOUND"]);
 
-            Card offeredCard = cardRepo.GetDeckCardForUser(trade.CardToTrade.Value, trade.OfferingUserId);
+            DeckCard offeredCard = cardRepo.GetDeckCardForUser(trade.CardToTrade.Value, trade.OfferingUserId);
 
             if (!OfferedCardIsOwnedByUser(acceptedCardId, userId) ||
                 userId == trade.OfferingUserId ||
@@ -90,7 +90,7 @@ public class CardTradingController : IController
     //////////////////////////////////////////////////////////////////////
 
 
-    protected void ExchangeDeckCards(Card acceptedCard, Card offeredCard, Guid userId, Guid offeringUserId)
+    protected void ExchangeDeckCards(DeckCard acceptedCard, DeckCard offeredCard, Guid userId, Guid offeringUserId)
     {
         var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
         cardRepo.AddCardsToDeck(new List<Card> { acceptedCard }, offeringUserId);

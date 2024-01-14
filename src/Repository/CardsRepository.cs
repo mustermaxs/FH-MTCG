@@ -6,6 +6,7 @@ namespace MTCG;
 
 public class CardRepository : BaseRepository<Card>, IRepository<Card>, IService
 {
+    protected static object cardRepoLock = new object();
     public CardRepository()
         : base()
     {
@@ -155,14 +156,28 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>, IService
 
     public void RemoveDeckCard(DeckCard card)
     {
-        using var builder = new QueryBuilder(Connect());
-        builder
-            .DeleteFrom("deck")
-            .Where("id=@deckcardid")
-            .AddParam("@deckcardid", card.DeckId)
-            .Build();
+        lock (cardRepoLock)
+        {
+            
+        }
+    }
 
-        builder.ExecuteNonQuery();
+
+    public void TransferDeckCardTo(DeckCard card, Guid userId)
+    {
+        lock(cardRepoLock)
+        {
+            using var builder = new QueryBuilder(Connect());
+            builder
+                .Update("deck")
+                .UpdateSet("userid", "@userid")
+                .Where("id=@id")
+                .AddParam("@id", card.DeckId)
+                .AddParam("@userid", userId)
+                .Build();
+
+            builder.ExecuteNonQuery();
+        }
     }
 
 
@@ -297,21 +312,29 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>, IService
 
     public void AddCardsToDeck(IEnumerable<Card> cards, Guid userId)
     {
-        using var builder = new QueryBuilder(Connect());
-        builder.InsertInto("deck", "cardid", "userid");
-        int i = 0;
-
-        foreach (Card card in cards)
+        lock (cardRepoLock)
         {
-            builder
-                .InsertValues($"@cardid{i}", $"@userid{i}")
-                .AddParam($"@cardid{i}", card.Id)
-                .AddParam($"@userid{i}", userId);
-            i++;
-        }
+            using var builder = new QueryBuilder(Connect());
+            builder.InsertInto("deck", "cardid", "userid");
+            int i = 0;
 
-        builder.Build();
-        builder.ExecuteNonQuery();
+            foreach (Card card in cards)
+            {
+                builder
+                    .InsertValues($"@cardid{i}", $"@userid{i}")
+                    .AddParam($"@cardid{i}", card.Id)
+                    .AddParam($"@userid{i}", userId);
+                i++;
+            }
+
+            builder.Build();
+            builder.ExecuteNonQuery();
+
+            foreach (var card in cards)
+            {
+                Console.WriteLine($"Added card {card.Name} to deck.");
+            }
+        }
     }
 
 
@@ -439,7 +462,7 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>, IService
 
         builder.ExecuteNonQuery();
     }
-    
+
 
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////

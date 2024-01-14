@@ -18,7 +18,7 @@ public class BattleManager
     public List<DeckCard> playedCardsPlayer2 { get; set; } = new List<DeckCard>();
     public int roundsPlayed { get; private set; }
     public bool battleIsFinished { get; set; }
-    public CardRepository? cardRepo { get; set; }
+    public static CardRepository? cardRepo { get; set; }
     public Battle battle { get; set; }
     public string? battleToken { get; private set; } = null;
 
@@ -56,9 +56,9 @@ public class BattleManager
     }
 
 
-    public void UseCardRepo(CardRepository cardRepo)
+    public void UseCardRepo(CardRepository repo)
     {
-        this.cardRepo = cardRepo;
+        cardRepo = repo;
     }
 
 
@@ -149,13 +149,15 @@ public class BattleManager
         else
             throw new Exception("Unhandled card type");
 
+        battleLogEntry.RoundNumber = roundsPlayed;
+
         battle.BattleLog.Add(battleLogEntry);
 
 
         // TODO transfer card to winner
         playedCardsPlayer1.Add(cardPlayer1!);
         playedCardsPlayer2.Add(cardPlayer2!);
-        
+
         TransferCardToWinner(battleLogEntry.RoundWinner, cardPlayer1!, cardPlayer2!);
         roundsPlayed++;
 
@@ -165,29 +167,25 @@ public class BattleManager
 
     protected void TransferCardToWinner(User? winner, DeckCard card1, DeckCard card2)
     {
-        List<DeckCard>? winnerDeck = winner?.Deck.ToList();
-        List<DeckCard>? loserDeck = null;
-
         if (winner == null) return;
 
         if (winner == player1)
         {
             var losersCard = card2;
-            loserDeck = player2.Deck.ToList();
-            winnerDeck!.Add(losersCard);
-            loserDeck.Remove(losersCard);
-            cardRepo!.AddCardsToDeck(new List<DeckCard> { losersCard }, winner.ID);
-            cardRepo!.RemoveDeckCard(losersCard);
+            cardRepo!.TransferDeckCardTo(card2, winner.ID);
+            player1.Deck.Add(losersCard);
+            player2.Deck.Remove(losersCard);
         }
         else
         {
             var losersCard = card1;
-            loserDeck = player1.Deck.ToList();
-            winnerDeck!.Add(losersCard);
-            loserDeck.Remove(losersCard);
-            cardRepo!.AddCardsToDeck(new List<DeckCard> { losersCard }, winner.ID);
-            cardRepo!.RemoveDeckCard(losersCard);
+            cardRepo!.TransferDeckCardTo(card1, player2.ID);
+            player2.Deck.Add(losersCard);
+            player1.Deck.Remove(losersCard);
         }
+
+        if (player1.Deck.Count() + player2.Deck.Count() != 10)
+            throw new Exception("Card count mismatch");
     }
 
 
@@ -403,7 +401,7 @@ public class BattleManager
     public bool LoadUserDeck(User user)
     {
         var deck = user.Deck;
-        deck = cardRepo.GetDeckByUserId(user.ID);
+        deck = cardRepo.GetDeckByUserId(user.ID).ToList();
 
         if (deck.Count() == 0) return false;
 
@@ -435,19 +433,14 @@ public class BattleManager
 
     public DeckCard? DrawCard(User player)
     {
-        List<DeckCard> deck = player.Deck.ToList();
-
-        int cardCount = deck.Count;
+        int cardCount = player.Deck.Count;
 
         if (cardCount == 0) return null;
 
         Random random = new Random();
         var randIndex = random.Next(0, cardCount);
 
-        var card = deck[randIndex];
-        // deck.RemoveAt(randIndex);
-
-        player.Deck = deck;
+        var card = player.Deck[randIndex];
 
         return card;
     }

@@ -16,8 +16,8 @@ async def main():
         reset()
 
 
-        # test_user = User("test", "test", "", ":)", 100, "", "")
         await test_battle()
+        test_user = User("test", "test", "", ":)", 100, "", "")
         # await test_battle_multiple_clients()
         # test_register_alreadyexisting_user()
         # test_retrieve_packages_no_packages()

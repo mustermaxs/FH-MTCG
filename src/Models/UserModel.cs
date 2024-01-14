@@ -13,8 +13,8 @@ public class User : IModel
     public string Token { get; set; } = string.Empty;
     virtual public Guid ID { get; set; }
     public string Language { get; set; } = "english";
-    public IEnumerable<Card> Stack { get; set; } = new List<Card>();
-    public IEnumerable<DeckCard> Deck { get; set; } = new List<DeckCard>();
+    public List<Card> Stack { get; set; } = new List<Card>();
+    public List<DeckCard> Deck { get; set; } = new List<DeckCard>();
 
     public User()
     {

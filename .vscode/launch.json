@@ -28,9 +28,6 @@
                 "programOutput": true,
                 "trace": true
             },
-            "env": {
-                "UNIT_TESTS": "true"
-            }
         }
     ]
 }

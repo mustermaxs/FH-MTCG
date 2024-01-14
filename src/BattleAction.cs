@@ -13,6 +13,7 @@ namespace MTCG
         public User? RoundWinner { get; set; }
         public DateTime? TimeStamp { get; set; }
         public Guid? BattleId { get; set; }
+        public int RoundNumber { get; set; }
 
         public BattleLogEntry()
         {
@@ -25,6 +26,7 @@ namespace MTCG
             RoundWinner = null;
             TimeStamp = null;
             BattleId = null;
+            RoundNumber = 0;
         }
 
         public object ToSerializableObj()
@@ -51,6 +53,7 @@ namespace MTCG
         public DateTime EndDateTime { get; set; }
         public int CountRounds { get; set; }
         public int GainedPoints { get; set; }
+        public string? BattleToken { get; set; }
         public List<BattleLogEntry> BattleLog { get; set; }
 
         public Battle()
@@ -63,6 +66,7 @@ namespace MTCG
             EndDateTime = DateTime.Now;
             CountRounds = 0;
             GainedPoints = 0;
+            BattleToken = string.Empty;
             BattleLog = new List<BattleLogEntry>();
         }    
 

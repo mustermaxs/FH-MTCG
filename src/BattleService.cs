@@ -88,10 +88,13 @@ namespace MTCG
                         pendingUsers.TryDequeue(out User? player2))
 
                 {
+                    string battleToken = CryptoHandler.GenerateRandomString(10);
                     List<string> actions = new List<string>();
                     
                     var battleManager = new BattleManager(player1, player2, Program.services.Get<BattleConfig>());
+                    battleManager.SetBattleToken(battleToken);
                     battleManager.UseCardRepo(ServiceProvider.GetDisposable<CardRepository>());
+
                     var battle = battleManager.Play();
                     
                     pendingBattles[player1].SetResult(battle);

@@ -55,6 +55,8 @@ namespace MTCG
                 .Register(responseConfig)
                 .Register(battleConfig)
                 .RegisterDisposable<CardRepository>()
+                .RegisterDisposable<BattleRepository>()
+                .RegisterDisposable<BattleLogRepository>()
                 .RegisterDisposable<UserRepository>()
                 .RegisterDisposable<PackageRepository>()
                 .RegisterDisposable<CardTradeRepository>()

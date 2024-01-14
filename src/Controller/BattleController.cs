@@ -6,7 +6,8 @@ namespace MTCG;
 [Controller]
 public class BattleController : IController
 {
-    // protected static BattleRepository repo = new BattleRepository();
+    protected BattleRepository battleRepo = ServiceProvider.GetDisposable<BattleRepository>();
+    protected BattleLogRepository battleLogRepo = ServiceProvider.GetDisposable<BattleLogRepository>(); 
     protected BattleService battleService = new BattleService();
     public BattleController(IRequest request) : base(request) { }
 
@@ -27,9 +28,4 @@ public class BattleController : IController
             return new Response<string>(500, ex.Message, "BATTLE FAILED");
         }
     }
-
-    // protected async Task<string> Foo()
-    // {
-    //     return await BattleService.HandleBattle(LoggedInUser);
-    // }
 }

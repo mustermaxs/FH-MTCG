@@ -20,6 +20,9 @@ public class BattleManager
     public bool battleIsFinished { get; set; }
     public CardRepository? cardRepo { get; set; } 
     public Battle battle { get; set; }
+    public string? battleToken { get; private set; } = null;
+
+
     public BattleManager(User player1, User player2, BattleConfig config)
     {
         this.player1 = player1;
@@ -29,6 +32,12 @@ public class BattleManager
         this.battleIsFinished = false;
         this.config = config;
         // this.cardRepo = ServiceProvider.GetDisposable<CardRepository>();
+    }
+
+    public void SetBattleToken(string token)
+    {
+        if (battleToken == string.Empty || battleToken == null)
+            battleToken = token;
     }
 
     public void Setup()

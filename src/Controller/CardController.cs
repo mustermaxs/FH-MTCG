@@ -219,7 +219,7 @@ public class CardController : IController
     {
         try
         {
-            var userRepo = ServiceProvider.GetDisposable<UserRepository>();
+            var userRepo = ServiceProvider.GetDisposable<BattleRepository>();
             var user = userRepo.Get(userid);
 
             if (user == null) return new Response<string>(204, "User not found.");

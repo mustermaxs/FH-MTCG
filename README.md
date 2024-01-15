@@ -153,7 +153,9 @@ E.g. `[Route("/users/{username:alphanum}", HTTPMethod.PUT, Role.USER | Role.ADMI
 
 ## `QueryBuilder`
 + uses simple string concatenation to simplfy and shorten the expressions needed to write to query the database
++ pretty badly written, but it did the job
 + e.g.
+[QueryBuilder usage example.](queybuilder.png)
 
 ---
 # Tests

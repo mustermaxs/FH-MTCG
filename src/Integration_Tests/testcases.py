@@ -462,15 +462,16 @@ async def test_battle(cn=None):
 
     async def make_request(player, delay):
         login_as(player)
+        txt = ""
         async with aiohttp.ClientSession() as session:
             async with session.post(url("battle", "POST"), timeout=30, headers=Headers(player.token)) as res:
                 # await session.close()
-                restxt = await res.text()
-                print(restxt.replace("\\n", "\n"))
+                txt = await res.text()
+                
                 # print(restxt)
 
                 
-                return res
+                return (res, txt)
 
 
     res1, res2 = await asyncio.gather(
@@ -478,8 +479,9 @@ async def test_battle(cn=None):
         make_request(player2, 2)
     )
 
-    
-    assert_true(res1.status == 200 and res2.status == 200, True)
+    print(res1[1].replace("\\n", "\n"))
+    print(res2[1].replace("\\n", "\n"))
+    assert_true(res1[0].status == 200 and res2[0].status == 200, True)
 
     
 @with_caller_name

@@ -34,6 +34,7 @@ async def main():
 
     except Exception as e:
         print(e)
+        raise e
     finally:
         reset()
         # pass

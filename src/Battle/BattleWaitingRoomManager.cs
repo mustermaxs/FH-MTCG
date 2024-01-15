@@ -16,7 +16,7 @@ namespace MTCG
         }
     }
 
-    public class BattleService
+    public class BattleWaitingRoomManager
     {
         // public event EventHandler<BattleEventArgs> StartBattle;
         private static object battleLock1 = new object();
@@ -24,9 +24,9 @@ namespace MTCG
         private static ConcurrentDictionary<User, TaskCompletionSource<Battle>> pendingBattles = new ConcurrentDictionary<User, TaskCompletionSource<Battle>>();
         private static SemaphoreSlim foundOpponent = new SemaphoreSlim(0, int.MaxValue);
 
-        public static ConcurrentQueue<User> pendingUsers = new ConcurrentQueue<User>();
+        public static ConcurrentQueue<User> waitingUsers = new ConcurrentQueue<User>();
 
-        public BattleService()
+        public BattleWaitingRoomManager()
         {
         }
 
@@ -53,14 +53,14 @@ namespace MTCG
             lock (battleLock1)
             {
                 Console.WriteLine($"ADDED TO LOBBY {user.Name}");
-                pendingUsers.Enqueue(user);
+                waitingUsers.Enqueue(user);
             }
 
         }
 
         public static void OnFindOpponentTriggerStart()
         {
-            if (pendingUsers.Count >= 2 && pendingUsers.Count != 1)
+            if (waitingUsers.Count >= 2 && waitingUsers.Count != 1)
             {
                 Console.WriteLine($"Found opponent.");
                 foundOpponent.Release();
@@ -84,14 +84,14 @@ namespace MTCG
 
             lock (battleLock1)
             {
-                if (pendingUsers.TryDequeue(out User? player1) &&
-                        pendingUsers.TryDequeue(out User? player2))
+                if (waitingUsers.TryDequeue(out User? player1) &&
+                        waitingUsers.TryDequeue(out User? player2))
 
                 {
                     string battleToken = CryptoHandler.GenerateRandomString(10);
                     List<string> actions = new List<string>();
                     
-                    var battleManager = new BattleManager(player1, player2, Program.services.Get<BattleConfig>());
+                    var battleManager = new BattleManager(player1, player2, Program.services.Get<BattleConfig>().Load<BattleConfig>());
                     battleManager.SetBattleToken(battleToken);
                     battleManager.UseCardRepo(ServiceProvider.GetDisposable<CardRepository>());
 

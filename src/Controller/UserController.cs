@@ -40,7 +40,6 @@ public class UserController : IController
             if (!TryValidateCredentials(username, password, out User? user))
                 return new Response<string>(401, resConfig["USR_CRD_INVALID"]);
 
-
             string authToken = SessionManager.CreateAuthToken(user!.ID.ToString());
             SessionManager.CreateSessionForUser(authToken, user);
 
@@ -127,7 +126,7 @@ public class UserController : IController
 
             repo.Save(user);
 
-            return new ResponseWithoutPayload(201, "User successfully created.");
+            return new Response<string>(201, resConfig["USR_ADD_SUCC"]);
         }
         catch (PostgresException pex) // in case registration failed due to user already existing or other reasons
         {

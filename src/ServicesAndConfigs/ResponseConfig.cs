@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace MTCG
 {
-    public class ResponseTextTranslator : IConfig, IService
+    public class ResponseTextTranslator : BaseConfig, IService
     {
         public override string Name => "ResponseConfig";
         public override string Section { get; protected set; } = "responses";

@@ -1,6 +1,6 @@
 namespace MTCG
 {
-  public class CardConfig : IConfig
+  public class CardConfig : BaseConfig
     {
         public override string Name => "CardConfig";
         public override string Section { get; protected set;} = "cards";

@@ -12,7 +12,6 @@ namespace MTCG
         // entry point                                                                                                      //
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
         public static ServiceProvider services = new ServiceProvider();
         /// <summary>Main entry point.</summary>
         /// <param name="args">Arguments.</param>
@@ -45,10 +44,10 @@ namespace MTCG
             var responseConfig = new ResponseTextTranslator();
             var cardConfig = new CardConfig();
 
-            serverConfig = serverConfig.Load<ServerConfig>();
-            battleConfig = battleConfig.Load<BattleConfig>();
-            responseConfig = responseConfig.Load<ResponseTextTranslator>();
-            cardConfig = cardConfig.Load<CardConfig>();
+            serverConfig = serverConfig.Load<ServerConfig>(Constants.CONFIG_FILE_PATH);
+            battleConfig = battleConfig.Load<BattleConfig>(Constants.CONFIG_FILE_PATH);
+            responseConfig = responseConfig.Load<ResponseTextTranslator>(Constants.CONFIG_FILE_PATH);
+            cardConfig = cardConfig.Load<CardConfig>(Constants.CONFIG_FILE_PATH);
 
             
 

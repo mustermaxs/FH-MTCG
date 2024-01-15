@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 namespace MTCG;
@@ -31,7 +32,6 @@ public class BattleManager
         this.roundsPlayed = 0;
         this.battleIsFinished = false;
         this.config = config;
-        // this.cardRepo = ServiceProvider.GetDisposable<CardRepository>();
     }
 
     public void SetBattleToken(string token)
@@ -46,13 +46,15 @@ public class BattleManager
     public void Setup()
     {
         // TODO resConfig für exception msg
-
-
         if (!LoadUserDeck(player1) || !LoadUserDeck(player2))
             throw new Exception("Failed to load users deck");
 
         battle.Player1 = player1;
         battle.Player2 = player2;
+
+        // remove two card from player2 deck
+        // player2.Deck.RemoveRange(0, 4);
+
     }
 
 
@@ -96,27 +98,41 @@ public class BattleManager
 
         while (NextRound()) ;
 
+        HandleBattleOutcome();
+
+        return battle;
+    }
+
+
+    protected void HandleBattleOutcome()
+    {
         battle.CountRounds = roundsPlayed;
         battle.EndDateTime = DateTime.Now;
 
         if (player1.Deck.Count() == 0 && player2.Deck.Count() == 0
-        || roundsPlayed == config.MaxNbrRounds)
+        || player1.Deck.Count() != 0 && player2.Deck.Count() != 0
+        || roundsPlayed == config.MaxNbrRounds
+        )
         {
             battle.IsDraw = true;
             battle.Winner = null;
+
+            return;
         }
         else if (player1.Deck.Count() == 0)
         {
             battle.Winner = player2;
             battle.IsDraw = false;
+            battle.Player1!.Elo -= 5;
         }
         else if (player2.Deck.Count() == 0)
         {
             battle.Winner = player1;
             battle.IsDraw = false;
+            battle.Player2!.Elo -= 5;
         }
 
-        return battle;
+        battle.Winner!.Elo += 3;
     }
 
 
@@ -128,6 +144,8 @@ public class BattleManager
     /// <exception cref="Exception">When card played that isnt registered as an allowed type.</exception>
     public bool NextRound()
     {
+        BattleLogEntry battleLogEntry = new BattleLogEntry();
+
         if (!ShouldContinue()) return false;
 
         var cardPlayer1 = DrawCard(player1);
@@ -136,7 +154,6 @@ public class BattleManager
         var cardAndOwner1 = new CardAndOwner { card = cardPlayer1!, owner = player1 };
         var cardAndOwner2 = new CardAndOwner { card = cardPlayer2!, owner = player2 };
 
-        BattleLogEntry battleLogEntry;
 
         if (CardType.Monster == (cardPlayer1!.Type() & cardPlayer2!.Type()))
             battleLogEntry = HandleMonsterVsMonster(cardAndOwner1, cardAndOwner2);
@@ -147,44 +164,61 @@ public class BattleManager
         else if ((CardType.Monster | CardType.Spell) == (cardPlayer1!.Type() | cardPlayer2!.Type()))
             battleLogEntry = HandleSpellVsMonster(cardAndOwner1, cardAndOwner2);
         else
-            throw new Exception("Unhandled card type");
+            throw new Exception("Unhandled card type or combination.");
 
+        
         battleLogEntry.RoundNumber = roundsPlayed;
-
+        battleLogEntry.CountCardsLeftPlayer1 = player1.Deck.Count();
+        battleLogEntry.CountCardsLeftPlayer2 = player2.Deck.Count();
         battle.BattleLog.Add(battleLogEntry);
-
-
-        // TODO transfer card to winner
-        playedCardsPlayer1.Add(cardPlayer1!);
-        playedCardsPlayer2.Add(cardPlayer2!);
-
-        TransferCardToWinner(battleLogEntry.RoundWinner, cardPlayer1!, cardPlayer2!);
+        
+        TransferCardToWinner(battleLogEntry.RoundWinner, cardPlayer1!, cardPlayer2!, battleLogEntry);
+        TryToStealCard(battleLogEntry);
         roundsPlayed++;
 
         return ShouldContinue();
     }
 
+    protected void TryToStealCard(BattleLogEntry entry)
+    {
+        Random random = new Random();
+        int randInt = random.Next(0, 100);
+        bool stealsCard = randInt > (100 - config.ChanceOfStealing);
 
-    protected void TransferCardToWinner(User? winner, DeckCard card1, DeckCard card2)
+        User victim = entry.RoundWinner == player1 ? player2 : player1;
+        User thief = entry.RoundWinner == player1 ? player1 : player2;
+
+        if (!stealsCard || victim.Deck.Count() == 0) return;
+        
+        DeckCard victimCard = DrawCard(victim);
+        TransferCard(victim, thief, victimCard);
+        // entry.ActionDescriptions = $"\n{thief.Name} stole card {victimCard.Name} from {victim.Name}!\n";
+        battle.BattleLog.Last().ActionDescriptions = $"\n{thief.Name} stole card {victimCard.Name} from {victim.Name}!\n";
+    }
+
+
+    protected void TransferCard(User from, User to, DeckCard card)
+    {
+        cardRepo!.TransferDeckCardTo(card, to.ID);
+        from.Deck.Remove(card);
+        to.Deck.Add(card);
+    }
+
+
+    protected void TransferCardToWinner(User? winner, DeckCard card1, DeckCard card2, BattleLogEntry entry)
     {
         if (winner == null) return;
 
         if (winner == player1)
         {
-            var losersCard = card2;
-            cardRepo!.TransferDeckCardTo(card2, winner.ID);
-            player1.Deck.Add(losersCard);
-            player2.Deck.Remove(losersCard);
+            TransferCard(player2, player1, card2);
         }
-        else
+        else if (winner == player2)
         {
-            var losersCard = card1;
-            cardRepo!.TransferDeckCardTo(card1, player2.ID);
-            player2.Deck.Add(losersCard);
-            player1.Deck.Remove(losersCard);
+            TransferCard(player1, player2, card1);
         }
 
-        if (player1.Deck.Count() + player2.Deck.Count() != 10)
+        if (player1.Deck.Count() + player2.Deck.Count() != config.MaxCardsInDeck * 2)
             throw new Exception("Card count mismatch");
     }
 
@@ -403,7 +437,9 @@ public class BattleManager
         var deck = user.Deck;
         deck = cardRepo.GetDeckByUserId(user.ID).ToList();
 
-        if (deck.Count() == 0) return false;
+        if (deck.Count() < config.MaxCardsInDeck
+        || deck.Count() > config.MaxCardsInDeck)
+            return false;
 
         user.Deck = deck;
 

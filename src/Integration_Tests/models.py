@@ -44,7 +44,7 @@ class Trade:
 json_data = [
     {
         "Description": "",
-        "Damage": 10.0,
+        "Damage": 1000.0,
         "Name": "FireTroll",
         "Element": "fire",
         "Type": "monster"
@@ -72,7 +72,7 @@ json_data = [
     },
     {
         "Description": "",
-        "Damage": 20.0,
+        "Damage": 200000.0,
         "Name": "Kraken",
         "Element": "fire",
         "Type": "monster"

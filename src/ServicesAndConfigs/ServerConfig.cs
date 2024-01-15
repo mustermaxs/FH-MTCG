@@ -1,6 +1,6 @@
 namespace MTCG
 {
-  public class ServerConfig : IConfig, IService
+  public class ServerConfig : BaseConfig, IService
     {
         public override string Name => "ServerConfig";
         public override string FilePath { get; set;} = "config.json";

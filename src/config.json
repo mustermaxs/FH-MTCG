@@ -22,7 +22,9 @@
                 "logcards": "Player #player1 played #card1\nPlayer #player2 played #card2\n",
                 "roundwin": "Player #winner won the round\n",
                 "rounddraw": "DRAW\n",
-                "timestamp": "TIME #time\n"
+                "timestamp": "TIME #time\n",
+                "countcardsleft": "#player has #count cards left.\n",
+                "steal": "#thief stole a the card #cardname from #victim.\n"
             },
             "german": {
                 "header": "Kampf zwischen #player1 und #player2\n",
@@ -34,10 +36,14 @@
                 "roundnbr": "Runde Nummer: #roundnbr\n",
                 "roundwin": "Spieler #winner hat die Runde gewonnen\n",
                 "rounddraw": "UNENTSCHIEDEN\n",
-                "timestamp": "ZEIT #time\\\n"
+                "timestamp": "ZEIT #time\\\n",
+                "countcardsleft": "#player hat #count Karten übrig.\n",
+                "steal": "#thief hat die Karte #cardname von #victim gestohlen.\n"
             }
         },
+        "ChanceOfStealing": 25,
         "StartingPoints": 100,
+        "MaxCardsInDeck": 5,
         "MaxNbrRounds": 100,
         "SpecialRules": {
             "Goblin": {
@@ -147,6 +153,7 @@
                 "USR_ADD_NO_USER": "No or wrong user provided.",
                 "USR_ADD_EXISTS_ERR": "User with same username already registered",
                 "USR_ADD_ERR": "Failed to register new user.",
+                "USR_ADD_SUCC": "User successfully created.",
                 "USR_UPDATE_SUCC": "User successfully updated.",
                 "USR_NOT_FOUND": "User not found.",
                 "CRD_DECK_EMPTY": "The request was fine, but the deck doesn't have any cards",
@@ -193,6 +200,7 @@
                 "USR_ADD_NO_USER": "Keine oder fehlerhafte Daten übermittelt.",
                 "USR_ADD_EXISTS_ERR": "User mit diesem Namen ist bereits registriert.",
                 "USR_ADD_ERR": "User konnte nicht registriert werden.",
+                "USR_ADD_SUCC": "User erfolgreich registriert.",
                 "USR_UPDATE_SUCC": "User erfolgreich upgedated.",
                 "USR_NOT_FOUND": "User konnte nicht gefunden werden",
                 "CRD_DECK_EMPTY": "Die Anfrage war in Ordnung, aber das Deck hat keine Karten",

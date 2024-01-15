@@ -13,6 +13,7 @@ namespace UnitTests.MTCG;
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
+// FIXME 'arrange' in den test cases selbst zu aufwendig für unit tests i guess
 
 [TestFixture]
 public class MTCG_RouteRegistry
@@ -42,13 +43,6 @@ public class MTCG_RouteRegistry
     {
         if (parser != null && routeRegistry != null)
         {
-            // routeTemplate = parser.TrimUrl(routeTemplate);
-            // requestedUrl = parser.TrimUrl(requestedUrl);
-
-            // string pattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
-            // string regexRoutePattern = parser.ReplaceTokensWithRegexPatterns(routeTemplate);
-            // MethodInfo controllerMethod = typeof(TestController).GetMethod("TestMethod")!;
-            // IEndpoint endpoint = new Endpoint(method, routeTemplate, regexRoutePattern, typeof(TestController), controllerMethod, Role.ANONYMOUS);
             var endpoint = new Mock<IEndpoint>();
             endpoint.Setup(e => e.HttpMethod).Returns(method);
             endpoint.Setup(e => e.RouteTemplate).Returns(routeTemplate);

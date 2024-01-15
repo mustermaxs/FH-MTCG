@@ -8,7 +8,7 @@ namespace MTCG;
 
 public class JsonConfigLoader : IConfigLoader
 {
-    public T? LoadConfig<T>(string filePath, string? keyword) where T : IConfig, new()
+    public T? LoadConfig<T>(string filePath, string? keyword) where T : BaseConfig, new()
     {
         dynamic completeConfig = FileHandler.ReadJsonFromFile(filePath) ?? throw new Exception("Failed to read config file");
 
@@ -18,12 +18,12 @@ public class JsonConfigLoader : IConfigLoader
             throw new Exception($"Failed to get relevant section for config {typeof(T).Name}");
     }
 
-    public static T? Load<T>(string filePath, string? keyword) where T : IConfig, new()
+    public static T? Load<T>(string filePath, string? keyword) where T : BaseConfig, new()
     {
         return new JsonConfigLoader().LoadConfig<T>(filePath, keyword);
     }
 
-    private bool TryGetRelevantSection<T>(dynamic completeConfig, string? keyword, out string config) where T : IConfig, new()
+    private bool TryGetRelevantSection<T>(dynamic completeConfig, string? keyword, out string config) where T : BaseConfig, new()
     {
         var sectionString = keyword ?? new T().Section;
         var sectionKey = sectionString;

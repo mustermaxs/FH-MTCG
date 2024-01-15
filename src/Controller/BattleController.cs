@@ -11,33 +11,31 @@ public class BattleController : IController
 {
     protected BattleRepository battleRepo = ServiceProvider.GetDisposable<BattleRepository>();
     protected BattleLogRepository battleLogRepo = ServiceProvider.GetDisposable<BattleLogRepository>();
-    protected BattleService battleService = new BattleService();
+    protected BattleWaitingRoomManager battleService = new BattleWaitingRoomManager();
     public BattleController(IRequest request) : base(request) { }
 
 
 
     [Route("/battle", HTTPMethod.POST, Role.USER)]
-    public async Task<IResponse> AddBattleRequest()
+    public async Task<IResponse> HandleBattleRequest()
     {
         Battle? battle = null;
 
         try
         {
-            var language = LoggedInUser.Language;
-
-            var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
-            string res = string.Empty;
-            battle = await BattleService.BattleRequest(LoggedInUser);
-            battleRepo.Save(battle);
+            var userRepo = ServiceProvider.GetDisposable<UserRepository>();
             var battlePrinter = new BattlePrintService();
-            var battleConfig = Program.services.Get<BattleConfig>();
-            battleConfig.SetLanguage(language);
+            var battleConfig = Program.services.Get<BattleConfig>().Load<BattleConfig>();
+            battleConfig.SetLanguage(LoggedInUser.Language); // sollte nicht immer explizit gesettet werden müssen, sollte "autom." passieren
+
+            battle = await BattleWaitingRoomManager.BattleRequest(LoggedInUser);
+            battleRepo.Save(battle);
+            var currentUser = battle.Player1!.ID == LoggedInUser.ID ? battle.Player1 : battle.Player2;
+            userRepo.Update(currentUser);
+
             battlePrinter.battleConfig = battleConfig;
-            string battleResultTxt = battlePrinter.GetBattleLogAsTxt(battle);
 
-            Console.WriteLine("Saved battle to DB.");
-
-            return new Response<string>(200, battleResultTxt, "BATTLE SUCCESSFUL");
+            return new Response<string>(200, battlePrinter.GetBattleLogAsTxt(battle), "BATTLE SUCCESSFUL");
         }
         catch (PostgresException pex)
         {

@@ -1,6 +1,6 @@
 namespace MTCG
 {
-  public abstract class IConfig : IService
+  public abstract class BaseConfig : IService
   {
     protected virtual IConfigLoader configLoader { get; set; } = new JsonConfigLoader();
     public abstract string Name { get; }
@@ -11,7 +11,7 @@ namespace MTCG
     // {
     //   this.configLoader = configLoader;
     // }
-    public virtual T Load<T>(string? filePath, string? keyword) where T : IConfig, new()
+    public virtual T Load<T>(string? filePath, string? keyword) where T : BaseConfig, new()
     {
       var path = filePath ?? new T().FilePath;
       var _keyword = keyword ?? new T().Section;
@@ -22,11 +22,11 @@ namespace MTCG
 
       return config;
     }
-    public virtual T Load<T>() where T : IConfig, new()
+    public virtual T Load<T>() where T : BaseConfig, new()
     {
       return Load<T>(null, null);
     }
-    public virtual T Load<T>(string filePath) where T : IConfig, new()
+    public virtual T Load<T>(string filePath) where T : BaseConfig, new()
     {
       return Load<T>(filePath, null);
     }

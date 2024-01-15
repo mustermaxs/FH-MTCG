@@ -14,7 +14,7 @@ public class UserRepository : BaseRepository<User>, IRepository<User>, IService
   : base()
   {
     _Table = "users";
-    _Fields = "id, name, password, coins, bio, image, role";
+    _Fields = "id, name, password, coins, bio, image, role, elo";
   }
 
 
@@ -69,6 +69,7 @@ public class UserRepository : BaseRepository<User>, IRepository<User>, IService
         .UpdateSet("name", "@name")
         .UpdateSet("coins", "@coins")
         .UpdateSet("language", "@lang")
+        .UpdateSet("elo", "@elo")
       .Where("id=@id")
     .AddParam("@bio", user.Bio)
     .AddParam("@image", user.Image)
@@ -76,6 +77,7 @@ public class UserRepository : BaseRepository<User>, IRepository<User>, IService
     .AddParam("@id", user.ID)
     .AddParam("@coins", user.Coins)
     .AddParam("@lang", user.Language)
+    .AddParam("@elo", user.Elo)
     .Build();
 
     builder.ExecuteNonQuery();
@@ -221,5 +223,6 @@ public class UserRepository : BaseRepository<User>, IRepository<User>, IService
     user.Image = re.GetString(re.GetOrdinal("image"));
     user.Language = re.GetString(re.GetOrdinal("language"));
     user.UserAccessLevel = Enum.TryParse<Role>(re.GetString(re.GetOrdinal("rolename")), out Role role) ? role : Role.ANONYMOUS;
+    user.Elo = re.GetInt32(re.GetOrdinal("elo"));
   }
 }

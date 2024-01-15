@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace MTCG
 {
-    public class BattleConfig : IConfig, IService
+    public class BattleConfig : BaseConfig, IService
     {
         public override string Name => "BattleConfig";
         public override string Section { get; protected set; }
@@ -13,6 +13,10 @@ namespace MTCG
         public JsonElement GamePlayTxt { get; set; } = default!;
         public virtual int MaxNbrRounds { get; set; }
         private string defaultLanguage = "english";
+        public int MaxCardsInDeck { get; set; }
+        public int ChanceOfStealing { get; set; }
+
+
         public string DefaultLanguage
         {
             get

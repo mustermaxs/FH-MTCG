@@ -70,6 +70,10 @@ public class BattlePrintService : IService
             logs += $"Damage {entry.CardPlayedPlayer1.Damage} vs {entry.CardPlayedPlayer2.Damage}\n";
             logs += $"Element: {entry.CardPlayedPlayer1.Type} vs {entry.CardPlayedPlayer2.Type}\n";
             logs += $"Typ: {entry.CardPlayedPlayer1.Type} vs {entry.CardPlayedPlayer2.Type}\n";
+            
+            logs += $"{entry.ActionDescriptions}";
+            logs += Txt("countcardsleft", ("player", entry.Player1.Name), ("count", entry.CountCardsLeftPlayer1.ToString()));
+            logs += Txt("countcardsleft", ("player", entry.Player2.Name), ("count", entry.CountCardsLeftPlayer2.ToString()));
 
             logs += entry.IsDraw
                 ? battleConfig!["rounddraw"]
@@ -79,5 +83,10 @@ public class BattlePrintService : IService
         }
 
         return logs;
+    }
+
+    private string PrintAction(BattleLogEntry entry)
+    {
+        throw new NotImplementedException();
     }
 }

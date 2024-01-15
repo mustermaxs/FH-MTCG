@@ -15,6 +15,7 @@ public class User : IModel
     public string Language { get; set; } = "english";
     public List<Card> Stack { get; set; } = new List<Card>();
     public List<DeckCard> Deck { get; set; } = new List<DeckCard>();
+    public int Elo { get; set; } = -1;
 
     public User()
     {

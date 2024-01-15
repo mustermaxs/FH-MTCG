@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Linq;
 
 
@@ -25,6 +26,7 @@ namespace MTCG
         private IRouter router;
 
         private ServerConfig serverConfig = Program.services.Get<ServerConfig>();
+        private List<Task> tasks = new List<Task>();
 
 
 
@@ -68,58 +70,67 @@ namespace MTCG
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /// <summary>Runs the HTTP server.</summary>
-        public void Run()
+        public async void Run()
         {
-            if (Active) return;
-
-            Active = true;
-            _Listener = new(IPAddress.Parse(serverConfig.SERVER_IP), serverConfig.SERVER_PORT);
-            _Listener.Start();
-            var tasks = new List<Task>();
-
-            byte[] buf = new byte[serverConfig.BufferSize];
-
-            while (Active)
-            {
-                TcpClient client = _Listener.AcceptTcpClient();
-
-
-                tasks.Add(Task.Run(async () =>
-                {
-                    string data = string.Empty;
-                    while (client.GetStream().DataAvailable || (string.IsNullOrEmpty(data)))
-                    {
-                        int n = client.GetStream().Read(buf, 0, buf.Length);
-                        data += Encoding.ASCII.GetString(buf, 0, n);
-                    }
-
-                    var svrEventArgs = new HttpSvrEventArgs(client, data);
-                    var request = BuildRequest(svrEventArgs);
-
-                    IResponse response = await router.HandleRequest(request);
-
-                    svrEventArgs.Reply(response);
-                }));
-            }
-
-            Task t = Task.WhenAll(tasks);
             try
             {
-                t.Wait();
-            }
-            catch { }
-            if (t.Status == TaskStatus.RanToCompletion)
-            {
-                _Listener.Stop();
+                if (Active) return;
 
+                Active = true;
+                _Listener = new(IPAddress.Parse(serverConfig.SERVER_IP), serverConfig.SERVER_PORT);
+                _Listener.Start();
+                CancellationTokenSource cancellationToken = new CancellationTokenSource();
+                CancellationToken token = cancellationToken.Token;
+
+                while (Active)
+                {
+                    TcpClient client = _Listener.AcceptTcpClient();
+                    tasks.Add(Task.Run(() => HandleClient(client), token));
+
+                }
+
+                await Task.WhenAll(tasks);
+
+                if (tasks.All(t => t.Status == TaskStatus.RanToCompletion))
+                    _Listener.Stop();
             }
+            catch
+            {
+                foreach (var t in tasks)
+                {
+                    t.Dispose();
+                }
+
+                _Listener.Stop();
+            }
+
+        }
+
+        protected async Task HandleClient(TcpClient client)
+        {
+            string data = string.Empty;
+            byte[] buf = new byte[serverConfig.BufferSize];
+            while (client.GetStream().DataAvailable || (string.IsNullOrEmpty(data)))
+            {
+                int n = client.GetStream().Read(buf, 0, buf.Length);
+                data += Encoding.ASCII.GetString(buf, 0, n);
+            }
+
+            var svrEventArgs = new HttpSvrEventArgs(client, data);
+            var request = CreateSessionAndRequest(svrEventArgs);
+
+            IResponse response = await router.HandleRequest(request);
+
+            svrEventArgs.Reply(response);
+
+            return;
         }
 
 
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
 
-        protected IRequest BuildRequest(HttpSvrEventArgs svrEventArgs)
+        protected IRequest CreateSessionAndRequest(HttpSvrEventArgs svrEventArgs)
         {
             Session session;
             var clientPort = svrEventArgs.GetHeader("Port");

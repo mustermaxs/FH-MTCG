@@ -1,8 +1,8 @@
+Assignmenet for SWEN course at FH Technikum Wien
 
 # README
 # MTCG
 
-Developed by: Maximilian Sinnl
 ## Custom features
 ## Multi-language
 > In hindsight it would have been nice to have a single TranslationService that handles language preferences concerning every output and works a bit more general than the dedicated classes now do - but I only thought of this when I already finished the `ResponseTextTranslator`.

@@ -27,7 +27,8 @@ api = {
         "users": "/users/",
         "user_by_id": "/users/:id",
         "user_by_name": "/users/{username:alpha}",
-        "score": "/score"
+        "stats": "/stats",
+        "score": "/scoreboard"
     },
     "PUT": {
         "deck": "/deck",

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using Npgsql;
+using System.Text.RegularExpressions;
+
 
 namespace MTCG;
 // public delegate void FillMethod<T>(T obj, IDataReader reader);
@@ -32,7 +34,8 @@ public enum QBCommand
     VALUES_DEF,
     DELETE,
     LIMIT,
-    RETURNING
+    RETURNING,
+    COUNT
 }
 
 public delegate void ObjectBuilder<T>(T obj, IDataReader reader);
@@ -81,7 +84,7 @@ public class QueryBuilder : IDisposable
         { QBCommand.SET, " SET" },
         { QBCommand.JOIN, " JOIN" },
         { QBCommand.FROM, " FROM" },
-        { QBCommand.RAW_QUERY, "STRING_QUERY" },
+        { QBCommand.RAW_QUERY, " " },
         { QBCommand.AND, " AND" },
         { QBCommand.OR, " OR" },
         { QBCommand.IN, " IN" },
@@ -91,7 +94,8 @@ public class QueryBuilder : IDisposable
         {QBCommand.BLANK, "  "},
         {QBCommand.DELETE, " DELETE "},
         {QBCommand.LIMIT, " LIMIT "},
-        {QBCommand.RETURNING, " RETURNING "}
+        {QBCommand.RETURNING, " RETURNING "},
+        {QBCommand.COUNT, " COUNT "}
     };
     private bool isFirstInsertValuesCall = true;
     private bool insertDefaultValues = false;
@@ -102,6 +106,7 @@ public class QueryBuilder : IDisposable
 
         this._connection = connection;
     }
+
 
     public void Dispose()
     {
@@ -159,10 +164,11 @@ public class QueryBuilder : IDisposable
         return this;
     }
 
+
     public QueryBuilder RawQuery(string query)
     {
         commandSequence.Add(QBCommand.RAW_QUERY);
-        columnSequence[commandIndex] = query;
+        columnSequence[commandIndex] = Regex.Replace(query, @"[\r\n]+", " ").Replace("\\", "");
         commandIndex++;
 
         return this;

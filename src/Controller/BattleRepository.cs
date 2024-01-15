@@ -15,10 +15,20 @@ public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, ISe
         _Fields = "id,player1,player2,winner,isdraw,enddatetime,countrounds,gainedpoints,battletoken";
     }
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
     public override Battle? Get(Guid id)
     {
         return base.Get(id);
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
 
     public override IEnumerable<Battle> GetAll()
     {
@@ -34,6 +44,12 @@ public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, ISe
         return battles;
     }
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+
     public Battle? GetBattleForUser(Guid userId)
     {
         ObjectBuilder<Battle> fill = Fill;
@@ -48,6 +64,10 @@ public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, ISe
 
         return builder.Read<Battle>(fill) ?? null;
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
     public override void Save(Battle obj)
     {
@@ -103,6 +123,57 @@ public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, ISe
         }
     }
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    public Dictionary<string, dynamic> GetUserBattleStats(Guid userId)
+    {
+        ObjectBuilder<Dictionary<string, dynamic>> fill = (Dictionary<string, dynamic> dict, IDataReader re) =>
+        {
+            dict.Add("Name", re.GetString(re.GetOrdinal("Name")));
+            dict.Add("Elo", re.GetInt32(re.GetOrdinal("Elo")));
+            dict.Add("Won", re.GetInt32(re.GetOrdinal("Wins")));
+            dict.Add("Lost", re.GetInt32(re.GetOrdinal("Losses")));
+        };
+
+        using var builder = new QueryBuilder(Connect());
+        builder
+            .RawQuery(@"
+            SELECT
+            u.name as Name, u.elo as Elo, u.id,
+            SUM(CASE WHEN b.winner = u.id THEN 1 ELSE 0 END) AS Wins,
+            SUM(CASE WHEN b.winner != u.id AND b.winner IS NOT NULL THEN 1 ELSE 0 END) AS Losses
+            FROM
+                users u
+            LEFT JOIN
+                battles b ON u.id IN (b.player1, b.player2)
+            WHERE
+                u.id=@userid
+            GROUP BY
+                u.id;").AddParam("@userid", userId).Build();
+
+        return builder.Read(fill);
+    }
+
+
+    public List<Dictionary<string, dynamic>> GetAllStats()
+    {
+        List<Dictionary<string, dynamic>> stats = new List<Dictionary<string, dynamic>>();
+        var userRepo = ServiceProvider.GetDisposable<UserRepository>();
+        var users = userRepo.GetAll();
+
+        foreach (var user in users)
+            stats.Add(GetUserBattleStats(user.ID));
+
+        return stats.OrderByDescending(stat => stat["Elo"]).ToList();
+    }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
     public override void Delete(Battle obj)
     {
         using var builder = new QueryBuilder(Connect());
@@ -114,6 +185,10 @@ public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, ISe
     }
 
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
     public void DeleteAll()
     {
         using var builder = new QueryBuilder(Connect());
@@ -123,6 +198,10 @@ public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, ISe
 
         builder.ExecuteNonQuery();
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
     protected override void Fill(Battle obj, IDataReader re)
     {
@@ -140,6 +219,10 @@ public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, ISe
         obj.BattleToken = re.GetString(re.GetOrdinal("battletoken"));
         obj.BattleLog = logEntryRepo.GetAllByBattleId(obj.Id.Value)?.ToList() ?? null;
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
     protected override void _Fill(Battle obj, IDataReader re)
     {

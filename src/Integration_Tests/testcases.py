@@ -510,3 +510,35 @@ async def test_battle_multiple_clients(cn=None):
     reasons = f"{res1.reason}, {res2.reason}, {res3.reason}, {res4.reason}"
 
     assert_true(res1.status == 200 and res2.status == 200 and res3.status == 200 and res4.status == 200, True, reasons)
+
+
+@with_caller_name
+async def test_get_stats(cn=None):
+    reset()
+    user = login_as(users["max"])
+    async def make_request(player, delay):
+        login_as(player)
+        txt = ""
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url("stats", "GET"), timeout=30, headers=Headers(user.token)) as res:
+                # await session.close()
+                txt = await res.json()
+                print(f"\n\nSTATS\n{txt}\n\n")
+                
+                # print(restxt)
+
+                
+                return (res, txt)
+
+
+    res1, = await asyncio.gather(
+        make_request(user, 0),
+    )
+    assert_true(res1[0].status == 200 , True)
+
+# @with_caller_name
+# async def test_get_stats(cn=None):
+#     user = login_as(users["max"])
+#     res = req.get(url("stats", "GET"), headers=Headers(user.token))
+#     assert_true(res.status_code == 200, True, res.reason)
+#     print(res.json())

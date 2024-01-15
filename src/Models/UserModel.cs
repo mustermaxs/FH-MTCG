@@ -19,6 +19,7 @@ public class User : IModel
 
     public User()
     {
+        Coins = 20;
     }
 
     public object ToSerializableObj()

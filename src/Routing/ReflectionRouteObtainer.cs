@@ -4,6 +4,7 @@ using System.Reflection.Metadata;
 
 namespace MTCG;
 
+// REMOVE Rbrauch ich nimma
 public class EndpointConfig
 {
     public override bool Equals(Object obj)

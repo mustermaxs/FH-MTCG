@@ -117,10 +117,11 @@ public class PackageController : IController
         try
         {
             var packages = repo.GetAll();
+            var user = userRepo.Get(LoggedInUser.ID);
 
             if (packages == null || packages.Count() == 0) return new Response<string>(204, resConfig["PCK_BUY_NO_PCKS"]);
 
-            if (LoggedInUser.Coins < cardConfig.PricePerPackage) return new Response<string>(403, resConfig["PCK_BUY_NO_COINS"]);
+            if (user.Coins < cardConfig.PricePerPackage) return new Response<string>(403, resConfig["PCK_BUY_NO_COINS"]);
 
             var package = packages.First();
             var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
@@ -132,7 +133,7 @@ public class PackageController : IController
 
             repo.Delete(package);
             var userRepo = ServiceProvider.GetDisposable<UserRepository>();
-            LoggedInUser.Coins = LoggedInUser.Coins - cardConfig.PricePerPackage;
+            LoggedInUser.Coins = user!.Coins - cardConfig.PricePerPackage;
             userRepo.Update(LoggedInUser);
 
 

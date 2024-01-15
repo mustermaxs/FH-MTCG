@@ -69,6 +69,46 @@ public class BattleController : IController
         }
     }
 
+
+    [Route("/stats", HTTPMethod.GET, Role.USER)]
+    public IResponse GetStats()
+    {
+        try
+        {
+            var stats = battleRepo.GetUserBattleStats(UserId);
+
+            return new Response<Dictionary<string,dynamic>>(200, stats, "Stats");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
+        }
+    }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    
+    
+    [Route("/scoreboard", HTTPMethod.GET, Role.USER | Role.ADMIN)]
+    public IResponse GetScoreboard()
+    {
+        try
+        {
+            var stats = battleRepo.GetAllStats();
+
+            return new Response<List<Dictionary<string, dynamic>>>(200, stats, "Scoreboard");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            return new Response<string>(500, resConfig["INT_SVR_ERR"]);
+        }
+    }
+
     // protected void SaveBattle(Battle battle)
     // {
     //     try

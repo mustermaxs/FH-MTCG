@@ -127,7 +127,12 @@ public class Router : IRouter
 
     }
 
-
+    /// <summary>
+    /// Creates an instance of the controller responsible for handling the request.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     private IController CreateControllerInstance(IRequest request)
     {
         var controllerType = request.Endpoint!.ControllerType;
@@ -140,6 +145,16 @@ public class Router : IRouter
     }
 
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    /// <summary>
+    /// Invokes the controller method responsible for handling the request.
+    /// </summary>
+    /// <param name="controller">IController instance.</param>
+    /// <param name="request">Request object</param>
+    /// <returns>Task<IResponse></returns>
     private async Task<IResponse> InvokeControllerMethod(IController controller, IRequest request)
     {
         IResponse response;
@@ -155,6 +170,13 @@ public class Router : IRouter
     }
 
 
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Ends the anonymous session if the request is an anonymous request.
+    /// </summary>
+    /// <param name="request"></param>
     private void HandleAnonymousSession(IRequest request)
     {
         // if anonymous session, end it
@@ -168,14 +190,9 @@ public class Router : IRouter
     //////////////////////////////////////////////////////////////////////
 
     /// <summary>
-    /// Responsible for getting the necessary ressources to process the request.
-    /// Includes mapping the request to the responsible endpoint, instantiating the
-    /// designated controller and executing the required controller method.
-    /// Directly replies to the client.
+    /// Handles the request by delegating the work to the designated controller.
     /// </summary>
-    /// <param name="svrEventArgs">
-    /// Object containing the received client request.
-    /// </param>
+    /// <param name="request">Request object</param>
     public async Task<IResponse> HandleRequest(IRequest request)
     {
         try

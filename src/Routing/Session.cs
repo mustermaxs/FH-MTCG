@@ -1,5 +1,9 @@
 namespace MTCG;
 
+
+/// <summary>
+/// 
+/// </summary>
 public class Session
 {
     public Session()

@@ -10,19 +10,19 @@ namespace MTCG
         public override string Section { get; protected set; }
         public JsonElement SpecialRules { get; set; } = default!;
         public JsonElement BattleResultMsgs { get; set; } = default!;
+        public JsonElement GamePlayTxt { get; set; } = default!;
         public virtual int MaxNbrRounds { get; set; }
+        private string defaultLanguage = "english";
         public string DefaultLanguage
         {
             get
             {
-                if (chosenLanguage == string.Empty)
-                    return DefaultLanguage;
+                return string.IsNullOrEmpty(chosenLanguage) ? defaultLanguage : chosenLanguage;
 
-                return chosenLanguage;
             }
             set
             {
-                DefaultLanguage = value;
+                defaultLanguage = value;
             }
         }
         protected string chosenLanguage = string.Empty;
@@ -39,6 +39,26 @@ namespace MTCG
         public void SetLanguage(string lang)
         {
             chosenLanguage = lang;
+        }
+
+
+        public string this[string gameplayTxt]
+        {
+            get
+            {
+                var language = string.IsNullOrEmpty(chosenLanguage) ? defaultLanguage : chosenLanguage;
+
+                if (GamePlayTxt.TryGetProperty(language, out JsonElement gameplay) &&
+                    gameplay.TryGetProperty(gameplayTxt, out JsonElement text))
+                {
+                    return text.ToString();
+                }
+
+                Logger.ToConsole($"[ERROR] No text found for code: {gameplayTxt} in language: {chosenLanguage}.");
+
+                return string.Empty;
+            }
+            private set { }
         }
 
 

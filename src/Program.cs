@@ -50,6 +50,8 @@ namespace MTCG
             responseConfig = responseConfig.Load<ResponseTextTranslator>();
             cardConfig = cardConfig.Load<CardConfig>();
 
+            
+
             services
                 .Register(serverConfig)
                 .Register(responseConfig)

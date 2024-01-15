@@ -465,6 +465,10 @@ async def test_battle(cn=None):
         async with aiohttp.ClientSession() as session:
             async with session.post(url("battle", "POST"), timeout=30, headers=Headers(player.token)) as res:
                 # await session.close()
+                restxt = await res.text()
+                print(restxt.replace("\\n", "\n"))
+                # print(restxt)
+
                 
                 return res
 

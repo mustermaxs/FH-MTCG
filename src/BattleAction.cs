@@ -41,7 +41,8 @@ namespace MTCG
                 CardPlayedPlayer1 = CardPlayedPlayer1?.ToSerializableObj(),
                 CardPlayedPlayer2 = CardPlayedPlayer2?.ToSerializableObj(),
                 RoundWinner = RoundWinner?.Name,
-                TimeStamp
+                TimeStamp,
+                IsDraw
             };
         }
     }

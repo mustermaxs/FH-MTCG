@@ -23,14 +23,21 @@ public class BattleController : IController
 
         try
         {
+            var language = LoggedInUser.Language;
+
             var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
             string res = string.Empty;
             battle = await BattleService.BattleRequest(LoggedInUser);
             battleRepo.Save(battle);
-            // cardRepo.
+            var battlePrinter = new BattlePrintService();
+            var battleConfig = Program.services.Get<BattleConfig>();
+            battleConfig.SetLanguage(language);
+            battlePrinter.battleConfig = battleConfig;
+            string battleResultTxt = battlePrinter.GetBattleLogAsTxt(battle);
+
             Console.WriteLine("Saved battle to DB.");
 
-            return new Response<Battle>(200, battle, "BATTLE SUCCESSFUL");
+            return new Response<string>(200, battleResultTxt, "BATTLE SUCCESSFUL");
         }
         catch (PostgresException pex)
         {

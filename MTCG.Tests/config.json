@@ -11,72 +11,30 @@
         "PricePerPackage": 5
     },
     "battle": {
-        "StartingPoints": 100,
-        "MaxNbrRounds": 100,
-        "SpecialRules": {
-            "Goblin": {
-                "against": "Dragon",
-                "wins": false,
-                "descriptions": {
-                    "english": "Goblins are too afraid of Dragons to attack.",
-                    "german": "Goblins haben zu viel Angst vor Drachen, um sie anzugreifen."
-                }
+        "GamePlayTxt": {
+            "english": {
+                "header": "Battle between #player1 and #player2\n",
+                "winner": "THE WINNER IS ... #winner\n",
+                "draw": "IT'S ... DRAW... better than losing\n",
+                "roundcount": "Number of rounds #rounds\n",
+                "roundnbr": "Round number: #roundnbr\n",
+                "points": "Gained points: #points\n",
+                "logcards": "Player #player1 played #card1\nPlayer #player2 played #card2\n",
+                "roundwin": "Player #winner won the round\n",
+                "rounddraw": "DRAW\n",
+                "timestamp": "TIME #time\n"
             },
-            "Dragon": {
-                "against": "Goblin",
-                "wins": true,
-                "descriptions": {
-                    "english": "The FireElves know Dragons since they were little and can evade their attacks.",
-                    "german": "Die Feuerelfen kennen Drachen seit ihrer Kindheit und können ihren Angriffen ausweichen."
-                }
-            },
-            "Wizzard": {
-                "against": "Ork",
-                "wins": true,
-                "descriptions": {
-                    "english": "Wizzards can control Orks so they are not able to damage them.",
-                    "german": "Zauberer können Orks kontrollieren, sodass sie ihnen keinen Schaden zufügen können."
-                }
-            },
-            "Ork": {
-                "against": "Wizzard",
-                "wins": false,
-                "descriptions": {
-                    "english": "Orks are too resistant to magical control, making it difficult for Wizards to affect them.",
-                    "german": "Orks sind zu widerstandsfähig gegen magische Kontrolle, was es Zauberern schwer macht, sie zu beeinflussen."
-                }
-            },
-            "Knight": {
-                "against": "WaterSpell",
-                "wins": false,
-                "descriptions": {
-                    "english": "The armor of Knights is so heavy that WaterSpells make them drown instantly.",
-                    "german": "Die Rüstung der Ritter ist so schwer, dass Wassersprüche sie sofort ertrinken lassen."
-                }
-            },
-            "WaterSpell": {
-                "against": "Knight",
-                "wins": true,
-                "descriptions": {
-                    "english": "WaterSpells have the power to overcome the heavy armor of Knights, making them vulnerable.",
-                    "german": "Wassersprüche haben die Kraft, die schwere Rüstung der Ritter zu überwinden und sie verwundbar zu machen."
-                }
-            },
-            "Kraken": {
-                "against": "Any",
-                "wins": false,
-                "descriptions": {
-                    "english": "The Kraken is immune against spells.",
-                    "german": "Der Kraken ist immun gegen Sprüche."
-                }
-            },
-            "FireElf": {
-                "against": "Dragon",
-                "wins": false,
-                "descriptions": {
-                    "english": "The FireElves know Dragons since they were little and can evade their attacks.",
-                    "german": "Die Feuerelfen kennen Drachen seit ihrer Kindheit und können ihren Angriffen ausweichen."
-                }
+            "german": {
+                "header": "Kampf zwischen #player1 und #player2\n",
+                "winner": "DER GEWINNER IST ... #winner\n",
+                "draw": "ES IST ... UNENTSCHIEDEN... besser als zu verlieren\n",
+                "roundcount": "Anzahl der Runden #rounds\n",
+                "points": "Erhaltene Punkte: #points\n",
+                "logcards": "Spieler #player1 spielte #card1\nSpieler #player2 spielte #card2\n",
+                "roundnbr": "Runde Nummer: #roundnbr\n",
+                "roundwin": "Spieler #winner hat die Runde gewonnen\n",
+                "rounddraw": "UNENTSCHIEDEN\n",
+                "timestamp": "ZEIT #time\n"
             }
         },
         "BattleResultMsgs": {

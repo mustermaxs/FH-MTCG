@@ -45,21 +45,49 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>, IService
     // BUG: Npgsql.PostgresException (0x80004005): 42601: syntax error at or near "DEFAULT"
     public Guid SaveAndGetInsertedId(Card card)
     {
-        using var builder = new QueryBuilder(Connect());
-        builder
-            .InsertInto("cards", "name", "descr", "damage", "type", "element")
-            .InsertValues("@name", "@descr", "@damage", "@type", "@element")
-            .AddParam("@name", card.Name.ToString())
-            .AddParam("@descr", card.Description)
-            .AddParam("@damage", card.Damage)
-            .AddParam("@type", card.Type.ToString())
-            .AddParam("@element", card.Element)
-            .GetInsertedIds(true)
-            .Build();
+        try
+        {
+            using var builder = new QueryBuilder(Connect());
+            builder
+                .InsertInto("cards", "name", "descr", "damage", "type", "element")
+                .InsertValues("@name", "@descr", "@damage", "@type", "@element")
+                .AddParam("@name", card.Name.ToString())
+                .AddParam("@descr", card.Description)
+                .AddParam("@damage", card.Damage)
+                .AddParam("@type", card.Type.ToString())
+                .AddParam("@element", card.Element)
+                .GetInsertedIds(true)
+                .Build();
 
-        Guid? insertedId = builder.ReadSingle<Guid>("id");
+            Guid? insertedId = builder.ReadSingle<Guid>("id");
 
-        return insertedId ?? Guid.Empty;
+            return insertedId ?? Guid.Empty;
+        }
+        catch (PostgresException ex)
+        {
+            if (ex.SqlState != "23505") throw ex;
+
+            using var builder = new QueryBuilder(Connect());
+            builder
+                .Select("id")
+                .From("cards")
+                .Where("name=@name")
+                .And("descr=@descr")
+                .And("damage=@damage")
+                .And("type=@type")
+                .And("element=@element")
+                .AddParam("@name", card.Name.ToString())
+                .AddParam("@descr", card.Description)
+                .AddParam("@damage", card.Damage)
+                .AddParam("@type", card.Type.ToString())
+                .AddParam("@element", card.Element)
+                .Build();
+
+            return builder.ReadSingle<Guid>("id") ??
+                throw new Exception("Tried to save new card (already exists?). Failed to get card id.");
+        }
+
+
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -158,14 +186,14 @@ public class CardRepository : BaseRepository<Card>, IRepository<Card>, IService
     {
         lock (cardRepoLock)
         {
-            
+
         }
     }
 
 
     public void TransferDeckCardTo(DeckCard card, Guid userId)
     {
-        lock(cardRepoLock)
+        lock (cardRepoLock)
         {
             using var builder = new QueryBuilder(Connect());
             builder

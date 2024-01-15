@@ -1,3 +1,8 @@
 bin
 obj
 out
+*.pyc
+venv/
+__pycache__/
+*.pyo
+*.pyd

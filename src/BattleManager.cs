@@ -96,13 +96,11 @@ public class BattleManager
 
         while (NextRound()) ;
 
-        if (roundsPlayed == config.MaxNbrRounds)
-            battle.Winner = null;
-
         battle.CountRounds = roundsPlayed;
         battle.EndDateTime = DateTime.Now;
 
-        if (player1.Deck.Count() == 0 && player2.Deck.Count() == 0)
+        if (player1.Deck.Count() == 0 && player2.Deck.Count() == 0
+        || roundsPlayed == config.MaxNbrRounds)
         {
             battle.IsDraw = true;
             battle.Winner = null;
@@ -110,10 +108,12 @@ public class BattleManager
         else if (player1.Deck.Count() == 0)
         {
             battle.Winner = player2;
+            battle.IsDraw = false;
         }
         else if (player2.Deck.Count() == 0)
         {
             battle.Winner = player1;
+            battle.IsDraw = false;
         }
 
         return battle;

@@ -6,6 +6,8 @@ using Npgsql;
 namespace MTCG;
 // public delegate void FillMethod<T>(T obj, IDataReader reader);
 
+
+// OBSOLETE voll unnötig, wieso hab ich das nochmal gemacht?
 public enum QBCommand
 {
     SELECT,
@@ -29,7 +31,8 @@ public enum QBCommand
     BLANK,
     VALUES_DEF,
     DELETE,
-    LIMIT
+    LIMIT,
+    RETURNING
 }
 
 public delegate void ObjectBuilder<T>(T obj, IDataReader reader);
@@ -42,6 +45,9 @@ public class ValueTypeWrapper<T>
         this.Value = default(T);
     }
 }
+
+// TODO write tests
+// TODO methoden vereinfachen und abstrahieren
 
 /// <summary>
 /// fix this ugly thing.
@@ -84,7 +90,8 @@ public class QueryBuilder : IDisposable
         { QBCommand.VALUES_DECL, " VALUES " },
         {QBCommand.BLANK, "  "},
         {QBCommand.DELETE, " DELETE "},
-        {QBCommand.LIMIT, " LIMIT "}
+        {QBCommand.LIMIT, " LIMIT "},
+        {QBCommand.RETURNING, " RETURNING "}
     };
     private bool isFirstInsertValuesCall = true;
     private bool insertDefaultValues = false;
@@ -609,6 +616,17 @@ public class QueryBuilder : IDisposable
         command.Dispose();
         reader.DisposeAsync();
         return resultList;
+    }
+
+
+    public QueryBuilder Returning(string columnName)
+    {
+        commandSequence.Add(QBCommand.RETURNING);
+        columnSequence[commandIndex] = $" {columnName} ";
+
+        commandIndex++;
+
+        return this;
     }
 
 

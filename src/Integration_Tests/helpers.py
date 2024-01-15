@@ -26,9 +26,11 @@ def change_language(lang: str, user: User):
 
 
 def login_as(user: User):
-    if user.Name == "max" and not settings["changedLang"]:
+    if user.Name == "max":
         change_language("german", user)
         settings["changedLang"] = True
+    else:
+        change_language("english", user)
     creds = {"Name": user.Name, "Password": user.Password}
     res = req.post(url("session", "POST"), json=creds)
     return user

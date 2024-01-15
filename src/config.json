@@ -11,6 +11,32 @@
         "PricePerPackage": 5
     },
     "battle": {
+        "GamePlayTxt": {
+            "english": {
+                "header": "Battle between #player1 and #player2\n",
+                "winner": "THE WINNER IS ... #winner\n",
+                "draw": "IT'S ... DRAW... better than losing\n",
+                "roundcount": "Number of rounds #rounds\n",
+                "roundnbr": "Round number: #roundnbr\n",
+                "points": "Gained points: #points\n",
+                "logcards": "Player #player1 played #card1\nPlayer #player2 played #card2\n",
+                "roundwin": "Player #winner won the round\n",
+                "rounddraw": "DRAW\n",
+                "timestamp": "TIME #time\n"
+            },
+            "german": {
+                "header": "Kampf zwischen #player1 und #player2\n",
+                "winner": "DER GEWINNER IST ... #winner\n",
+                "draw": "ES IST ... UNENTSCHIEDEN... besser als zu verlieren\n",
+                "roundcount": "Anzahl der Runden #rounds\n",
+                "points": "Erhaltene Punkte: #points\n",
+                "logcards": "Spieler #player1 spielte #card1\nSpieler #player2 spielte #card2\n",
+                "roundnbr": "Runde Nummer: #roundnbr\n",
+                "roundwin": "Spieler #winner hat die Runde gewonnen\n",
+                "rounddraw": "UNENTSCHIEDEN\n",
+                "timestamp": "ZEIT #time\\\n"
+            }
+        },
         "StartingPoints": 100,
         "MaxNbrRounds": 100,
         "SpecialRules": {

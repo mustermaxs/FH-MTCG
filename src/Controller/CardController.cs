@@ -33,9 +33,9 @@ public class CardController : IController
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
             IEnumerable<Card> cards = repo.GetAllCardsInStackByUserId(userId);
 
-            if (cards.Count() == 0) return new Response<IEnumerable<Card>>(204, cards, "The request was fine, but the user doesn't have any cards");
+            if (cards.Count() == 0) return new Response<string>(204, resConfig["CRD_DECK_EMPTY"]);
 
-            return new Response<IEnumerable<Card>>(200, cards, $"The user has cards, the response contains these");
+            return new Response<IEnumerable<Card>>(200, cards, resConfig["CRD_DECK_SUCC"]);
         }
         catch (Exception ex)
         {
@@ -59,7 +59,7 @@ public class CardController : IController
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId).ID;
             var userCards = repo.GetDeckByUserId(userId);
 
-            if (userCards == null || userCards.Count() == 0) return new Response<IEnumerable<DeckCard>>(204, userCards, resConfig["CRD_DECK_EMPTY"]);
+            if (userCards == null || userCards.Count() == 0) return new Response<string>(204, resConfig["CRD_DECK_EMPTY"]);
 
             return new Response<IEnumerable<DeckCard>>(200, userCards, resConfig["CRD_DECK_SUCC"]);
         }

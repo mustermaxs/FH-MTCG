@@ -35,19 +35,19 @@ public class BattleController : IController
 
             battlePrinter.battleConfig = battleConfig;
 
-            return new Response<string>(200, battlePrinter.GetBattleLogAsTxt(battle), "BATTLE SUCCESSFUL");
+            return new Response<string>(200, battlePrinter.GetBattleLogAsTxt(battle), resConfig["BATTLE_SUCC"]);
         }
         catch (PostgresException pex)
         {
             Console.WriteLine($"Battle already saved to DB by other player.\n{pex}");
 
-            return new Response<Battle>(200, battle, "BATTLE SUCCESSFUL");
+            return new Response<Battle>(200, battle, resConfig["BATTLE_SUCC"]);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
 
-            return new Response<string>(500, ex.Message, "BATTLE FAILED");
+            return new Response<string>(500, ex.Message, resConfig["INT_SVR_ERR"]);
         }
     }
 
@@ -59,7 +59,7 @@ public class BattleController : IController
         {
             var battles = battleRepo.GetAll();
 
-            return new Response<IEnumerable<Battle>>(200, battles, "Battles");
+            return new Response<IEnumerable<Battle>>(200, battles, "Got all battles");
         }
         catch (Exception ex)
         {
@@ -77,7 +77,7 @@ public class BattleController : IController
         {
             var stats = battleRepo.GetUserBattleStats(UserId);
 
-            return new Response<Dictionary<string,dynamic>>(200, stats, "Stats");
+            return new Response<Dictionary<string,dynamic>>(200, stats, resConfig["STATS_SUCC"]);
         }
         catch (Exception ex)
         {
@@ -99,7 +99,7 @@ public class BattleController : IController
         {
             var stats = battleRepo.GetAllStats();
 
-            return new Response<List<Dictionary<string, dynamic>>>(200, stats, "Scoreboard");
+            return new Response<List<Dictionary<string, dynamic>>>(200, stats, resConfig["SCORE_SUCC"]);
         }
         catch (Exception ex)
         {

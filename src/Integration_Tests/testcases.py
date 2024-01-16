@@ -528,17 +528,30 @@ async def test_get_stats(cn=None):
                 # print(restxt)
 
                 
-                return (res, txt)
+                return (res, txt, res.reason)
 
 
     res1, = await asyncio.gather(
         make_request(user, 0),
     )
-    assert_true(res1[0].status == 200 , True)
+    assert_true(res1[0].status == 200 , True, res1[2])
 
-# @with_caller_name
-# async def test_get_stats(cn=None):
-#     user = login_as(users["max"])
-#     res = req.get(url("stats", "GET"), headers=Headers(user.token))
-#     assert_true(res.status_code == 200, True, res.reason)
-#     print(res.json())
+
+@with_caller_name
+async def test_get_scoreboard(cn=None):
+    user = login_as(users["max"])
+    async def make_request(player, delay):
+        login_as(player)
+        txt = ""
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url("score", "GET"), timeout=30, headers=Headers(user.token)) as res:
+                txt = await res.json()
+                print(f"\n\nSCOREBOARD\n{txt}\n\n")
+                
+                return (res, txt, res.reason)
+
+
+    res1, = await asyncio.gather(
+        make_request(user, 0),
+    )
+    assert_true(res1[0].status == 200 , True, res1[2])

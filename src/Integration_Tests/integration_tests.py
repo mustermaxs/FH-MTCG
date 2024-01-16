@@ -15,7 +15,9 @@ async def main():
     try:
         reset()
 
-        await test_battle()
+        for i in range(3):
+            await test_battle()
+        await test_get_scoreboard()
         # await test_get_stats()
         await test_get_stats()
         test_register_alreadyexisting_user()

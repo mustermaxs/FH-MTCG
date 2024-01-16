@@ -180,7 +180,12 @@
                 "TRADE_DEL_NOT_FOUND": "The provided deal ID was not found.",
                 "TRADE_DEL_SUCC": "Trading deal successfully deleted",
                 "AUTH_ERR": "Access token is missing or invalid.",
-                "ROUTE_UNKOWN": "The requested endpoint doesn't seem to exist."
+                "ROUTE_UNKOWN": "The requested endpoint doesn't seem to exist.",
+                "BATTLE_SUCC": "The battle has been carried out successfully",
+                "SCORE_SUCC": "The scoreboard could be retrieved successfully",
+                "STATS_SUCC": "The stats could be retrieved successfully."
+
+
             },
             "german": {
                 "INT_SVR_ERR": "Interner Serverfehler. Etwas ist schiefgegangen :(",
@@ -227,7 +232,10 @@
                 "TRADE_DEL_NOT_FOUND": "Die bereitgestellte Deal-ID wurde nicht gefunden.",
                 "TRADE_DEL_SUCC": "Deal erfolgreich gelöscht.",
                 "AUTH_ERR": "Access token fehlt oder ist nicht vorhanden.",
-                "ROUTE_UNKOWN": "Die angefragte Adresse konnte nicht gefunden werden."
+                "ROUTE_UNKOWN": "Die angefragte Adresse konnte nicht gefunden werden.",
+                "BATTLE_SUCC": "Battle wurde erfolgreich ausgetragen.",
+                "SCORE_SUCC": "Das Scoreboard wurde erfolgreich geladen.",
+                "STATS_SUCC": "Die Spielerstatistik wurde erfolgreich geladen."
             }
         }
     }

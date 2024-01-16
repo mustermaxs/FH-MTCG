@@ -8,7 +8,7 @@ namespace MTCG
         // TODO
         protected IRequest request;
         protected User? LoggedInUser { get; private set; }
-        protected ResponseTextTranslator resConfig { get; private set; } = Program.services.Get<ResponseTextTranslator>();
+        protected ResponseTextTranslator resConfig { get; set; } = Program.services.Get<ResponseTextTranslator>();
         protected Guid UserId { get; private set; }
 
         public IController(IRequest request)
@@ -23,6 +23,7 @@ namespace MTCG
             {
                 this.LoggedInUser = session.User;
                 this.UserId = LoggedInUser!.ID;
+                resConfig = session.responseTxt;
             }
 
             // this.resConfig = session.responseTxt;

@@ -23,8 +23,11 @@ public class SettingsController : IController
         {
             if (!resConfig.TranslationExists(lang)) return new Response<string>(403, resConfig["SETTINGS_LANG_UNKNOWN"]);
 
+            var userRepo = ServiceProvider.GetDisposable<UserRepository>();
+            var user = userRepo.Get(UserId)!;
             resConfig.SetLanguage(lang);
-            LoggedInUser.Language = lang;
+            user.Language = lang;
+            userRepo.Update(user);
 
             return new Response<string>(200, resConfig["SETTINGS_LANG_CHANGE_SUCC"]);
         }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 
 namespace MTCG;
 
@@ -86,7 +87,7 @@ public abstract class BaseSessionManager
     /// <param name="repo">The repository to be used.</param>
     public static void UseRepo(IRepository<User> repo) { BaseSessionManager.userRepository = repo; }
 
-    private static Dictionary<string, Session> sessions = new Dictionary<string, Session>();
+    private static ConcurrentDictionary<string, Session> sessions = new ConcurrentDictionary<string, Session>();
 
-    protected static Dictionary<string, Session> Sessions => sessions;
+    protected static ConcurrentDictionary<string, Session> Sessions => sessions;
 }

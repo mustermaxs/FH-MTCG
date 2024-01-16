@@ -56,6 +56,7 @@ public class Session
 
         User = user;
         responseTxt.SetLanguage(User.Language);
+        responseTxt = responseTxt.Load<ResponseTextTranslator>();
 
         return this;
     }

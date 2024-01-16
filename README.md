@@ -150,6 +150,8 @@ E.g. `[Route("/users/{username:alphanum}", HTTPMethod.PUT, Role.USER | Role.ADMI
 
 ## `BattleWaitingRoomManager`
 + handles the queue where lonesome players wait for an opponent
++ uses `ConcurrentDictionary<User, TaskCompletionSource<Battle>>` to store a pending battle request
++ as soon as two players are paired up for a battle, the `PerformBattle` method gets mutexed and the `BattleManager` proceedes with the battle on a single thread
 
 ## `QueryBuilder`
 + uses simple string concatenation to simplfy and shorten the expressions needed to write to query the database

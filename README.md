@@ -1,6 +1,5 @@
 Assignmenet for SWEN course at FH Technikum Wien
 
-# README
 # MTCG
 
 ## Custom features

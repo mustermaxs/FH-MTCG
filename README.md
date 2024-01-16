@@ -38,6 +38,12 @@ A few endpoints that were not required but made the development eaiser (e.g. res
 + contains information on where to find config data (json-files) and under which section (json object key)
 + provides name for config object to prevent overriding of the same config object
 + Loads data for config objects from file path that is passed via `Load` method.
++ some configs files can be changed at runtime and still have an effect on the application, e.g. the configurations for the battle
+  + number of rounds per battle
+  + required amount of cards in the deck
+  + probability of card theft
+  + translations
+  + ...
 
 ---
 ## `Controller`

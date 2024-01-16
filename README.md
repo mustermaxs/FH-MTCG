@@ -1,8 +1,7 @@
+Assignmenet for SWEN course at FH Technikum Wien
 
-# README
 # MTCG
 
-Developed by: Maximilian Sinnl
 ## Custom features
 ## Multi-language
 > In hindsight it would have been nice to have a single TranslationService that handles language preferences concerning every output and works a bit more general than the dedicated classes now do - but I only thought of this when I already finished the `ResponseTextTranslator`.
@@ -150,6 +149,8 @@ E.g. `[Route("/users/{username:alphanum}", HTTPMethod.PUT, Role.USER | Role.ADMI
 
 ## `BattleWaitingRoomManager`
 + handles the queue where lonesome players wait for an opponent
++ uses `ConcurrentDictionary<User, TaskCompletionSource<Battle>>` to store a pending battle request
++ as soon as two players are paired up for a battle, the `PerformBattle` method gets mutexed and the `BattleManager` proceedes with the battle on a single thread
 
 ## `QueryBuilder`
 + uses simple string concatenation to simplfy and shorten the expressions needed to write to query the database

@@ -21,7 +21,7 @@ public class SessionManager : BaseSessionManager
     private static object _sessionLock = new object();
 
     /// <summary>
-    /// Creates a new session object and stores it
+    /// Creates a new session object for a registered user and stores it
     /// in a static dictionary.
     /// </summary>
     /// <param name="sessionId"></param>
@@ -30,23 +30,28 @@ public class SessionManager : BaseSessionManager
     /// string - session id that can be used to access session
     /// in static session dictionary.
     /// </returns>
-    public static string CreateSessionForUser(string authToken, User user)
+    public static bool TryCreateSessionForUser(string authToken, User user, out Session session)
     {
-        string sessionId = SessionManager.CreateSessionIdFromAuthToken(authToken);
-        Session session = new Session(sessionId).WithAuthToken(authToken).WithUser(user);
-        session.IsAnonymous = false;
-
-        try
+        lock (_sessionLock)
         {
+            string sessionId = SessionManager.CreateSessionIdFromAuthToken(authToken);
+            Session newSession = new Session(sessionId).WithAuthToken(authToken).WithUser(user);
+            newSession.IsAnonymous = false;
             user.Token = authToken;
-            Sessions.TryAdd(sessionId, session);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine($"Error creating session: {e.Message}. Already exists.");
-        }
+            try
+            {
+                Sessions.TryAdd(sessionId, newSession);
 
-        return sessionId;
+                session = newSession;
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error creating session: {e.Message}. Already exists.");
+                throw e;
+            }
+        }
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -57,6 +62,25 @@ public class SessionManager : BaseSessionManager
     {
         return Sessions.ContainsKey(CreateSessionIdFromAuthToken(token));
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    public static bool UpdateSession(string sessionId, ref Session? session)
+    {
+        lock (_sessionLock)
+        {
+            if (!Sessions.TryGetValue(sessionId, out Session? existingSession))
+                return false;
+
+            session = existingSession;
+
+            return true;
+        }
+    }
+
 
 
     //////////////////////////////////////////////////////////////////////

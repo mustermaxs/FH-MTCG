@@ -41,7 +41,13 @@ public class UserController : IController
                 return new Response<string>(401, resConfig["USR_CRD_INVALID"]);
 
             string authToken = SessionManager.CreateAuthToken(user!.ID.ToString());
-            SessionManager.CreateSessionForUser(authToken, user);
+
+            if (!SessionManager.TryCreateSessionForUser(authToken, user, out Session session))
+                return new Response<string>(500, resConfig["INT_SVR_ERR"], "Failedd to create session.");
+
+            SessionManager.UpdateSession(session.SessionId, ref session!);
+            session.responseTxt.SetLanguage(user.Language);
+
 
             return new Response<object>(200, new { authToken }, resConfig["USR_LOGIN_SUCC"]);
         }

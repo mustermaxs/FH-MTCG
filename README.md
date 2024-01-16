@@ -25,7 +25,7 @@ A few endpoints that were not required but made the development eaiser (e.g. res
 
 # Architecture
 ## Database schema
-![Database schema](mtc_db.jpg)
+![Database schema](assets/mtc_db.jpg)
 
 ## Services & Configs
 ### `ServiceProvider`
@@ -156,7 +156,7 @@ E.g. `[Route("/users/{username:alphanum}", HTTPMethod.PUT, Role.USER | Role.ADMI
 + uses simple string concatenation to simplfy and shorten the expressions needed to write to query the database
 + pretty badly written, but it did the job
 + e.g.
-[QueryBuilder usage example.](queybuilder.png)
+[QueryBuilder usage example.](assets/queybuilder.png)
 
 ---
 # Tests

@@ -109,30 +109,43 @@ public class BattleManager
         battle.CountRounds = roundsPlayed;
         battle.EndDateTime = DateTime.Now;
 
-        if (player1.Deck.Count() == 0 && player2.Deck.Count() == 0
-        || player1.Deck.Count() != 0 && player2.Deck.Count() != 0
-        || roundsPlayed == config.MaxNbrRounds
-        )
+        if (BattleEndedWithDraw())
         {
             battle.IsDraw = true;
             battle.Winner = null;
 
             return;
         }
-        else if (player1.Deck.Count() == 0)
-        {
-            battle.Winner = player2;
-            battle.IsDraw = false;
-            battle.Player1!.Elo -= 5;
-        }
-        else if (player2.Deck.Count() == 0)
-        {
-            battle.Winner = player1;
-            battle.IsDraw = false;
-            battle.Player2!.Elo -= 5;
-        }
 
-        battle.Winner!.Elo += 3;
+        var winner = DetermineWinner(player1, player2);
+        var loser = winner == player1 ? player2 : player1;
+
+        battle.Winner = winner;
+        winner.Elo += 3;
+        loser.Elo -= 5;
+    }
+
+
+    protected bool BattleEndedWithDraw()
+    {
+        bool reachedMaxRound = roundsPlayed == config.MaxNbrRounds;
+        bool anyPlayerLostAllCards = player1.Deck.Count() == 0 || player2.Deck.Count() == 0;
+
+        return (reachedMaxRound) ||
+                (reachedMaxRound && !anyPlayerLostAllCards);
+    }
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+
+
+    protected User DetermineWinner(User player1, User player2)
+    {
+        return player1.Deck.Count() == 0 ?
+                player2 :
+                player1;
     }
 
 
@@ -166,12 +179,12 @@ public class BattleManager
         else
             throw new Exception("Unhandled card type or combination.");
 
-        
+
         battleLogEntry.RoundNumber = roundsPlayed;
         battleLogEntry.CountCardsLeftPlayer1 = player1.Deck.Count();
         battleLogEntry.CountCardsLeftPlayer2 = player2.Deck.Count();
         battle.BattleLog.Add(battleLogEntry);
-        
+
         TransferCardToWinner(battleLogEntry.RoundWinner, cardPlayer1!, cardPlayer2!, battleLogEntry);
         TryToStealCard(battleLogEntry);
         roundsPlayed++;
@@ -189,10 +202,9 @@ public class BattleManager
         User thief = entry.RoundWinner == player1 ? player1 : player2;
 
         if (!stealsCard || victim.Deck.Count() == 0) return;
-        
-        DeckCard victimCard = DrawCard(victim);
+
+        DeckCard victimCard = DrawCard(victim)!;
         TransferCard(victim, thief, victimCard);
-        // entry.ActionDescriptions = $"\n{thief.Name} stole card {victimCard.Name} from {victim.Name}!\n";
         battle.BattleLog.Last().ActionDescriptions = $"\n{thief.Name} stole card {victimCard.Name} from {victim.Name}!\n";
     }
 
@@ -229,25 +241,9 @@ public class BattleManager
 
     public BattleLogEntry HandleSpellVsSpell(CardAndOwner co1, CardAndOwner co2)
     {
-        var result = HigherCalcDamage(co1, co2);
         var cardPlayer1 = co1.card;
         var cardPlayer2 = co2.card;
-
-        string description = string.Empty;
-        // REMOVE
-        if (cardPlayer1.Element() == cardPlayer2.Element())
-        {
-            if (result == null)
-            {
-                return NewEntry(cardPlayer1, cardPlayer2, null, description);
-            }
-            else
-            {
-                return NewEntry(cardPlayer1, cardPlayer2, result?.owner);
-            }
-        }
-
-        result = GetStrongerElementCard(co1, co2);
+        CardAndOwner? result = GetStrongerElementCard(co1, co2);
 
         return NewEntry(cardPlayer1, cardPlayer2, result?.owner);
     }
@@ -263,10 +259,16 @@ public class BattleManager
         return $"{player1.Name} plays {cardPlayer1.Name}\n{player2.Name} plays {cardPlayer2.Name}\n";
     }
 
+
+
+
     public void TransferCardToUser(User fromUser, User toUser, DeckCard card)
     {
         throw new NotImplementedException();
     }
+
+
+
 
     public BattleLogEntry HandleSpellVsMonster(CardAndOwner co1, CardAndOwner co2)
     {
@@ -283,7 +285,6 @@ public class BattleManager
 
     public BattleLogEntry HandleMonsterVsMonster(CardAndOwner co1, CardAndOwner co2)
     {
-        // throw new NotImplementedException();
         var cardPlayer1 = co1.card;
         var cardPlayer2 = co2.card;
         CardAndOwner? winner = null;
@@ -370,12 +371,13 @@ public class BattleManager
         var card2 = c2.card;
         double factor1 = 1;
         double factor2 = 1;
+        double inverseFactor = factor == 0 ? 0 : (1 / factor);
 
         if (effectedByFactor != null)
         {
             bool card1IsEffectedCard = effectedByFactor == card1 ? true : false;
-            if (card1IsEffectedCard) factor1 = factor;
-            if (!card1IsEffectedCard) factor2 = factor;
+            if (card1IsEffectedCard) { factor1 = factor; factor = inverseFactor; }
+            if (!card1IsEffectedCard) { factor2 = factor; factor2 = inverseFactor; }
         }
 
         if (card1.Damage * factor1 == card2.Damage * factor2)

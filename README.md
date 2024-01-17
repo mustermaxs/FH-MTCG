@@ -24,7 +24,7 @@ A few endpoints that were not required but made the development eaiser (e.g. res
 ## Lessons learned
 Writing unit tests felt like a tedious task in the beginning, but turned out to be incredibly useful. Especially writing the tests before implementing the tested classes and methods. It helped with thinking things through, structuring the code a bit better and in the end accelerated the whole development process by automating the testing and not being dependend so much on trial and error processes.
 
-Also I convinced myself not to use Chat-GPT to write the application to get the most out this assignement which definitely was a well-worth challenge.
+Also I convinced myself not to use Chat-GPT to help me write the application to get the most out this assignement which definitely was a well-worth challenge.
 
 # Architecture
 ## Database schema

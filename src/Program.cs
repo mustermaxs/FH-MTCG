@@ -25,14 +25,15 @@ namespace MTCG
             /// to register endpoints and the responsible controllers
             /// to handle requests.
             
-            LoadServices();
             IUrlParser urlParser = new UrlParser();
             IEndpointMapper routeRegistry = RouteRegistry.GetInstance(urlParser);
             IAttributeHandler attributeHandler = new AttributeHandler();
             IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);
 
             Router router = new(routeRegistry, routeObtainer);
+            router.RegisterRoutes();
             HttpServer svr = new(router);
+            LoadServices();
             svr.Run();
         }
 

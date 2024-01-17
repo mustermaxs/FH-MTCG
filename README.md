@@ -170,15 +170,18 @@ public IResponse DeleteUser(Guid userid)
 
 
 
-# Tests
+# Tests & Lessons learned
 ## Unit tests
 + 54 Unit tests
-
-Writing unit tests felt like a tedious task in the beginning, but turned out to be incredibly useful. Especially writing the tests before implementing the tested classes and methods. It helped with thinking things through, structuring the code a bit better and in the end accelerated the whole development process by automating the testing and not being dependend so much on trial and error processes.
++ c# NUnit testing library
 ### Chosen testcases
-I tried to choose mainly critical sections of the code like the `UrlParser`, the `RouteRegistry`, loading data from the config files, the battle logic. 
+The testcases mainly concern the whole routing process - parsing the URL, mapping it to an `Endpoint`, Serializing and deserializing objects - but also the battle logic.
 
 ### Integration tests
 + 24 integration tests
 + implemented in python
 + check status codes and payloads (case dependent)
+
+## Lessons learned
+Writing unit tests felt like a tedious task in the beginning, but turned out to be incredibly useful. Especially writing the tests before implementing the tested classes and methods. It helped with thinking things through, structuring the code a bit better and in the end accelerated the whole development process by automating the testing and not being dependend so much on trial and error processes.
+Also I convinced myself not to use Chat-GPT to write the application to get the most out this assignement which definitely was a well-worth challenge.

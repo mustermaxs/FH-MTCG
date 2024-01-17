@@ -153,7 +153,7 @@ public class UserController : IController
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Err(ex, true);
 
             return new ErrorResponse<User>($"{resConfig["USR_ADD_ERR"]} {ex}", 500);
         }

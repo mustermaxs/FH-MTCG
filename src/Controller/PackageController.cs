@@ -44,7 +44,7 @@ public class PackageController : IController
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Err(ex, true);
 
             return new Response<string>(403, resConfig["PCK_ADD_EXISTS"]);
         }
@@ -71,7 +71,7 @@ public class PackageController : IController
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Err(ex, true);
 
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
@@ -97,7 +97,7 @@ public class PackageController : IController
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Err(ex, true);
 
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
@@ -169,7 +169,7 @@ public class PackageController : IController
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Err(ex, true);
 
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }

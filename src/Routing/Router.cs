@@ -85,7 +85,7 @@ public class Router : IRouter
 
                 Endpoint endpoint = endpointBuilder.Build();
                 routeRegistry.RegisterEndpoint(endpoint);
-                Console.WriteLine($"[Register Route] {HttpMethod.ToString().PadRight(5)} {RouteTemplate}");
+                Logger.ToConsole($"[Register Route] {HttpMethod.ToString().PadRight(5)} {RouteTemplate}");
             }
         }
         catch (Exception ex)
@@ -240,19 +240,22 @@ public class Router : IRouter
 
         catch (RouteDoesntExistException ex)
         {
-            Logger.ToConsole($"[ERROR]\n{ex}\nRoute doesn't exist: {ex.Url}", true);
+            Logger.Err($"{ex}\nRoute doesn't exist: {ex.Url}", true);
+            
             return new Response<string>(404, $"[ {ex.Url} ] {languageConfig["ROUTE_UNKOWN"]}");
         }
 
         catch (AuthenticationFailedException ex)
         {
-            Logger.ToConsole($"[ERROR]\n{ex}\nAuthentication failed.", true);
+            Logger.Err($"{ex}\nAuthentication failed.", true);
+            
             return new Response<string>(404, languageConfig["AUTH_ERR"]);
         }
         catch (Exception ex)
         {
 
-            Logger.ToConsole($"[ERROR]\n{ex}\nSomething went wrong.", true);
+            Logger.Err($"{ex}\nSomething went wrong.", true);
+            
             return new Response<string>(500, $"{languageConfig["INT_SVR_ERR"]}.\n{ex.Message}");
         }
         finally

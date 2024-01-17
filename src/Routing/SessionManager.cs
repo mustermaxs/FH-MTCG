@@ -48,7 +48,7 @@ public class SessionManager : BaseSessionManager
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error creating session: {e.Message}. Already exists.");
+                Logger.Err($"creating session: {e.Message}. Already exists.");
                 throw e;
             }
         }
@@ -119,7 +119,7 @@ public class SessionManager : BaseSessionManager
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Error creating session: {e.Message}. Already exists.");
+            Logger.Err($"creating session: {e.Message}. Already exists.");
         }
         return session.SessionId;
     }

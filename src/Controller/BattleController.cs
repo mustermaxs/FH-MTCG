@@ -52,7 +52,7 @@ public class BattleController : IController
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Err(ex, true);
 
             return new Response<string>(500, ex.Message, resConfig["INT_SVR_ERR"]);
         }
@@ -74,7 +74,7 @@ public class BattleController : IController
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Err(ex, true);
 
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
@@ -96,7 +96,7 @@ public class BattleController : IController
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Err(ex, true);
 
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
@@ -118,7 +118,7 @@ public class BattleController : IController
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Err(ex, true);
 
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }

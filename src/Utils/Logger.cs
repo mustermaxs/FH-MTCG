@@ -4,21 +4,32 @@ namespace MTCG;
 
 public class Logger
 {
-    public readonly static string decoline = new string('-', 15);
+    protected static string decoline = new string('-', 25);
+
     public static void ToConsole(string txt, bool withTimeStamp = false)
     {
-        DateTime localDate = DateTime.Now;
-        DateTime utcDate = DateTime.UtcNow;
-        var timestamp = withTimeStamp ? localDate.ToString("yyyy-MM-dd HH:mm:ss") : "";
-
-        string decoline = new string('-', 25);
-        string logTxt = $"{decoline}\n{timestamp}\n{txt}";
-        
-        if (txt.Contains("[ERROR]"))
-            Console.ForegroundColor = ConsoleColor.Red;
-            
+        string logTxt = $"{decoline}\n{TimeStamp(null)}\n{txt}";
         Console.WriteLine(logTxt);
-        
+    }
+
+    public static void Err(string txt, bool withTimeStamp = false)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        ToConsole($"[ERROR] {txt}", withTimeStamp);
         Console.ResetColor();
+    }
+    public static void Err(Exception ex, bool withTimeStamp = false)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        ToConsole($"[ERROR] {ex.ToString()}", withTimeStamp);
+        Console.ResetColor();
+    }
+
+
+    public static string TimeStamp(DateTime? time)
+    {
+        string format = "yyyy-MM-dd HH:mm:ss";
+
+        return time == null ? DateTime.Now.ToString(format) : time.Value.ToString(format);
     }
 }

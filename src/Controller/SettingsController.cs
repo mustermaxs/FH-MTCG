@@ -33,7 +33,7 @@ public class SettingsController : IController
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Err(ex, true);
 
             return new Response<string>(403, resConfig["INT_SVR_ERR"]);
         }
@@ -57,7 +57,7 @@ public class SettingsController : IController
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Err(ex, true);
 
             return new Response<string>(403, resConfig["INT_SVR_ERR"]);
         }

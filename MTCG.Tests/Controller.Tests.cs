@@ -33,7 +33,7 @@
 //         }
 //         catch (Exception ex)
 //         {
-//             Console.WriteLine(ex);
+//             Logger.Err(ex, true);
 //         }
 //     }
 //     [Test]

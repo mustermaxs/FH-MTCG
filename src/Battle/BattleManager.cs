@@ -185,7 +185,7 @@ public class BattleManager
         battleLogEntry.CountCardsLeftPlayer2 = player2.Deck.Count();
         battle.BattleLog.Add(battleLogEntry);
 
-        TransferCardToWinner(battleLogEntry.RoundWinner, cardPlayer1!, cardPlayer2!, battleLogEntry);
+        TransferLosersCardToWinner(battleLogEntry.RoundWinner, cardPlayer1!, cardPlayer2!, battleLogEntry);
         TryToStealCard(battleLogEntry);
         roundsPlayed++;
 
@@ -217,7 +217,7 @@ public class BattleManager
     }
 
 
-    protected void TransferCardToWinner(User? winner, DeckCard card1, DeckCard card2, BattleLogEntry entry)
+    protected void TransferLosersCardToWinner(User? winner, DeckCard card1, DeckCard card2, BattleLogEntry entry)
     {
         if (winner == null) return;
 
@@ -258,15 +258,6 @@ public class BattleManager
     {
         return $"{player1.Name} plays {cardPlayer1.Name}\n{player2.Name} plays {cardPlayer2.Name}\n";
     }
-
-
-
-
-    public void TransferCardToUser(User fromUser, User toUser, DeckCard card)
-    {
-        throw new NotImplementedException();
-    }
-
 
 
 

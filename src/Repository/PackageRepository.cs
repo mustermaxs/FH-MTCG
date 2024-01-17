@@ -5,6 +5,7 @@ namespace MTCG;
 
 public class PackageRepository : BaseRepository<Package>, IRepository<Package>, IService
 {
+    private static object packageLock = new();
     public PackageRepository()
         : base()
     {
@@ -35,8 +36,8 @@ public class PackageRepository : BaseRepository<Package>, IRepository<Package>, 
     }
 
 
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
 
     /// <summary>
@@ -75,7 +76,7 @@ public class PackageRepository : BaseRepository<Package>, IRepository<Package>, 
     {
         ObjectBuilder<ValueTypeWrapper<Guid>> objectBuilder =
             (ValueTypeWrapper<Guid> v, IDataReader re) => v.Value = re.GetGuid(re.GetOrdinal("id"));
-            
+
         var builder = new QueryBuilder(this.Connect());
         builder
             .Select("id")
@@ -88,8 +89,8 @@ public class PackageRepository : BaseRepository<Package>, IRepository<Package>, 
     }
 
 
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
     /// <summary>
     /// Gets all card ids for a given package id.
@@ -188,15 +189,18 @@ public class PackageRepository : BaseRepository<Package>, IRepository<Package>, 
     /// <param name="obj"></param>
     public override void Delete(Package obj)
     {
-        var builder = new QueryBuilder(this.Connect());
+        lock (packageLock)
+        {
+            var builder = new QueryBuilder(this.Connect());
 
-        builder
-            .DeleteFrom("packages")
-            .Where("id=@id")
-            .AddParam("@id", obj.Id)
-            .Build();
-            
+            builder
+                .DeleteFrom("packages")
+                .Where("id=@id")
+                .AddParam("@id", obj.Id)
+                .Build();
+
             builder.ExecuteNonQuery();
+        }
     }
 
 

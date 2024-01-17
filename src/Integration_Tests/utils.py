@@ -13,6 +13,7 @@ class Colors:
 
 def print_colored(text, color):
     print(f"{color}{text}{Colors.RESET}")
+    print("-" * 25)
 
 def with_caller_name(func):
     def wrapper(*args, **kwargs):

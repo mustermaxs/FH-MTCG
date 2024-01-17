@@ -109,10 +109,12 @@ def test_retrieve_packages_no_packages(cn=None):
 
 
 @with_caller_name
-def test_delete_package(id : str, cn=None):
+def test_delete_package(cn=None):
     reset()
 
     create_package(cards)
+    packages = get_all_packages()
+    id = packages[0]["Id"]
     admin = login_as(users["admin"])
     u = url("packages", "DELETE")
     u = u.replace(":id", id)

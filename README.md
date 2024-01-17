@@ -172,10 +172,13 @@ public IResponse DeleteUser(Guid userid)
 
 # Tests
 ## Unit tests
++ 54 Unit tests
+
 Writing unit tests felt like a tedious task in the beginning, but turned out to be incredibly useful. Especially writing the tests before implementing the tested classes and methods. It helped with thinking things through, structuring the code a bit better and in the end accelerated the whole development process by automating the testing and not being dependend so much on trial and error processes.
 ### Chosen testcases
 I tried to choose mainly critical sections of the code like the `UrlParser`, the `RouteRegistry`, loading data from the config files, the battle logic. 
 
 ### Integration tests
++ 23 integration tests
 + implemented in python
 + check status codes and payloads (case dependent)

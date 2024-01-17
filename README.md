@@ -21,7 +21,7 @@ Assignmenet for SWEN course at FH Technikum Wien
 ## Various endpoints
 A few endpoints that were not required but made the development eaiser (e.g. resetting, trying out different scenarios).
 
----
+
 
 # Architecture
 ## Database schema
@@ -64,6 +64,48 @@ A few endpoints that were not required but made the development eaiser (e.g. res
 + ends the anonymous session if the request is an anonymous request.
 + handles certain exceptions
 
+## `UrlParser`
++ uses URL templates to generate a *regex* pattern that can be used to extract named parameters and query parameters transmitted via the URL
++ checks if requested URL matches a specific generated pattern
++ provides key-value pairs of named parameters/query parameters and their values
+
+## `RouteRegistry`
++ used to register endpoint handlers
++ can be used together with `ReflectionRouteObtainer` to register `Endpoint` objects
++ `MapRequestToEndpoint(ref IRequest request)` uses `UrlParser` to check if one of the registered URLs matches the incoming client request concerning the HTTP method, access rights, expected named parameters, ...
++ in case a endpoint was found, it completes the provided `IRequest` object with the `Endpoint` object
++ throws a `RouteDoesntExistException` in case no registered endpoint fits the request
+
+
+## `RouteAttribute`
++ used to register methods as endpoint handlers
+E.g. `[Route("/users/{username:alphanum}", HTTPMethod.PUT, Role.USER | Role.ADMIN)]`
++ the url defines a template for the `UrlParser` class, that generates a *Regex* pattern from it to handle named parameters and query strings
++ HTTPMethod.*MethodName* HTTP-method
++ `Role.*` define the access level a client must have to be able to access this endpoint
+	+ get stored as `Enum` because bitwise operations make it pretty easy to check and compare the permission level even with access groups
+		+ e.g. `Role.ALL = Role.USER | Role.ADMIN | Role.ANONYMOUS`
+
+## `ReflectionRouteObtainer`
++ scans the source code for the `ControllerAttribute`s and `RouteAttribute`s to register the endpoints along with their corresponding:
+	+ controller types and controller methods
+	+ access rights
+	+ URL templates (patterns)
+	+ URL Regex patterns
+	+ ...
+
+
+## `ReflectionUtils`
++ used in `Router.HandleRequest` to map variable arguments in the URI to the expected parameter list in the controller methods that handle an endpoint
++ one implementation of `MapArgumentsAndInvoke` handles synchronized method calls and one asynchronous method calls
++ since the named params are received as type `string`, they get converted/cast/parsed to the data types of the parameters defined in the controller methods by `ReflectionUtils.MapProvidedArgumentsToSignature`
+	+ e.g.  `alphanum` translates to "alphanumeric" value
+	+ the alphanumeric value will get parsed as type Guid
+
+```
+[Route("/users/{userid:alphanum}, HTTPMethod.DELETE, Role.ADMIN | Role.USER)]
+public IResponse DeleteUser(Guid userid)
+```
 
 ## `Repository`
 + provides interface to get data from database
@@ -89,44 +131,6 @@ A few endpoints that were not required but made the development eaiser (e.g. res
 	+ `Trade`
 	+ `Package`
 + method `object ToSerializableObj()` used to provide `Request` a easily serializable object that contains only the fields the user is supposed to see
-
-
-## `RouteAttribute`
-+ used to register methods as endpoint handlers
-E.g. `[Route("/users/{username:alphanum}", HTTPMethod.PUT, Role.USER | Role.ADMIN)]`
-+ the url defines a template for the `UrlParser` class, that generates a *Regex* pattern from it to handle named parameters and query strings
-+ HTTPMethod.*MethodName* HTTP-method
-+ `Role.*` define the access level a client must have to be able to access this endpoint
-	+ get stored as `Enum` because bitwise operations make it pretty easy to check and compare the permission level even with access groups
-		+ e.g. `Role.ALL = Role.USER | Role.ADMIN | Role.ANONYMOUS`
-
-## `RouteRegistry`
-+ used to register endpoint handlers
-+ can be used together with `ReflectionRouteObtainer` to register `Endpoint` objects
-+ `MapRequestToEndpoint(ref IRequest request)` uses `UrlParser` to check if one of the registered URLs matches the incoming client request concerning the HTTP method, access rights, expected named parameters, ...
-+ in case a endpoint was found, it completes the provided `IRequest` object with the `Endpoint` object
-+ throws a `RouteDoesntExistException` in case no registered endpoint fits the request
-
-
-## `ReflectionRouteObtainer`
-+ scans the source code for the `ControllerAttribute`s and `RouteAttribute`s to register the endpoints along with their corresponding:
-	+ controller types and controller methods
-	+ access rights
-	+ URL templates (patterns)
-	+ URL Regex patterns
-	+ ...
-
-
-## `ReflectionUtils`
-+ used in `Router.HandleRequest` to map variable arguments in the URI to the expected parameter list in the controller methods that handle an endpoint
-+ one implementation of `MapArgumentsAndInvoke` handles synchronized method calls and one asynchronous method calls
-+ since the named params are received as type `string`, they get converted/cast/parsed to the data types of the parameters defined in the controller methods by `ReflectionUtils.MapProvidedArgumentsToSignature`
-	+ e.g.  `alphanum` translates to "alphanumeric" value
-	+ the alphanumeric value will get parsed as type Guid
-	+ ![[Pasted image 20240115161959.png]]
-
-
-
 
 ## `Response`
 + Response objects implement `abstract class BaseJsonResponse : IResponse`
@@ -164,7 +168,8 @@ E.g. `[Route("/users/{username:alphanum}", HTTPMethod.PUT, Role.USER | Role.ADMI
 + e.g.
 [QueryBuilder usage example.](assets/queybuilder.png)
 
----
+
+
 # Tests
 ## Unit tests
 Writing unit tests felt like a tedious task in the beginning, but turned out to be incredibly useful. Especially writing the tests before implementing the tested classes and methods. It helped with thinking things through, structuring the code a bit better and in the end accelerated the whole development process by automating the testing and not being dependend so much on trial and error processes.
@@ -172,5 +177,5 @@ Writing unit tests felt like a tedious task in the beginning, but turned out to 
 I tried to choose mainly critical sections of the code like the `UrlParser`, the `RouteRegistry`, loading data from the config files, the battle logic. 
 
 ### Integration tests
-+ implement in python
-+ 
++ implemented in python
++ check status codes and payloads (case dependent)

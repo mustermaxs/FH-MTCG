@@ -179,6 +179,6 @@ Writing unit tests felt like a tedious task in the beginning, but turned out to 
 I tried to choose mainly critical sections of the code like the `UrlParser`, the `RouteRegistry`, loading data from the config files, the battle logic. 
 
 ### Integration tests
-+ 23 integration tests
++ 24 integration tests
 + implemented in python
 + check status codes and payloads (case dependent)

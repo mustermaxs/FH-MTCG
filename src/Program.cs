@@ -13,19 +13,18 @@ namespace MTCG
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         public static ServiceProvider services = new ServiceProvider();
+
+        
         /// <summary>Main entry point.</summary>
         /// <param name="args">Arguments.</param>
         static void Main(string[] args)
         {
-
-
-            /// <summary>
             /// Setup necessary entities for mapping of endpoints,
             /// instantiating and starting server and router.
             /// This application currently uses reflection and custom attributes
             /// to register endpoints and the responsible controllers
             /// to handle requests.
-            /// </summary>
+            
             LoadServices();
             IUrlParser urlParser = new UrlParser();
             IEndpointMapper routeRegistry = RouteRegistry.GetInstance(urlParser);

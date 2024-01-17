@@ -1,6 +1,6 @@
 Assignmenet for SWEN course at FH Technikum Wien
 
-# MTCG
+# Monster Card Trading Game - MTCG
 
 ## Custom features
 ## Multi-language

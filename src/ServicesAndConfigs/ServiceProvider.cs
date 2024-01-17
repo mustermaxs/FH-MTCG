@@ -33,7 +33,7 @@ namespace MTCG
             var serviceName = service.GetType().Name;
 
             localServices[serviceName] = service;
-            Console.WriteLine($"[Registered Service] {serviceName}");
+            Console.WriteLine($"[Registered Service]".PadRight(28) + $"{serviceName}");
 
             return this;
         }
@@ -44,7 +44,7 @@ namespace MTCG
             var serviceName = service.GetType().Name;
 
             staticServices[serviceName] = service;
-            Console.WriteLine($"[Registered Service] {serviceName}");
+            Console.WriteLine($"[Registered Service]".PadRight(28) + $"{serviceName}");
 
             return this;
         }
@@ -55,7 +55,7 @@ namespace MTCG
             var serviceName = typeof(T).Name;
 
             disposableServices[serviceName] = typeof(T);
-            Console.WriteLine($"[Registered Service] {serviceName}");
+            Console.WriteLine($"[Registered Service]".PadRight(28) + $"{serviceName}");
 
             return this;
         }
@@ -88,7 +88,7 @@ namespace MTCG
             var service = new T();
 
             staticServices[serviceName] = service;
-            Console.WriteLine($"[Registered Service] {serviceName}");
+            Console.WriteLine($"[Registered Service]".PadRight(28) + $"{serviceName}");
 
             return this;
         }

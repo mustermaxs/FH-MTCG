@@ -12,7 +12,11 @@ public class BattleController : IController
     protected BattleRepository battleRepo = ServiceProvider.GetDisposable<BattleRepository>();
     protected BattleLogRepository battleLogRepo = ServiceProvider.GetDisposable<BattleLogRepository>();
     protected BattleWaitingRoomManager battleService = new BattleWaitingRoomManager();
+    protected UserRepository userRepo = ServiceProvider.GetDisposable<UserRepository>();
+
+
     public BattleController(IRequest request) : base(request) { }
+
 
 
 
@@ -23,22 +27,25 @@ public class BattleController : IController
 
         try
         {
-            var userRepo = ServiceProvider.GetDisposable<UserRepository>();
             var battlePrinter = new BattlePrintService();
             var battleConfig = Program.services.Get<BattleConfig>().Load<BattleConfig>();
             battleConfig.SetLanguage(LoggedInUser.Language); // sollte nicht immer explizit gesettet werden müssen, sollte "autom." passieren
 
             battle = await BattleWaitingRoomManager.BattleRequest(LoggedInUser);
             battleRepo.Save(battle);
-            var currentUser = battle.Player1!.ID == LoggedInUser.ID ? battle.Player1 : battle.Player2;
-            userRepo.Update(currentUser);
+            userRepo.Update(LoggedInUser);
 
             battlePrinter.battleConfig = battleConfig;
 
             return new Response<string>(200, battlePrinter.GetBattleLogAsTxt(battle), resConfig["BATTLE_SUCC"]);
         }
+
+
+        
         catch (PostgresException pex)
         {
+            if (pex.SqlState != "2305") throw;
+
             Console.WriteLine($"Battle already saved to DB by other player.\n{pex}");
 
             return new Response<Battle>(200, battle, resConfig["BATTLE_SUCC"]);
@@ -50,6 +57,10 @@ public class BattleController : IController
             return new Response<string>(500, ex.Message, resConfig["INT_SVR_ERR"]);
         }
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
 
     [Route("/battle", HTTPMethod.GET, Role.ALL)]
@@ -68,6 +79,10 @@ public class BattleController : IController
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
 
     [Route("/stats", HTTPMethod.GET, Role.USER)]
@@ -108,20 +123,4 @@ public class BattleController : IController
             return new Response<string>(500, resConfig["INT_SVR_ERR"]);
         }
     }
-
-    // protected void SaveBattle(Battle battle)
-    // {
-    //     try
-    //     {
-    //         battleRepo.Save(battle);
-    //     }
-    // catch (PostgresException pex)
-    // {
-
-    // }
-    //     catch (Exception ex)
-    //     {
-
-    //     }
-    // }
 }

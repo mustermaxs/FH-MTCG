@@ -166,7 +166,7 @@ public IResponse DeleteUser(Guid userid)
 + uses simple string concatenation to simplfy and shorten the expressions needed to write to query the database
 + pretty badly written, but it did the job
 + e.g.
-[QueryBuilder usage example.](assets/queybuilder.png)
+![QueryBuilder usage example.](assets/queybuilder.png)
 
 
 

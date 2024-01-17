@@ -51,16 +51,16 @@ namespace MTCG
             
 
             services
-                .Register(serverConfig)
-                .Register(responseConfig)
-                .Register(battleConfig)
-                .RegisterDisposable<CardRepository>()
-                .RegisterDisposable<BattleRepository>()
-                .RegisterDisposable<BattleLogRepository>()
-                .RegisterDisposable<UserRepository>()
-                .RegisterDisposable<PackageRepository>()
-                .RegisterDisposable<CardTradeRepository>()
-                .Register(cardConfig);
+                .RegisterPreconfigured(serverConfig)
+                .RegisterPreconfigured(responseConfig)
+                .RegisterPreconfigured(cardConfig)
+                .RegisterLocal(battleConfig)
+                .RegisterType<CardRepository>()
+                .RegisterType<BattleRepository>()
+                .RegisterType<BattleLogRepository>()
+                .RegisterType<UserRepository>()
+                .RegisterType<PackageRepository>()
+                .RegisterType<CardTradeRepository>();
         }
     }
 }

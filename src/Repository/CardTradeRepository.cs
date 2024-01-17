@@ -42,7 +42,7 @@ public class CardTradeRepository : BaseRepository<CardTrade>, IRepository<CardTr
 
     protected override void Fill(CardTrade trade, IDataReader re)
     {
-        var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
+        var cardRepo = ServiceProvider.GetFreshInstance<CardRepository>();
         Guid offeredCardId = re.GetGuid(re.GetOrdinal("offeredcardid"));
         var offeredCard = cardRepo.Get(offeredCardId);
 

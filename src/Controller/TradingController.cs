@@ -48,7 +48,7 @@ public class CardTradingController : IController
         try
         {
             Guid userId = SessionManager.GetUserBySessionId(request.SessionId!)!.ID;
-            var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
+            var cardRepo = ServiceProvider.GetFreshInstance<CardRepository>();
             string reqContent = request.PayloadAsObject<string>();
             Guid acceptedCardId = Guid.Parse(reqContent!);
             DeckCard acceptedCard = cardRepo.GetDeckCardForUser(acceptedCardId, userId);
@@ -92,7 +92,7 @@ public class CardTradingController : IController
 
     protected void ExchangeDeckCards(DeckCard acceptedCard, DeckCard offeredCard, Guid userId, Guid offeringUserId)
     {
-        var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
+        var cardRepo = ServiceProvider.GetFreshInstance<CardRepository>();
         cardRepo.AddCardsToDeck(new List<Card> { acceptedCard }, offeringUserId);
         cardRepo.RemoveCardFromDeck(acceptedCard, userId);
         cardRepo.AddCardsToDeck(new List<Card> { offeredCard }, userId);
@@ -175,7 +175,7 @@ public class CardTradingController : IController
 
             if (trade == null) throw new Exception($"Failed to create trade object from provided JSON string.\n{request.Payload}");
 
-            var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
+            var cardRepo = ServiceProvider.GetFreshInstance<CardRepository>();
             DeckCard deckCard = cardRepo.GetDeckCardForUser(trade.CardToTrade.Value, UserId);
 
             if (deckCard == null || !deckCard.DeckId.HasValue || deckCard.Locked)
@@ -254,7 +254,7 @@ public class CardTradingController : IController
     {
         if (!cardId.HasValue || !userId.HasValue) return false;
 
-        var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
+        var cardRepo = ServiceProvider.GetFreshInstance<CardRepository>();
         var deckCards = cardRepo.GetDeckByUserId(userId.Value);
 
         if (deckCards == null || deckCards.Count() == 0)

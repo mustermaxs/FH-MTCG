@@ -9,10 +9,10 @@ namespace MTCG;
 [Controller]
 public class BattleController : IController
 {
-    protected BattleRepository battleRepo = ServiceProvider.GetDisposable<BattleRepository>();
-    protected BattleLogRepository battleLogRepo = ServiceProvider.GetDisposable<BattleLogRepository>();
+    protected BattleRepository battleRepo = ServiceProvider.GetFreshInstance<BattleRepository>();
+    protected BattleLogRepository battleLogRepo = ServiceProvider.GetFreshInstance<BattleLogRepository>();
     protected BattleWaitingRoomManager battleService = new BattleWaitingRoomManager();
-    protected UserRepository userRepo = ServiceProvider.GetDisposable<UserRepository>();
+    protected UserRepository userRepo = ServiceProvider.GetFreshInstance<UserRepository>();
 
 
     public BattleController(IRequest request) : base(request) { }
@@ -28,7 +28,7 @@ public class BattleController : IController
         try
         {
             var battlePrinter = new BattlePrintService();
-            var battleConfig = Program.services.Get<BattleConfig>().Load<BattleConfig>();
+            var battleConfig = Program.services.GetLocal<BattleConfig>().Load<BattleConfig>();
             battleConfig.SetLanguage(LoggedInUser.Language); // sollte nicht immer explizit gesettet werden müssen, sollte "autom." passieren
 
             battle = await BattleWaitingRoomManager.BattleRequest(LoggedInUser);

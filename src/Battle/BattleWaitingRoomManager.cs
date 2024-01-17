@@ -91,9 +91,9 @@ namespace MTCG
                     string battleToken = CryptoHandler.GenerateRandomString(10);
                     List<string> actions = new List<string>();
                     
-                    var battleManager = new BattleManager(player1, player2, Program.services.Get<BattleConfig>().Load<BattleConfig>());
+                    var battleManager = new BattleManager(player1, player2, ServiceProvider.Get<BattleConfig>().Load<BattleConfig>());
                     battleManager.SetBattleToken(battleToken);
-                    battleManager.UseCardRepo(ServiceProvider.GetDisposable<CardRepository>());
+                    battleManager.UseCardRepo(ServiceProvider.GetFreshInstance<CardRepository>());
 
                     var battle = battleManager.Play();
                     

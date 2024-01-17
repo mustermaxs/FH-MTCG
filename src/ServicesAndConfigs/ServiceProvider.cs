@@ -15,10 +15,10 @@ namespace MTCG
     {
         protected ConcurrentDictionary<string, IService> localServices = new ConcurrentDictionary<string, IService>();
         protected static ConcurrentDictionary<string, IService> staticServices = new ConcurrentDictionary<string, IService>();
-        protected static ConcurrentDictionary<string, Type> disposableServices = new ConcurrentDictionary<string, Type>();
+        protected static ConcurrentDictionary<string, Type> typeMappings = new ConcurrentDictionary<string, Type>();
 
 
-        public virtual ServiceProvider Register<T>() where T : IService, new()
+        public virtual ServiceProvider RegisterLocal<T>() where T : IService, new()
         {
             var serviceName = typeof(T).Name;
             var service = new T();
@@ -28,11 +28,20 @@ namespace MTCG
 
             return this;
         }
-        public virtual ServiceProvider Register(IService service)
+        public virtual ServiceProvider RegisterLocal(IService service)
         {
             var serviceName = service.GetType().Name;
 
             localServices[serviceName] = service;
+            Console.WriteLine($"[Registered Service]".PadRight(28) + $"{serviceName}");
+
+            return this;
+        }
+        public virtual ServiceProvider RegisterPreconfigured(IService service)
+        {
+            var serviceName = service.GetType().Name;
+
+            staticServices[serviceName] = service;
             Console.WriteLine($"[Registered Service]".PadRight(28) + $"{serviceName}");
 
             return this;
@@ -50,11 +59,11 @@ namespace MTCG
         }
 
 
-        public ServiceProvider RegisterDisposable<T>() where T : IService, new()
+        public ServiceProvider RegisterType<T>() where T : IService, new()
         {
             var serviceName = typeof(T).Name;
 
-            disposableServices[serviceName] = typeof(T);
+            typeMappings[serviceName] = typeof(T);
             Console.WriteLine($"[Registered Service]".PadRight(28) + $"{serviceName}");
 
             return this;
@@ -100,7 +109,7 @@ namespace MTCG
             return localServices.TryRemove(typeof(T).Name, out IService? _);
         }
 
-        public virtual T Get<T>() where T : IService
+        public virtual T GetLocal<T>() where T : IService
         {
             Type serviceType = typeof(T);
 
@@ -110,11 +119,11 @@ namespace MTCG
             throw new Exception($"Failed to get config {serviceType.Name}");
         }
 
-        public static T GetDisposable<T>() where T : IService
+        public static T GetFreshInstance<T>() where T : IService
         {
             Type serviceType = typeof(T);
 
-            if (disposableServices.TryGetValue(serviceType.Name, out Type? service))
+            if (typeMappings.TryGetValue(serviceType.Name, out Type? service))
             {
                 try
                 {
@@ -136,7 +145,7 @@ namespace MTCG
 
 
 
-        public static T GetStatic<T>() where T : IService
+        public static T Get<T>() where T : IService
         {
             Type serviceType = typeof(T);
 

@@ -97,8 +97,8 @@ public class BattleLogRepository : BaseRepository<BattleLogEntry>, IRepository<B
 
     protected override void Fill(BattleLogEntry obj, IDataReader re)
     {
-        var userRepo = ServiceProvider.GetDisposable<UserRepository>();
-        var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
+        var userRepo = ServiceProvider.GetFreshInstance<UserRepository>();
+        var cardRepo = ServiceProvider.GetFreshInstance<CardRepository>();
 
         obj.Id = re.GetGuid(re.GetOrdinal("id"));
         obj.Player1 = userRepo.Get(re.GetGuid(re.GetOrdinal("player1")));

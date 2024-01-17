@@ -68,11 +68,13 @@ public class SessionManager : BaseSessionManager
     //////////////////////////////////////////////////////////////////////
 
 
-    public static bool UpdateSession(string sessionId, ref Session? session)
+    public static bool UpdateSession(string token, ref Session? session)
     {
         lock (_sessionLock)
         {
-            if (!Sessions.TryGetValue(sessionId, out Session? existingSession))
+            string id = CreateSessionIdFromAuthToken(token);
+            
+            if (!Sessions.TryGetValue(id, out Session? existingSession))
                 return false;
 
             session = existingSession;

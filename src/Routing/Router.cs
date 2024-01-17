@@ -42,7 +42,7 @@ public class Router : IRouter
     {
         this.routeRegistry = routeRegistry;
         this.routeObtainer = routeObtainer;
-        this.languageConfig = Program.services.Get<ResponseTextTranslator>();
+        this.languageConfig = ServiceProvider.Get<ResponseTextTranslator>();
     }
 
 

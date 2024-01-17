@@ -16,7 +16,7 @@ public class PackageRepository : BaseRepository<Package>, IRepository<Package>, 
 
     public override IEnumerable<Package> GetAll()
     {
-        var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
+        var cardRepo = ServiceProvider.GetFreshInstance<CardRepository>();
         List<Package> packages = new List<Package>();
         List<Guid> packageIds = GetAllPackageIds().ToList();
         List<Card> packageCards = new List<Card>();
@@ -53,7 +53,7 @@ public class PackageRepository : BaseRepository<Package>, IRepository<Package>, 
     /// </exception>
     private List<Card> GetCardsForPackage(List<Guid> packageCardIds)
     {
-        var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
+        var cardRepo = ServiceProvider.GetFreshInstance<CardRepository>();
         List<Card> cards = new List<Card>();
 
         foreach (Guid cardId in packageCardIds)
@@ -125,7 +125,7 @@ public class PackageRepository : BaseRepository<Package>, IRepository<Package>, 
 
         if (packageId == Guid.Empty) return null;
 
-        var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
+        var cardRepo = ServiceProvider.GetFreshInstance<CardRepository>();
         var package = new Package();
         var packageCardIds = GetPackageCardIds(packageId).ToList();
         var cards = cardRepo.GetCardsByIds(packageCardIds);

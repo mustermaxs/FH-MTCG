@@ -8,7 +8,7 @@ namespace MTCG
         // TODO
         protected IRequest request;
         protected User? LoggedInUser { get; private set; }
-        protected ResponseTextTranslator resConfig { get; set; } = Program.services.Get<ResponseTextTranslator>();
+        protected ResponseTextTranslator resConfig { get; set; }
         protected Guid UserId { get; private set; }
 
         public IController(IRequest request)
@@ -19,12 +19,11 @@ namespace MTCG
             if (!SessionManager.TryGetSessionById(request.SessionId, out Session? session))
                 throw new Exception("Session not found");
 
-            if (session.User != null)
-            {
-                this.LoggedInUser = session.User;
-                this.UserId = LoggedInUser!.ID;
-                resConfig = session.responseTxt;
-            }
+
+            this.LoggedInUser = session.User;
+            this.UserId = LoggedInUser!.ID;
+            resConfig = ServiceProvider.Get<ResponseTextTranslator>();
+            resConfig.SetLanguage(session.User.Language);
 
             // this.resConfig = session.responseTxt;
         }

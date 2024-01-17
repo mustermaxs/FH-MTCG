@@ -11,8 +11,8 @@ namespace MTCG;
 [Controller]
 public class CardController : IController
 {
-    protected CardRepository repo = ServiceProvider.GetDisposable<CardRepository>();
-    protected CardConfig cardConfig = Program.services.Get<CardConfig>();
+    protected CardRepository repo = ServiceProvider.GetFreshInstance<CardRepository>();
+    protected CardConfig cardConfig = ServiceProvider.Get<CardConfig>();
     public CardController(IRequest request) : base(request) { }
 
 
@@ -220,7 +220,7 @@ public class CardController : IController
     {
         try
         {
-            var userRepo = ServiceProvider.GetDisposable<UserRepository>();
+            var userRepo = ServiceProvider.GetFreshInstance<UserRepository>();
             var user = userRepo.Get(userid);
 
             if (user == null) return new Response<string>(204, "User not found.");

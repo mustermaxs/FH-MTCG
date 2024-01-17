@@ -25,7 +25,7 @@ namespace MTCG
 
         private IRouter router;
 
-        private ServerConfig serverConfig = Program.services.Get<ServerConfig>();
+        private ServerConfig serverConfig = ServiceProvider.Get<ServerConfig>();
         private List<Task> tasks = new List<Task>();
 
 

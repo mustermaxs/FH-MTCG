@@ -75,7 +75,7 @@ public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, ISe
         {
             try
             {
-                var battleLogRepo = ServiceProvider.GetDisposable<BattleLogRepository>();
+                var battleLogRepo = ServiceProvider.GetFreshInstance<BattleLogRepository>();
                 var winnerIsNull = obj.Winner == null;
 
                 dynamic winner = winnerIsNull ? DBNull.Value : obj.Winner!.ID;
@@ -161,7 +161,7 @@ public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, ISe
     public List<Dictionary<string, dynamic>> GetAllStats()
     {
         List<Dictionary<string, dynamic>> stats = new List<Dictionary<string, dynamic>>();
-        var userRepo = ServiceProvider.GetDisposable<UserRepository>();
+        var userRepo = ServiceProvider.GetFreshInstance<UserRepository>();
         var users = userRepo.GetAll();
 
         foreach (var user in users)
@@ -205,8 +205,8 @@ public class BattleRepository : BaseRepository<Battle>, IRepository<Battle>, ISe
 
     protected override void Fill(Battle obj, IDataReader re)
     {
-        var userRepo = ServiceProvider.GetDisposable<UserRepository>();
-        var logEntryRepo = ServiceProvider.GetDisposable<BattleLogRepository>();
+        var userRepo = ServiceProvider.GetFreshInstance<UserRepository>();
+        var logEntryRepo = ServiceProvider.GetFreshInstance<BattleLogRepository>();
 
         obj.Id = re.GetGuid(re.GetOrdinal("id"));
         obj.Player1 = userRepo.Get(re.GetGuid(re.GetOrdinal("player1")));

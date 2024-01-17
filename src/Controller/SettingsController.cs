@@ -23,11 +23,20 @@ public class SettingsController : IController
         {
             if (!resConfig.TranslationExists(lang)) return new Response<string>(403, resConfig["SETTINGS_LANG_UNKNOWN"]);
 
-            var userRepo = ServiceProvider.GetDisposable<UserRepository>();
+            var userRepo = ServiceProvider.GetFreshInstance<UserRepository>();
             var user = userRepo.Get(UserId)!;
-            resConfig.SetLanguage(lang);
+
+            if (!resConfig.SetLanguage(lang))
+                return new Response<string>(404, resConfig["SETTINGS_LANG_UNKNOWN"]);
+
             user.Language = lang;
             userRepo.Update(user);
+
+            SessionManager.TryGetSessionById(request.SessionId, out Session? session);
+            SessionManager.UpdateSession(session.AuthToken, ref session!);
+            resConfig = ServiceProvider.Get<ResponseTextTranslator>();
+            resConfig.SetLanguage(user.Language);
+            session.User = user;
 
             return new Response<string>(200, resConfig["SETTINGS_LANG_CHANGE_SUCC"]);
         }
@@ -45,10 +54,10 @@ public class SettingsController : IController
     {
         try
         {
-            var userRepo = ServiceProvider.GetDisposable<UserRepository>();
-            var cardRepo = ServiceProvider.GetDisposable<CardRepository>();
-            var battleRepo = ServiceProvider.GetDisposable<BattleRepository>();
-            var battleLogRepo = ServiceProvider.GetDisposable<BattleLogRepository>();
+            var userRepo = ServiceProvider.GetFreshInstance<UserRepository>();
+            var cardRepo = ServiceProvider.GetFreshInstance<CardRepository>();
+            var battleRepo = ServiceProvider.GetFreshInstance<BattleRepository>();
+            var battleLogRepo = ServiceProvider.GetFreshInstance<BattleLogRepository>();
 
             cardRepo.DeleteAll();
             battleRepo.DeleteAll();

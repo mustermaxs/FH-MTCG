@@ -19,8 +19,8 @@ namespace MTCG
             {
                 return false;
             }
-
             chosenLanguage.Value = lang;
+
             return true;
         }
 

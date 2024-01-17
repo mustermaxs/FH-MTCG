@@ -81,7 +81,6 @@ public class UserRepository : BaseRepository<User>, IRepository<User>, IService
     .Build();
 
     builder.ExecuteNonQuery();
-    SessionManager.UpdateUser(user);
   }
 
 

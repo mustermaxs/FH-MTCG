@@ -17,7 +17,7 @@ namespace MTCG;
 public class UserController : IController
 {
 
-    protected static UserRepository repo = ServiceProvider.GetDisposable<UserRepository>();
+    protected static UserRepository repo = ServiceProvider.GetFreshInstance<UserRepository>();
     public UserController(IRequest request) : base(request) { }
 
 
@@ -47,7 +47,6 @@ public class UserController : IController
 
             InitUserSettings(session, user);
 
-
             return new Response<object>(200, new { authToken }, resConfig["USR_LOGIN_SUCC"]);
         }
         catch (Exception ex)
@@ -61,8 +60,10 @@ public class UserController : IController
 
     protected void InitUserSettings(Session session, User user)
     {
-        SessionManager.UpdateSession(session.SessionId, ref session!);
-        session.responseTxt.SetLanguage(session.User!.Language);
+        SessionManager.UpdateSession(session.AuthToken, ref session!);
+        session.User.Language = user.Language;
+        resConfig = ServiceProvider.Get<ResponseTextTranslator>();
+        resConfig.SetLanguage(user.Language);
     }
 
     /// <summary>

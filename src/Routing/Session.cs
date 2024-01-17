@@ -20,23 +20,11 @@ public class Session
                                             // is easier like this
     public bool IsLoggedIn { get => User != null && AuthToken != ""; }
     public ResponseTextTranslator responseTxt { get; protected set; } = new ResponseTextTranslator();
+    private string language = "english";
     public string Language
     {
         get {
-            return Language;
-
-        }
-        set
-        {
-            if (value != string.Empty)
-            {
-                Language = value;
-                responseTxt.SetLanguage(value);
-            }
-            else
-            {
-                Language = "english";
-            }
+            return User?.Language ?? language;
         }
     } 
 
@@ -73,6 +61,7 @@ public class Session
         }
 
         User = user;
+        language = User.Language;
         responseTxt.SetLanguage(User.Language);
         responseTxt = responseTxt.Load<ResponseTextTranslator>();
 

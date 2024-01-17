@@ -324,25 +324,6 @@ COPY public.actions (id, actiontype) FROM stdin;
 --
 
 COPY public.battlelogs (id, cardidplayer1, cardidplayer2, player1, player2, roundwinner, battleid, roundnumber, isdraw) FROM stdin;
-e2a98209-4500-4994-9ead-4b57deb7b4ca	5735bd1b-38a7-4f68-b0a4-8bc6c95f9209	c6a85a42-4b34-400d-a8e1-4eeae64997c4	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	9825268f-3434-48bc-abe2-b2c1f969752a	1	f
-f2ea465f-c2e3-4826-a083-e04dc670135d	5eca66fb-71a5-451f-87ef-a7c89aa98643	5735bd1b-38a7-4f68-b0a4-8bc6c95f9209	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	060ab0c4-abef-4d89-bf45-c33af92a7c89	9825268f-3434-48bc-abe2-b2c1f969752a	2	f
-040aaf49-6aa5-421f-8be1-c919b35b6164	5735bd1b-38a7-4f68-b0a4-8bc6c95f9209	fe7951d7-e560-4264-84fa-5ea8d42f083f	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	9825268f-3434-48bc-abe2-b2c1f969752a	3	f
-4f8b2ba8-41e9-47f1-8d48-39367c3fd9bd	5eca66fb-71a5-451f-87ef-a7c89aa98643	d7c9b9d7-da19-4f4e-944c-095bddec37b5	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	060ab0c4-abef-4d89-bf45-c33af92a7c89	9825268f-3434-48bc-abe2-b2c1f969752a	5	f
-8a6bdae3-fe5c-4996-b086-483f528e0e98	5eca66fb-71a5-451f-87ef-a7c89aa98643	5eca66fb-71a5-451f-87ef-a7c89aa98643	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	9825268f-3434-48bc-abe2-b2c1f969752a	7	t
-1aee8fe2-96b5-452c-b922-4fe8e38c80bc	c6a85a42-4b34-400d-a8e1-4eeae64997c4	5eca66fb-71a5-451f-87ef-a7c89aa98643	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	060ab0c4-abef-4d89-bf45-c33af92a7c89	9825268f-3434-48bc-abe2-b2c1f969752a	9	f
-dec93083-1339-485f-abd3-349bc10255a2	d7c9b9d7-da19-4f4e-944c-095bddec37b5	5735bd1b-38a7-4f68-b0a4-8bc6c95f9209	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	9825268f-3434-48bc-abe2-b2c1f969752a	11	f
-c9228871-585f-46bc-ad8b-3bbe4f38095a	5735bd1b-38a7-4f68-b0a4-8bc6c95f9209	fe7951d7-e560-4264-84fa-5ea8d42f083f	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	9825268f-3434-48bc-abe2-b2c1f969752a	12	f
-56a3fa1a-d3c7-41ba-9cfa-2212a88a891a	c6a85a42-4b34-400d-a8e1-4eeae64997c4	5eca66fb-71a5-451f-87ef-a7c89aa98643	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	060ab0c4-abef-4d89-bf45-c33af92a7c89	9825268f-3434-48bc-abe2-b2c1f969752a	14	f
-884b805e-9153-4325-a7c6-419d9d8525a9	5eca66fb-71a5-451f-87ef-a7c89aa98643	c6a85a42-4b34-400d-a8e1-4eeae64997c4	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	9825268f-3434-48bc-abe2-b2c1f969752a	16	f
-bf90444c-b9b4-420a-b905-7b78e493a707	5eca66fb-71a5-451f-87ef-a7c89aa98643	c6a85a42-4b34-400d-a8e1-4eeae64997c4	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	9825268f-3434-48bc-abe2-b2c1f969752a	18	f
-b38c0113-9232-4d6b-8988-9cea9e1e1809	d7c9b9d7-da19-4f4e-944c-095bddec37b5	d7c9b9d7-da19-4f4e-944c-095bddec37b5	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	9825268f-3434-48bc-abe2-b2c1f969752a	0	t
-21edf570-3e69-43e3-95b0-a68f2acbc284	d7c9b9d7-da19-4f4e-944c-095bddec37b5	fe7951d7-e560-4264-84fa-5ea8d42f083f	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	9825268f-3434-48bc-abe2-b2c1f969752a	4	f
-bd14810d-a8f1-4d62-aa20-27b3f7ab639e	d7c9b9d7-da19-4f4e-944c-095bddec37b5	5735bd1b-38a7-4f68-b0a4-8bc6c95f9209	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	9825268f-3434-48bc-abe2-b2c1f969752a	6	f
-5f8d799a-ac69-4ea8-b262-fb86c240afba	c6a85a42-4b34-400d-a8e1-4eeae64997c4	5735bd1b-38a7-4f68-b0a4-8bc6c95f9209	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	060ab0c4-abef-4d89-bf45-c33af92a7c89	9825268f-3434-48bc-abe2-b2c1f969752a	8	f
-e5d0c717-8ff4-418e-a8d5-86f4e2649dc5	c6a85a42-4b34-400d-a8e1-4eeae64997c4	d7c9b9d7-da19-4f4e-944c-095bddec37b5	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	060ab0c4-abef-4d89-bf45-c33af92a7c89	9825268f-3434-48bc-abe2-b2c1f969752a	10	f
-29960736-30ef-4c51-917c-ca6509364e3b	c6a85a42-4b34-400d-a8e1-4eeae64997c4	d7c9b9d7-da19-4f4e-944c-095bddec37b5	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	060ab0c4-abef-4d89-bf45-c33af92a7c89	9825268f-3434-48bc-abe2-b2c1f969752a	13	f
-a9a35104-7fea-4e01-9ee9-a9eac547520d	c6a85a42-4b34-400d-a8e1-4eeae64997c4	c6a85a42-4b34-400d-a8e1-4eeae64997c4	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	9825268f-3434-48bc-abe2-b2c1f969752a	15	t
-e7b5ff5e-0db2-480e-93a5-68e23bb9ac5d	d7c9b9d7-da19-4f4e-944c-095bddec37b5	5735bd1b-38a7-4f68-b0a4-8bc6c95f9209	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	9825268f-3434-48bc-abe2-b2c1f969752a	17	f
 \.
 
 
@@ -351,7 +332,6 @@ e7b5ff5e-0db2-480e-93a5-68e23bb9ac5d	d7c9b9d7-da19-4f4e-944c-095bddec37b5	5735bd
 --
 
 COPY public.battles (id, player1, player2, winner, isdraw, enddatetime, countrounds, gainedpoints, battletoken) FROM stdin;
-9825268f-3434-48bc-abe2-b2c1f969752a	060ab0c4-abef-4d89-bf45-c33af92a7c89	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	f	2024-01-15 15:45:35.188309+01	19	0	Eg0mx3N2xn
 \.
 
 
@@ -360,11 +340,6 @@ COPY public.battles (id, player1, player2, winner, isdraw, enddatetime, countrou
 --
 
 COPY public.cards (id, descr, damage, type, element, name) FROM stdin;
-5eca66fb-71a5-451f-87ef-a7c89aa98643		1000	monster	fire	FireTroll
-d7c9b9d7-da19-4f4e-944c-095bddec37b5		15	spell	fire	FireSpell
-5735bd1b-38a7-4f68-b0a4-8bc6c95f9209		10	spell	water	WaterSpell
-fe7951d7-e560-4264-84fa-5ea8d42f083f		20	monster	normal	Ork
-c6a85a42-4b34-400d-a8e1-4eeae64997c4		200000	monster	fire	Kraken
 \.
 
 
@@ -381,16 +356,6 @@ COPY public.cardtrades (id, offeringuserid, acceptinguserid, offeredcardid, acce
 --
 
 COPY public.deck (id, cardid, userid, countcardsoftype, locked) FROM stdin;
-bf85647f-31a8-4bcf-9034-dee276ff6125	fe7951d7-e560-4264-84fa-5ea8d42f083f	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	f
-d1a6cb4a-f008-4896-8425-b4cfdb58342c	5735bd1b-38a7-4f68-b0a4-8bc6c95f9209	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	f
-55399f43-c91e-47a2-89c6-ce8ef0d5ba10	fe7951d7-e560-4264-84fa-5ea8d42f083f	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	f
-f0fc0eb8-dddb-4678-bd94-48515fb0d920	5735bd1b-38a7-4f68-b0a4-8bc6c95f9209	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	f
-bd3875cf-7d5a-42c1-a34c-6160d752efdc	d7c9b9d7-da19-4f4e-944c-095bddec37b5	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	f
-b36ef046-d00a-410c-ab09-81c8be079b30	c6a85a42-4b34-400d-a8e1-4eeae64997c4	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	f
-40fcb202-ab54-4907-89ab-50511113d3b1	5eca66fb-71a5-451f-87ef-a7c89aa98643	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	f
-4312cf90-f222-4385-acc2-33d7e482f8b8	d7c9b9d7-da19-4f4e-944c-095bddec37b5	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	f
-2faeed8a-bcac-451a-84f9-e3fbe683d581	5eca66fb-71a5-451f-87ef-a7c89aa98643	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	f
-2ae04644-abb2-49df-8980-41b14ed4ee81	c6a85a42-4b34-400d-a8e1-4eeae64997c4	5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	\N	f
 \.
 
 
@@ -462,11 +427,11 @@ COPY public.stackcards (id, cardid, userid) FROM stdin;
 --
 
 COPY public.users (id, name, password, coins, bio, image, role, language, elo) FROM stdin;
-d324b594-06d6-42e2-b921-f371180edb8b	Wintersperger	f6bd083b0a55b6523a1348233369c5392d925f0d5cf5cbe7d270faa8600a865f	20	jazzhands	Brueckenmeier	49e2c62b-940f-4a58-a59a-e4fc8d7a69ff	english	100
-14076953-be7d-4bfb-9180-a797d9dad345	admin	8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918	20	mustermax-admin	:)	8f5999cc-6542-4898-9eb1-587401412ae5	english	100
-5d53d909-dee4-44b9-886b-24b0654ee674	toni	bb37067afeb4ee16d668eef073ca6eea4f3b4a1fc6c68e3c0b1fd01a5fb7f5ad	20	miau	:)	49e2c62b-940f-4a58-a59a-e4fc8d7a69ff	english	100
-060ab0c4-abef-4d89-bf45-c33af92a7c89	max	9baf3a40312f39849f46dad1040f2f039f1cffa1238c41e9db675315cfad39b6	20		:)	49e2c62b-940f-4a58-a59a-e4fc8d7a69ff	german	100
 5eb99dbc-f562-4f9e-ba06-8b7b76d3dff2	test	9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08	20		:)	49e2c62b-940f-4a58-a59a-e4fc8d7a69ff	english	100
+14076953-be7d-4bfb-9180-a797d9dad345	admin	8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918	20	mustermax-admin	:)	8f5999cc-6542-4898-9eb1-587401412ae5	english	100
+060ab0c4-abef-4d89-bf45-c33af92a7c89	max	9baf3a40312f39849f46dad1040f2f039f1cffa1238c41e9db675315cfad39b6	20		:)	49e2c62b-940f-4a58-a59a-e4fc8d7a69ff	german	100
+d324b594-06d6-42e2-b921-f371180edb8b	Wintersperger	f6bd083b0a55b6523a1348233369c5392d925f0d5cf5cbe7d270faa8600a865f	20	jazzhands	Brueckenmeier	49e2c62b-940f-4a58-a59a-e4fc8d7a69ff	english	100
+5d53d909-dee4-44b9-886b-24b0654ee674	toni	bb37067afeb4ee16d668eef073ca6eea4f3b4a1fc6c68e3c0b1fd01a5fb7f5ad	20	miau	:)	49e2c62b-940f-4a58-a59a-e4fc8d7a69ff	english	100
 \.
 
 

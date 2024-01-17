@@ -186,3 +186,11 @@ The testcases mainly concern the whole routing process - parsing the URL, mappin
 + 24 integration tests
 + implemented in python
 + check status codes and payloads (case dependent)
+
+
+## Info
+In order to run the tests, simply execute the bash script `run_tests.sh`.
+
+```
+./run_tests.sh [-i --integration] [-u --unit] [-b --both]
+```

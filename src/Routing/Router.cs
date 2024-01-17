@@ -46,8 +46,12 @@ public class Router : IRouter
     }
 
 
+
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
+
+
 
 
     /// <summary>
@@ -92,8 +96,12 @@ public class Router : IRouter
 
     }
 
+
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
+
+
 
 
     public bool ClientHasPermission(IRequest request)
@@ -119,6 +127,8 @@ public class Router : IRouter
     }
 
 
+
+
     // FIXME ergibt irgendwie keinen Sinn, dass hier alles explizit gemacht werden soll
     protected void InitUserSettings(IRequest request)
     {
@@ -126,6 +136,8 @@ public class Router : IRouter
         languageConfig.SetLanguage(user!.Language);
 
     }
+
+
 
     /// <summary>
     /// Creates an instance of the controller responsible for handling the request.
@@ -145,8 +157,10 @@ public class Router : IRouter
     }
 
 
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
+
 
 
     /// <summary>
@@ -170,8 +184,12 @@ public class Router : IRouter
     }
 
 
+
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
+
+
 
     /// <summary>
     /// Ends the anonymous session if the request is an anonymous request.
@@ -186,8 +204,12 @@ public class Router : IRouter
             SessionManager.EndSessionWithSessionId(request.SessionId);
     }
 
+
+
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
+
+
 
     /// <summary>
     /// Handles the request by delegating the work to the designated controller.
@@ -212,6 +234,7 @@ public class Router : IRouter
 
             return response;
         }
+
 
 
 

@@ -45,8 +45,7 @@ public class UserController : IController
             if (!SessionManager.TryCreateSessionForUser(authToken, user, out Session session))
                 return new Response<string>(500, resConfig["INT_SVR_ERR"], "Failedd to create session.");
 
-            SessionManager.UpdateSession(session.SessionId, ref session!);
-            session.responseTxt.SetLanguage(user.Language);
+            InitUserSettings(session, user);
 
 
             return new Response<object>(200, new { authToken }, resConfig["USR_LOGIN_SUCC"]);
@@ -57,6 +56,13 @@ public class UserController : IController
 
             return new Response<string>(500, resConfig["USR_LOGIN_ERR"]);
         }
+    }
+
+
+    protected void InitUserSettings(Session session, User user)
+    {
+        SessionManager.UpdateSession(session.SessionId, ref session!);
+        session.responseTxt.SetLanguage(session.User!.Language);
     }
 
     /// <summary>

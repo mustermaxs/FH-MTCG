@@ -14,6 +14,7 @@ public class Session
         SessionId = sessionId;
     }
     public bool IsAnonymous { get; set; } = false;
+    public ServiceProvider services;
     public string SessionId { get; private set; } = string.Empty;
     public string AuthToken { get; private set; } = string.Empty;
     public User? User { get; set; } = null; // setter used to be private, updating 

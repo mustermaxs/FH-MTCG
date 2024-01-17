@@ -33,16 +33,6 @@ namespace MTCG
         public HttpServer(IRouter router)
         {
             this.router = router;
-
-            try
-            {
-                router.RegisterRoutes();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Router failed to register routes.");
-            }
-
         }
 
 
@@ -85,7 +75,12 @@ namespace MTCG
                 while (Active)
                 {
                     TcpClient client = _Listener.AcceptTcpClient();
-                    tasks.Add(Task.Run(() => HandleClient(client), token));
+                    tasks.Add(Task.Run(async () => {
+                        var svrEventArgs = GetHttpEventArgs(client);
+                        var request = CreateRequestObjAndInitSession(svrEventArgs);
+                        var response = await router.HandleRequest(request);                        
+                        svrEventArgs.Reply(response);
+                        }, token));
 
                 }
 
@@ -106,31 +101,26 @@ namespace MTCG
 
         }
 
-        protected async Task HandleClient(TcpClient client)
+        protected HttpSvrEventArgs GetHttpEventArgs(TcpClient client)
         {
             string data = string.Empty;
             byte[] buf = new byte[serverConfig.BufferSize];
+
             while (client.GetStream().DataAvailable || (string.IsNullOrEmpty(data)))
             {
                 int n = client.GetStream().Read(buf, 0, buf.Length);
                 data += Encoding.ASCII.GetString(buf, 0, n);
             }
 
-            var svrEventArgs = new HttpSvrEventArgs(client, data);
-            var request = CreateSessionAndRequest(svrEventArgs);
-
-            IResponse response = await router.HandleRequest(request);
-
-            svrEventArgs.Reply(response);
-
-            return;
+            return new HttpSvrEventArgs(client, data);
         }
 
 
         //////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////
 
-        protected IRequest CreateSessionAndRequest(HttpSvrEventArgs svrEventArgs)
+
+        protected IRequest CreateRequestObjAndInitSession(HttpSvrEventArgs svrEventArgs)
         {
             Session session;
             var clientPort = svrEventArgs.GetHeader("Port");
@@ -155,11 +145,6 @@ namespace MTCG
             request.WithSessionId(sessionId);
 
             return request.Build();
-        }
-
-        protected void SetUpRouter()
-        {
-            router.RegisterRoutes();
         }
 
         /// <summary>Stops the HTTP server.</summary>

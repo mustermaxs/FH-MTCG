@@ -57,7 +57,12 @@ public class UserController : IController
         }
     }
 
-
+    /// <summary>
+    /// Initializes the user settings for the given session.
+    /// </summary>
+    /// <param name="session"></param>
+    /// <param name="user"></param>
+    /// wäre wsl besser das irgendwoanders zu machen
     protected void InitUserSettings(Session session, User user)
     {
         SessionManager.UpdateSession(session.AuthToken, ref session!);

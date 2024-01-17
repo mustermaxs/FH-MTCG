@@ -32,6 +32,7 @@ namespace MTCG
             IRouteObtainer routeObtainer = new ReflectionRouteObtainer(attributeHandler);
 
             Router router = new(routeRegistry, routeObtainer);
+            router.RegisterRoutes();
             HttpServer svr = new(router);
             svr.Run();
         }

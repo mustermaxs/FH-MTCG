@@ -90,8 +90,9 @@ namespace MTCG
                 {
                     string battleToken = CryptoHandler.GenerateRandomString(10);
                     List<string> actions = new List<string>();
-                    
-                    var battleManager = new BattleManager(player1, player2, ServiceProvider.Get<BattleConfig>().Load<BattleConfig>());
+                    var battleConfig = ServiceProvider.Get<BattleConfig>();
+                    battleConfig = battleConfig.Load<BattleConfig>();
+                    var battleManager = new BattleManager(player1, player2, battleConfig);
                     battleManager.SetBattleToken(battleToken);
                     battleManager.UseCardRepo(ServiceProvider.GetFreshInstance<CardRepository>());
 
@@ -109,18 +110,5 @@ namespace MTCG
 
 
         }
-
-
-
-        // protected virtual void OnReadyForBattle(object sender, BattleEventArgs e)
-        // {
-        //     lock (battleLock)
-        //     {
-        //         if (PendingBattleRequests.Count >= 2)
-        //         {
-        //             StartBattle?.Invoke(this, e);
-        //         }
-        //     }
-        // }
     }
 }

@@ -28,7 +28,7 @@ public class BattleController : IController
         try
         {
             var battlePrinter = new BattlePrintService();
-            var battleConfig = Program.services.GetLocal<BattleConfig>().Load<BattleConfig>();
+            var battleConfig = ServiceProvider.Get<BattleConfig>().Load<BattleConfig>();
             battleConfig.SetLanguage(LoggedInUser.Language); // sollte nicht immer explizit gesettet werden müssen, sollte "autom." passieren
 
             battle = await BattleWaitingRoomManager.BattleRequest(LoggedInUser);

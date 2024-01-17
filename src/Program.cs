@@ -54,7 +54,7 @@ namespace MTCG
                 .RegisterPreconfigured(serverConfig)
                 .RegisterPreconfigured(responseConfig)
                 .RegisterPreconfigured(cardConfig)
-                .RegisterLocal(battleConfig)
+                .RegisterPreconfigured(battleConfig)
                 .RegisterType<CardRepository>()
                 .RegisterType<BattleRepository>()
                 .RegisterType<BattleLogRepository>()

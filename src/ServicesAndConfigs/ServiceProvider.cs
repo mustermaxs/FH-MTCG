@@ -70,27 +70,6 @@ namespace MTCG
         }
 
 
-
-        // public virtual ServiceProvider RegisterLocalService<T>() where T : IService
-        // {
-        //     var serviceName = typeof(T).Name;
-
-        //     localServices[serviceName] = typeof(T);
-        //     Console.WriteLine($"[Registered Service] {serviceName}");
-
-        //     return this;
-        // }
-
-        // public virtual ServiceProvider RegisterLocalService(IService service)
-        // {
-        //     var serviceName = service.GetType().Name;
-
-        //     localServices[serviceName] = service.GetType();
-        //     Console.WriteLine($"[Registered Service] {serviceName}");
-
-        //     return this;
-        // }
-
         public ServiceProvider RegisterStatic<T>() where T : IService, new()
         {
             var serviceName = typeof(T).Name;
@@ -154,69 +133,6 @@ namespace MTCG
 
             throw new Exception($"Failed to get config {serviceType.Name}");
         }
-
-        // }
-        // public class ConfigService : IServiceProvider
-        // {
-        //     private static ConfigService? configService = null;
-        //     private IConfigLoader configLoader = new JsonConfigLoader();
-        //     private IConfigLoader? customConfigLoader = null;
-
-        //     //////////////////////////////////////////////////////////////////////
-        //     //////////////////////////////////////////////////////////////////////
-
-        //     [Obsolete("")]
-        //     public void SetConfigLoader(IConfigLoader loader) => this.customConfigLoader = loader;
-
-
-
-        //     public ConfigService()
-        //     {
-        //     }
-
-        //     //////////////////////////////////////////////////////////////////////
-        //     //////////////////////////////////////////////////////////////////////
-
-        //     public override IServiceProvider Register<T>() where T : IConfig
-        //     {
-        //         var filePath = new T().FilePath;
-
-        //         var config = (T)configLoader.LoadConfig<T>(filePath, new T().Section);
-
-        //         if (config == default)
-        //             throw new Exception("Failed to deserialize config file");
-
-        //         services[config.Name] = config;
-        //         Console.WriteLine($"[Registered Config] {config.Name}");
-        //         return this;
-        //     }
-
-
-
-
-        //     //////////////////////////////////////////////////////////////////////
-        //     //////////////////////////////////////////////////////////////////////
-
-        //     /// <summary>
-        //     /// Registers a config object.
-        //     /// </summary>
-        //     /// <param name="config">IConfig object.</param>
-        //     /// <returns>ConfigService instance. For method chaining.</returns>
-        //     public ConfigService Register(IConfig config)
-        //     {
-        //         if (ConfigService.configs.ContainsKey(config.Name))
-        //         {
-        //             Console.WriteLine($"ConfigService already contains config {config.Name}.");
-
-        //             return this;
-        //         }
-
-        //         ConfigService.configs.Add(config.Name, config);
-        //         Console.WriteLine($"Registered config {config.Name}");
-
-        //         return this;
-        //     }
-        // }
     }
 }
 

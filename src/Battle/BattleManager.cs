@@ -196,7 +196,7 @@ public class BattleManager
     {
         Random random = new Random();
         int randInt = random.Next(0, 100);
-        bool stealsCard = randInt > (100 - config.ChanceOfStealing);
+        bool stealsCard = randInt < config.ChanceOfStealing; // calculate chance of stealing
 
         User victim = entry.RoundWinner == player1 ? player2 : player1;
         User thief = entry.RoundWinner == player1 ? player1 : player2;

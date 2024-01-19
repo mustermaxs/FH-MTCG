@@ -184,7 +184,7 @@ public IResponse DeleteUser(Guid userid)
 The testcases mainly concern the whole routing process - parsing the URL, mapping it to an `Endpoint`, Serializing and deserializing objects - but also the battle logic.
 
 ### Integration tests
-+ 24 integration tests
++ 25 integration tests
 + implemented in python
 + check status codes and payloads (case dependent)
 

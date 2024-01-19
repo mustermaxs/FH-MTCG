@@ -45,8 +45,8 @@ async def main():
         print(e)
         raise e
     finally:
-        # reset()
-        pass
+        reset()
+        # pass
 
 
 

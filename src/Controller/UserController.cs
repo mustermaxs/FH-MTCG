@@ -257,7 +257,7 @@ public class UserController : BaseController
     //////////////////////////////////////////////////////////////////////
 
 
-    [Route("/users/{userid:alphanum}", HTTPMethod.GET, Role.ADMIN)]
+    [Route("/users/id/{userid:alphanum}", HTTPMethod.GET, Role.ADMIN)]
     public IResponse GetUserById(Guid userid)
     {
         User? user = repo.Get(userid);
@@ -272,11 +272,16 @@ public class UserController : BaseController
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-    [Route("/users/{username:alpha}", HTTPMethod.GET, Role.ALL)]
+    [Route("/users/{username:alpha}", HTTPMethod.GET, Role.USER | Role.ADMIN)]
     public IResponse GetUserByName(string username)
     {
         try
         {
+            if (LoggedInUser.UserAccessLevel == Role.USER)
+            {
+                if (LoggedInUser.Name != username) return new Response<string>(404, resConfig["AUTH_ERR"]);
+            }
+
             User? user = repo.GetByName(username);
 
             if (user == null)

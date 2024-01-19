@@ -94,7 +94,7 @@ public class MTCG_RouteRegistry
     }
 }
 
-public class TestController : IController
+public class TestController : BaseController
 {
     public TestController(IRequest request) : base(request) { }
     public void TestMethod()

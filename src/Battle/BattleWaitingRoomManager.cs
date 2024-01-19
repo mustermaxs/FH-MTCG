@@ -88,7 +88,7 @@ namespace MTCG
                         waitingUsers.TryDequeue(out User? player2))
 
                 {
-                    string battleToken = CryptoHandler.GenerateRandomString(10);
+                    string battleToken = Encoder.GenerateRandomString(10);
                     List<string> actions = new List<string>();
                     var battleConfig = ServiceProvider.Get<BattleConfig>();
                     battleConfig = battleConfig.Load<BattleConfig>();

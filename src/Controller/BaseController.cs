@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace MTCG
 {
-    public abstract class IController
+    public abstract class BaseController
     {
         // TODO
         protected IRequest request;
@@ -11,7 +11,7 @@ namespace MTCG
         protected ResponseTextTranslator resConfig { get; set; }
         protected Guid UserId { get; private set; }
 
-        public IController(IRequest request)
+        public BaseController(IRequest request)
         {
             this.request = request;
 

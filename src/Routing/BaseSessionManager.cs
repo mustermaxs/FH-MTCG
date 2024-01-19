@@ -16,7 +16,7 @@ public abstract class BaseSessionManager
     ///
     protected static string CreateSessionIdFromAuthToken(string authToken)
     {
-        return CryptoHandler.Encode(authToken);
+        return Encoder.Encode(authToken);
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ public abstract class BaseSessionManager
     /// <returns>The generated authentication token.</returns>
     public static string CreateAuthToken(string seed)
     {
-        return CryptoHandler.Encode(seed);
+        return Encoder.Encode(seed);
     }
 
     //////////////////////////////////////////////////////////////////////

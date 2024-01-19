@@ -145,10 +145,10 @@ public class Router : IRouter
     /// <param name="request"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    private IController CreateControllerInstance(IRequest request)
+    private BaseController CreateControllerInstance(IRequest request)
     {
         var controllerType = request.Endpoint!.ControllerType;
-        var controller = (IController?)Activator.CreateInstance(controllerType, request);
+        var controller = (BaseController?)Activator.CreateInstance(controllerType, request);
 
         if (controller == null)
             throw new Exception("Failed to instantiate controller.");
@@ -169,7 +169,7 @@ public class Router : IRouter
     /// <param name="controller">IController instance.</param>
     /// <param name="request">Request object</param>
     /// <returns>Task<IResponse></returns>
-    private async Task<IResponse> InvokeControllerMethod(IController controller, IRequest request)
+    private async Task<IResponse> InvokeControllerMethod(BaseController controller, IRequest request)
     {
         IResponse response;
         MethodInfo controllerAction = request.Endpoint!.ControllerMethod;

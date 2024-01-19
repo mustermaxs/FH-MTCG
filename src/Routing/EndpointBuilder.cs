@@ -33,7 +33,7 @@ namespace MTCG;
 
         public EndpointBuilder WithControllerType(Type type)
         {
-            if (!typeof(IController).IsAssignableFrom(type))
+            if (!typeof(BaseController).IsAssignableFrom(type))
             {
                 throw new ArgumentException($"Invalid controller type passed.\nType passed: {type}");
             }

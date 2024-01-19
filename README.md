@@ -52,6 +52,7 @@ Also I convinced myself not to use Chat-GPT to help me write the application (ex
 
 ---
 ### `Controller`
++ inherits from `BaseController`
 + are identified by the custom attribute `ControllerAttribute`
 + handle client requests by implementing dedicated methods
 + dedicated Endpoint methods are identified by the custom attribute `RouteAttribute`
@@ -155,7 +156,7 @@ public IResponse DeleteUser(Guid userid)
 	+ `Endpoint`
 	+ etc.
 + `T? PayloadAsObject<T>()` tries to deserialize payload
-+ gets passed to `IController` implementations
++ gets passed to `BaseController` implementations
 
 ### `BattleManager`
 + handles the battle logic
@@ -177,7 +178,7 @@ public IResponse DeleteUser(Guid userid)
 
 ## Testing
 ### Unit tests
-+ 54 Unit tests
++ 56 Unit tests
 + c# NUnit testing library
 #### Chosen testcases
 The testcases mainly concern the whole routing process - parsing the URL, mapping it to an `Endpoint`, Serializing and deserializing objects - but also the battle logic.

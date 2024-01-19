@@ -7,7 +7,7 @@ namespace MTCG;
 
 
 [Controller]
-public class BattleController : IController
+public class BattleController : BaseController
 {
     protected BattleRepository battleRepo = ServiceProvider.GetFreshInstance<BattleRepository>();
     protected BattleLogRepository battleLogRepo = ServiceProvider.GetFreshInstance<BattleLogRepository>();

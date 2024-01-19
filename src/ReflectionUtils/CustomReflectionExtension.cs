@@ -20,7 +20,7 @@ public static class ReflectionUtils
 
 
     public static TReturnType MapArgumentsAndInvoke<TReturnType, TValueType>(
-        this MethodBase self, object classInstance, Dictionary<string, TValueType> providedParams) where TReturnType :  IResponse
+        this MethodBase self, object classInstance, Dictionary<string, TValueType> providedParams)
     {
         if (providedParams == null || providedParams.Count == 0)
         {

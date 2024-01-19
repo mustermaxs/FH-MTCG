@@ -8,7 +8,7 @@ namespace MTCG;
 //////////////////////////////////////////////////////////////////////
 
 [Controller]
-public class CardTradingController : IController
+public class CardTradingController : BaseController
 {
     protected static CardTradeRepository repo = new CardTradeRepository();
     public CardTradingController(IRequest request) : base(request) { }

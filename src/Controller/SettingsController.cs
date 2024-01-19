@@ -5,7 +5,7 @@ namespace MTCG;
 
 
 [Controller]
-public class SettingsController : IController
+public class SettingsController : BaseController
 {
     public SettingsController(IRequest request) : base(request) { }
 

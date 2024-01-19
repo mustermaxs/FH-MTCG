@@ -9,7 +9,7 @@ namespace MTCG;
 /// </summary>
 
 [Controller]
-public class CardController : IController
+public class CardController : BaseController
 {
     protected CardRepository repo = ServiceProvider.GetFreshInstance<CardRepository>();
     protected CardConfig cardConfig = ServiceProvider.Get<CardConfig>();

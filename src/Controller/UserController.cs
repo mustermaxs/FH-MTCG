@@ -14,7 +14,7 @@ namespace MTCG;
 /// Controller for user related things.
 /// </summary>
 [Controller]
-public class UserController : IController
+public class UserController : BaseController
 {
 
     protected static UserRepository repo = ServiceProvider.GetFreshInstance<UserRepository>();
@@ -80,7 +80,7 @@ public class UserController : IController
     private bool TryValidateCredentials(string username, string password, out User? user)
     {
         user = repo.GetByName(username);
-        var hashedPwd = CryptoHandler.Encode(password);
+        var hashedPwd = Encoder.Encode(password);
 
         if (user == null || hashedPwd != user.Password)
             return false;
@@ -140,7 +140,7 @@ public class UserController : IController
             if (user == null)
                 return new Response<string>(500, resConfig["USR_ADD_NO_USER"]);
 
-            user.Password = CryptoHandler.Encode(user.Password);
+            user.Password = Encoder.Encode(user.Password);
 
             repo.Save(user);
 

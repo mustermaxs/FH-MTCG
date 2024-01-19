@@ -14,7 +14,7 @@ public class Endpoint : IEndpoint
     public Endpoint(HTTPMethod HttpMethod, string? routePattern, string RouteTemplate, Type controllerType, MethodInfo controllerMethod, Role accessLevel=Role.ADMIN)
     : base()
     {
-        if (!typeof(IController).IsAssignableFrom(controllerType))
+        if (!typeof(BaseController).IsAssignableFrom(controllerType))
         {
             throw new ArgumentException($"Invalid controller type passed.\nType passed: {controllerType}");
         }

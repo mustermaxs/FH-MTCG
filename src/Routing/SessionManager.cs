@@ -165,7 +165,7 @@ public class SessionManager : BaseSessionManager
 
     public static bool TryGetSessionWithToken(string authToken, out Session session)
     {
-        string sessionId = CryptoHandler.Encode(authToken);
+        string sessionId = Encoder.Encode(authToken);
 
         lock (_sessionLock)
         {

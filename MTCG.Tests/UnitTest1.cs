@@ -147,7 +147,7 @@ public class Tests_Response
 
 
 [Controller]
-public class ReflectionRouteObtainerTest : IController
+public class ReflectionRouteObtainerTest : BaseController
 {
     public ReflectionRouteObtainerTest(IRequest request) : base(request) { }
 

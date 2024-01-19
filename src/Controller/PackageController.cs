@@ -4,7 +4,7 @@ namespace MTCG;
 
 
 [Controller]
-public class PackageController : IController
+public class PackageController : BaseController
 {
     protected static PackageRepository repo = ServiceProvider.GetFreshInstance<PackageRepository>();
     protected CardConfig cardConfig = ServiceProvider.Get<CardConfig>();

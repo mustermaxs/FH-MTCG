@@ -6,7 +6,7 @@ namespace MTCG;
 /// <summary>
 /// Represents a cryptographic handler for encoding and validating data.
 /// </summary>
-public class CryptoHandler
+public class Encoder
 {
     /// <summary>
     /// Encodes the specified data using SHA256 hashing algorithm.

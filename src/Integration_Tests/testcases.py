@@ -555,3 +555,12 @@ async def test_get_scoreboard(cn=None):
         make_request(user, 0),
     )
     assert_true(res1[0].status == 200 , True, res1[2])
+
+
+@with_caller_name
+def test_get_user_profile_page(cn=None):
+    user = login_as(users["max"])
+    URL = url("profile", "GET").replace(":name", user.Name)
+    res = req.get(URL, headers=Headers(user.token))
+
+    assert_true(res.status_code == 200, True, res.reason)

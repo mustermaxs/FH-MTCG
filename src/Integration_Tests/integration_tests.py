@@ -35,6 +35,7 @@ async def main():
         test_logout_user()
         test_register_user()
         test_update_user()
+        test_get_user_profile_page()
         for i in range(3):
             await test_battle()
         await test_get_scoreboard()

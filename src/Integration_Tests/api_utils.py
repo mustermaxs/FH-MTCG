@@ -25,10 +25,11 @@ api = {
         "package": "/packages/{packageid:alphanum}",
         "tradings": "/tradings",
         "users": "/users/",
-        "user_by_id": "/users/:id",
+        "user_by_id": "/users/id/:id",
         "user_by_name": "/users/{username:alpha}",
         "stats": "/stats",
-        "score": "/scoreboard"
+        "score": "/scoreboard",
+        "profile": "/users/:name"
     },
     "PUT": {
         "deck": "/deck",
